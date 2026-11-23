@@ -2,22 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Owner login and public holidays always; fictional demo data only when SEED_DEMO=true.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call([OwnerSeeder::class, ClosureSeeder::class]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        if (config('workshop.seed_demo')) {
+            $this->call(DemoSeeder::class);
+        }
     }
 }

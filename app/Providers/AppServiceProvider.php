@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\Workshop;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // One calendar/availability snapshot per request.
+        $this->app->scoped(Workshop::class);
     }
 
     /**
