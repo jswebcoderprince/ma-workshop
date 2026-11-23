@@ -69,11 +69,15 @@ class CalendarController extends Controller
             ->where('start_date', '<', $to)
             ->get()
             ->map(function (WorkOrder $w) use ($schedule, $from, $to) {
-                $cells = collect($schedule->span($w->id))
-                    ->filter(fn (Position $p) => $p->date >= $from && $p->date < $to)
+                $span = collect($schedule->span($w->id));
+                $cells = $span->filter(fn (Position $p) => $p->date >= $from && $p->date < $to)
                     ->map(fn (Position $p) => [$p->date, $p->quarter])->values();
 
-                return $cells->isEmpty() ? null : JobView::row($w, $schedule) + ['cells' => $cells];
+                // skip: quarters of the job before this view (needed to drag a job that started earlier).
+                return $cells->isEmpty() ? null : JobView::row($w, $schedule) + [
+                    'cells' => $cells,
+                    'skip' => $span->filter(fn (Position $p) => $p->date < $from)->count(),
+                ];
             })->filter()->values();
 
         $usage = $schedule->utilisation($ids, $from, $to, $workshop->currentQuarter());

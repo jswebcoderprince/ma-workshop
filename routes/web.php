@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::post('jobs/{workOrder}/status', [WorkOrderController::class, 'status'])->name('jobs.status');
     Route::post('jobs/{workOrder}/informed', [WorkOrderController::class, 'informed'])->name('jobs.informed');
     Route::post('jobs/{workOrder}/move', [WorkOrderController::class, 'move'])->name('jobs.move');
+    Route::post('jobs/{workOrder}/undo-move', [WorkOrderController::class, 'undoMove'])->name('jobs.undo-move');
 
     Route::get('jobs', [JobController::class, 'index'])->name('jobs');
     Route::get('jobs/{workOrder}', [JobController::class, 'show'])->name('jobs.show');

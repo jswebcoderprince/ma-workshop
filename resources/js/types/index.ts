@@ -16,7 +16,7 @@ export interface SharedData {
         roster: RosterEntry[];
         counts: { openJobs: number; toCall: number; warnings: number };
     } | null;
-    flash: { status: string | null; warning: string | null };
+    flash: { status: string | null; warning: string | null; undo: number | null };
     [key: string]: unknown;
 }
 
@@ -97,6 +97,8 @@ export interface CalendarLane extends MechanicView {
 
 export interface CalendarJob extends JobRow {
     cells: [string, number][];
+    /** Quarters of the job before the visible range. */
+    skip: number;
 }
 
 export interface JobDetail extends JobRow {

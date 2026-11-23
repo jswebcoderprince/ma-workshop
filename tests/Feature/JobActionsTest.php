@@ -91,6 +91,47 @@ class JobActionsTest extends TestCase
         $this->assertSame('2026-11-24', $job->fresh()->start_date->format('Y-m-d'));
     }
 
+    public function test_dragged_by_its_middle_the_job_starts_offset_quarters_earlier(): void
+    {
+        $job = $this->job($this->tomas, '2026-11-24', 0, 4);
+
+        // Grabbed by its 3rd quarter and dropped on Monday 30 Nov 10:30: it starts Saturday 11:30 (Sunday is closed).
+        $this->post("/jobs/{$job->id}/move", ['mechanic_id' => $this->tomas->id, 'date' => '2026-11-30', 'quarter' => 1, 'offset' => 2])
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('undo', $job->id);
+
+        $this->assertSame(['2026-11-28', 1], [$job->fresh()->start_date->format('Y-m-d'), $job->fresh()->start_quarter]);
+    }
+
+    public function test_undo_puts_the_job_back_with_its_call_flag(): void
+    {
+        $job = $this->job($this->tomas, '2026-11-26', 0, 4);
+
+        $this->post("/jobs/{$job->id}/move", ['mechanic_id' => $this->mantas->id, 'date' => '2026-11-30', 'quarter' => 2]);
+        $this->assertSame(NotifyDirection::Later, $job->fresh()->notify_customer);
+
+        $this->post("/jobs/{$job->id}/undo-move")->assertSessionHasNoErrors()->assertSessionMissing('warning');
+
+        $job->refresh();
+        $this->assertSame([$this->tomas->id, '2026-11-26', 0], [$job->mechanic_id, $job->start_date->format('Y-m-d'), $job->start_quarter]);
+        $this->assertNull($job->notify_customer, 'back where the customer expects it: nobody to call');
+        $this->assertSame(1, ActivityLog::where('action', 'job.move_undone')->count());
+
+        // A second undo has nothing to undo.
+        $this->post("/jobs/{$job->id}/undo-move")->assertSessionHas('warning');
+        $this->assertSame('2026-11-26', $job->fresh()->start_date->format('Y-m-d'));
+    }
+
+    public function test_undo_refuses_when_the_job_changed_after_the_move(): void
+    {
+        $job = $this->job($this->tomas, '2026-11-26', 0, 4);
+        $this->post("/jobs/{$job->id}/move", ['mechanic_id' => $this->tomas->id, 'date' => '2026-11-30', 'quarter' => 0]);
+        $this->post("/jobs/{$job->id}/informed");
+
+        $this->post("/jobs/{$job->id}/undo-move")->assertSessionHas('warning');
+        $this->assertSame('2026-11-30', $job->fresh()->start_date->format('Y-m-d'));
+    }
+
     public function test_mark_informed_clears_the_flag(): void
     {
         $job = $this->job($this->tomas, '2026-11-26', 0, 4);

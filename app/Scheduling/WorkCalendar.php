@@ -85,6 +85,34 @@ final class WorkCalendar
             : $this->firstOn(self::addDays($p->date, 1));
     }
 
+    /** The position directly before $p. Closed days are skipped. */
+    public function previous(Position $p): Position
+    {
+        $q = min($p->quarter, $this->quartersOn($p->date)) - 1;
+        if ($q >= 0) {
+            return new Position($p->date, $q);
+        }
+        $date = $p->date;
+        for ($i = 0; $i < self::MAX_EMPTY_DAYS; $i++) {
+            $date = self::addDays($date, -1);
+            if ($this->isOpen($date)) {
+                return new Position($date, $this->quartersOn($date) - 1);
+            }
+        }
+
+        throw new LogicException('The workshop calendar has no open day within '.self::MAX_EMPTY_DAYS.' days.');
+    }
+
+    /** The position $steps working quarters before $p (a job dragged by its middle starts there). */
+    public function back(Position $p, int $steps): Position
+    {
+        for ($i = 0; $i < $steps; $i++) {
+            $p = $this->previous($p);
+        }
+
+        return $p;
+    }
+
     /**
      * Every position a job covers, in order. Closed days are skipped.
      *

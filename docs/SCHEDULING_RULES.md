@@ -75,6 +75,9 @@ Nothing happens without that press.
 which also records who and when in the activity log.
 Changing only the mechanic, the start quarter on the same day, or the duration does not set it.
 
+**Undo** right after a move puts the job back where it was, with the flag it had before the move
+(so moving a job and undoing it leaves nobody to call). It only works while the move is the job's last change.
+
 ## Duration changes
 
 Buttons: −¼, +¼, +½, +1 day, +2 days, or an exact value. Minimum 1 quarter.

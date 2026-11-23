@@ -391,9 +391,24 @@
     animation-delay: 160ms;
 }
 
-/* Calendar bars and cells fade in when a new week or month is shown. */
+/* Calendar bars and cells fade in when a new week or month is shown.
+   Bars rise with the "translate" property so motion's layout animation (a transform) can run at the same time. */
+@keyframes bar-rise {
+    from {
+        opacity: 0;
+        translate: 0 6px;
+    }
+}
 .bar-in {
-    animation: rise-in 0.28s var(--ease-out) backwards;
+    animation: bar-rise 0.28s var(--ease-out) backwards;
+}
+
+/* While a job is dragged on the calendar board. */
+body.board-dragging,
+body.board-dragging * {
+    cursor: grabbing !important;
+    user-select: none;
+    -webkit-user-select: none;
 }
 .cell-in {
     animation: fade-in 0.3s var(--ease-out) backwards;

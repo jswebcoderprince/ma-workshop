@@ -92,6 +92,13 @@ The owner found the board cluttered. Rules now (`components/calendar/board.tsx`,
 - Mechanic column: avatar, name, one load bar with %. Free time row: one number per day.
 - Inspector floats in from the right over the board (board keeps its width); Esc closes. Phones: bottom sheet.
 - Toolbar holds view switch, ‹ Today ›, range, "Booked % | Free time", mechanic filter. Legend and hint sit under the board.
+- **Drag and drop** (desktop board, all three views; added 2026-11-24). Pointer events, not HTML5 drag:
+  a press becomes a drag after 5 px (mouse) or a 320 ms long press (touch, so a swipe still scrolls).
+  The old place stays as a faint bar; a dashed outline glides to where the job would land (red when it would overlap
+  or fall on the mechanic's day off); a small card follows the pointer with "→ day · time · mechanic". Esc or letting
+  go outside the board cancels. Grabbing a job by its middle keeps that quarter under the pointer (`offset` in
+  `jobs.move`). The bar glides to its new place at once (motion `layoutId`), then the server's answer replaces it.
+  The toast says "Job moved." with **Undo** (`jobs.undo-move`). Phones keep "Move" in the job sheet.
 
 ## Motion
 

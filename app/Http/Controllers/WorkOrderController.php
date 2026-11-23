@@ -140,20 +140,55 @@ class WorkOrderController extends Controller
             'mechanic_id' => ['required', 'integer', 'exists:mechanics,id'],
             'date' => ['required', 'date_format:Y-m-d'],
             'quarter' => ['required', 'integer', 'min:0', 'max:3'],
+            // Dragged by its middle: date/quarter is where the grabbed quarter lands, `offset` quarters after the start.
+            'offset' => ['sometimes', 'integer', 'min:0', 'max:2000'],
         ]);
-        $to = new Position($v['date'], (int) $v['quarter']);
-        if (! $workshop->calendar()->isValid($to)) {
+        $cal = $workshop->calendar();
+        $drop = new Position($v['date'], (int) $v['quarter']);
+        if (! $cal->isValid($drop)) {
             return back()->withErrors(['date' => __('The workshop is closed at that time.')]);
         }
+        $to = $cal->back($drop, (int) ($v['offset'] ?? 0));
 
         $from = $workOrder->startPosition();
-        $before = ['mechanic_id' => $workOrder->mechanic_id, 'date' => $from->date, 'quarter' => $from->quarter];
+        $before = [
+            'mechanic_id' => $workOrder->mechanic_id,
+            'date' => $from->date,
+            'quarter' => $from->quarter,
+            'notify' => $workOrder->notify_customer?->value,
+        ];
         $changes = ['mechanic_id' => (int) $v['mechanic_id'], 'start_date' => $to->date, 'start_quarter' => $to->quarter];
         if ($to->date !== $from->date && $workOrder->status === WorkOrderStatus::Scheduled) {
             $changes['notify_customer'] = $to->isBefore($from) ? NotifyDirection::Earlier : NotifyDirection::Later;
         }
         $workOrder->update($changes);
-        ActivityLog::record('job.moved', $workOrder, ['before' => $before, 'after' => $v]);
+        ActivityLog::record('job.moved', $workOrder, [
+            'before' => $before,
+            'after' => ['mechanic_id' => (int) $v['mechanic_id'], 'date' => $to->date, 'quarter' => $to->quarter],
+        ]);
+
+        return back()->with($this->flash($workOrder) + ['undo' => $workOrder->id]);
+    }
+
+    /** "Undo" in the toast after a move: put the job back where it was, with its "customer to call" flag. */
+    public function undoMove(WorkOrder $workOrder): RedirectResponse
+    {
+        $last = ActivityLog::query()
+            ->where('subject_type', $workOrder->getMorphClass())
+            ->where('subject_id', $workOrder->id)
+            ->latest('id')
+            ->first();
+        if ($last?->action !== 'job.moved' || ! isset($last->changes['before'])) {
+            return back()->with('warning', __('The job changed after the move, so it was not put back.'));
+        }
+
+        $before = $last->changes['before'];
+        $changes = ['mechanic_id' => $before['mechanic_id'], 'start_date' => $before['date'], 'start_quarter' => $before['quarter']];
+        if (array_key_exists('notify', $before)) {
+            $changes['notify_customer'] = $before['notify'];
+        }
+        $workOrder->update($changes);
+        ActivityLog::record('job.move_undone', $workOrder, ['to' => $before]);
 
         return back()->with($this->flash($workOrder));
     }

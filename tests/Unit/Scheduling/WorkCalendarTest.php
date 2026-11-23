@@ -70,6 +70,19 @@ class WorkCalendarTest extends TestCase
         $this->assertEquals(new Position('2026-11-28', 1), $c->normalize(new Position('2026-11-28', 1)));
     }
 
+    public function test_previous_and_back_skip_closed_days(): void
+    {
+        $c = $this->cal();
+        $this->assertEquals(new Position('2026-11-24', 2), $c->previous(new Position('2026-11-24', 3)));
+        // Monday 08:00 → Saturday's last quarter (Sunday is closed).
+        $this->assertEquals(new Position('2026-11-28', 1), $c->previous(new Position('2026-11-30', 0)));
+        // Mon 28 Dec 08:00 → Wed 23 Dec 15:30 (Christmas closures and Sunday).
+        $this->assertEquals(new Position('2026-12-23', 3), $c->previous(new Position('2026-12-28', 0)));
+        // back() is the inverse of span(): a 4-quarter job ending Mon 30 q1 starts Sat 28 q0.
+        $this->assertEquals(new Position('2026-11-28', 0), $c->back(new Position('2026-11-30', 1), 3));
+        $this->assertEquals(new Position('2026-11-30', 1), $c->back(new Position('2026-11-30', 1), 0));
+    }
+
     public function test_distance_counts_working_quarters(): void
     {
         $c = $this->cal();

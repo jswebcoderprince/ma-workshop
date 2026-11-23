@@ -97,7 +97,7 @@ export default function AppLayout({
     const offLabel = useOffLabel();
     const { appearance, updateAppearance } = useAppearance();
     const [mini, setMini] = useState(() => typeof window !== 'undefined' && localStorage.getItem('sidebar-mini') === '1');
-    const [toast, setToast] = useState<{ text: string; warn: boolean } | null>(null);
+    const [toast, setToast] = useState<{ text: string; warn: boolean; undo: number | null } | null>(null);
     const searchRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -108,9 +108,10 @@ export default function AppLayout({
 
     useEffect(() => {
         if (!flash?.status && !flash?.warning) return;
-        // A warning (e.g. "3 jobs fall in this time off") stays longer than a plain "Saved".
-        setToast(flash.warning ? { text: flash.warning, warn: true } : { text: t('Saved'), warn: false });
-        const id = setTimeout(() => setToast(null), flash.warning ? 9000 : 2200);
+        // A warning (e.g. "3 jobs fall in this time off") stays longer than a plain "Saved". A move can be undone.
+        const undo = flash.undo ?? null;
+        setToast(flash.warning ? { text: flash.warning, warn: true, undo } : { text: undo ? t('Job moved.') : t('Saved'), warn: false, undo });
+        const id = setTimeout(() => setToast(null), flash.warning ? 9000 : undo ? 6000 : 2200);
         return () => clearTimeout(id);
     }, [flash, t]);
 
@@ -486,6 +487,22 @@ export default function AppLayout({
                             <CircleCheck className="size-[17px]" strokeWidth={1.8} />
                         )}
                         <span className="flex-1">{toast.text}</span>
+                        {toast.undo !== null && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const id = toast.undo!;
+                                    setToast(null);
+                                    router.post(route('jobs.undo-move', id), {}, { preserveScroll: true, preserveState: true });
+                                }}
+                                className={cn(
+                                    'press -my-1 ml-2 rounded-md px-2 py-1 text-[13px] font-semibold transition-colors duration-150',
+                                    toast.warn ? 'border-parts-line hover:bg-panel/60 border' : 'text-brand hover:bg-white/10',
+                                )}
+                            >
+                                {t('Undo')}
+                            </button>
+                        )}
                         {toast.warn && (
                             <button
                                 type="button"

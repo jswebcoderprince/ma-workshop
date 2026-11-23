@@ -629,6 +629,7 @@ function History({ log }: { log: Job['log'] }) {
     const labels: Record<string, string> = {
         'job.created': t('Booked'),
         'job.moved': t('Moved'),
+        'job.move_undone': t('Move undone'),
         'job.duration': t('Duration changed'),
         'job.status': t('Status changed'),
         'job.informed': t('Customer informed'),

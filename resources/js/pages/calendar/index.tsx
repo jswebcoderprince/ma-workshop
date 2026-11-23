@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import type { CalendarDay, CalendarJob, CalendarLane, Hours, JobDetail, MechanicView, OffReason } from '@/types';
 import { router } from '@inertiajs/react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ChevronLeft, ChevronRight, HardHat, MousePointerClick, Package, Phone, Plus, Search, TriangleAlert } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HardHat, MousePointerClick, Move, Package, Phone, Plus, Search, TriangleAlert } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
@@ -289,6 +289,10 @@ export default function Calendar(props: Props) {
                                 <span className="text-muted-foreground flex items-center gap-1.5 text-[12px]">
                                     <MousePointerClick className="size-3.5" />
                                     {t('Click an empty spot to book there.')}
+                                </span>
+                                <span className="text-muted-foreground flex items-center gap-1.5 text-[12px]">
+                                    <Move className="size-3.5" />
+                                    {t('Drag a job to move it.')}
                                 </span>
                             </div>
                         </Card>
