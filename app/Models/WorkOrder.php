@@ -64,9 +64,16 @@ class WorkOrder extends Model
         return $this->hasMany(WorkOrderLine::class)->orderBy('sort_order')->orderBy('id');
     }
 
+    /** Every invoice ever issued for this job, voided ones included (their numbers stay on record). */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class)->orderByDesc('id');
+    }
+
+    /** The invoice that counts: the newest one that is not voided. */
     public function invoice(): HasOne
     {
-        return $this->hasOne(Invoice::class);
+        return $this->hasOne(Invoice::class)->ofMany(['id' => 'max'], fn ($q) => $q->whereNull('voided_at'));
     }
 
     public function startPosition(): Position

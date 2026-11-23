@@ -73,6 +73,10 @@ These follow from the rules above. Change them here if the client disagrees.
 - Moving a booking to another date sets "customer to contact" in both directions (earlier and later). Changing only the mechanic does not.
 - "Completed now" on a job in progress shortens it to the current quarter. That is what opens the gap for "Could move earlier".
 - Invoice numbers: one series (default `MAE`), starting at 0001, never reused. An issued invoice cannot be edited, only voided.
+- A voided invoice stays on record with its number. The job's lines unlock, and a new invoice gets the next number.
+  A job that ever had an invoice cannot be deleted.
+- Line prices are typed without VAT. VAT (Settings, default 21 %) is worked out once on the invoice total.
+- The job card has no prices: it is for the mechanic, with empty rows for parts and notes written by hand.
 
 ## Still to get from the client (before delivery, does not block development)
 

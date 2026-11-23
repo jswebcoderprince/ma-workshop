@@ -119,7 +119,7 @@ class DemoSeeder extends Seeder
                     $status = $end->isBefore($now) ? 'completed' : ($start->isBefore($now) || $start->equals($now) ? 'in_progress' : 'scheduled');
                 }
 
-                WorkOrder::create([
+                $job = WorkOrder::create([
                     'customer_id' => $customer->id,
                     'vehicle_id' => $customer->vehicles->first()->id,
                     'mechanic_id' => $mechanic->id,
@@ -132,6 +132,9 @@ class DemoSeeder extends Seeder
                     'notify_customer' => isset($p[5]) ? NotifyDirection::from($p[5]) : null,
                     'completed_at' => $status === 'completed' ? now() : null,
                 ]);
+                if ($status !== 'scheduled') {
+                    self::sampleLines($job);
+                }
 
                 // Advance by duration + gap working quarters (a negative gap makes the next job overlap).
                 $cursor = $start;
@@ -139,6 +142,29 @@ class DemoSeeder extends Seeder
                     $cursor = $cal->next($cursor);
                 }
             }
+        }
+    }
+
+    /** Made-up work and parts lines with made-up prices (sample data), by the kind of work. */
+    public static function sampleLines(WorkOrder $job): void
+    {
+        $labour = fn (string $d, float $h) => ['kind' => 'labour', 'description' => $d, 'quantity' => $h, 'unit' => 'h', 'unit_price_cents' => 4000];
+        $part = fn (string $d, float $q, string $u, int $cents) => ['kind' => 'part', 'description' => $d, 'quantity' => $q, 'unit' => $u, 'unit_price_cents' => $cents];
+        $lines = match ($job->description) {
+            'Variklio diagnostika' => [$labour('Variklio diagnostika kompiuteriu', 1), $labour('Klaidų kodų analizė ir bandomasis važiavimas', 0.5)],
+            'Variklio kapitalinis remontas' => [
+                $labour('Variklio išardymas, defektavimas ir surinkimas', 14),
+                $part('Stūmoklių žiedų komplektas', 1, 'set', 18600),
+                $part('Galvutės tarpinė', 1, 'pcs', 6450),
+                $part('Variklio alyva 5W-30', 5, 'l', 980),
+            ],
+            'Sezoninis aptarnavimas' => [$labour('Sezoninis aptarnavimas', 2), $part('Uždegimo žvakė', 2, 'pcs', 1240), $part('Alyva 10W-40', 3, 'l', 1120)],
+            'Stabdžių sistemos remontas' => [$labour('Stabdžių kaladėlių ir diskų keitimas', 2.5), $part('Stabdžių kaladėlių komplektas', 1, 'set', 4890), $part('Stabdžių skystis DOT4', 1, 'l', 1250)],
+            'Variklio aptarnavimas' => [$labour('Variklio aptarnavimas', 2), $part('Tepalo filtras', 1, 'pcs', 1460), $part('Variklio alyva', 4, 'l', 1050)],
+            default => [$labour($job->description, 2)],
+        };
+        foreach ($lines as $i => $line) {
+            $job->lines()->create($line + ['sort_order' => $i]);
         }
     }
 

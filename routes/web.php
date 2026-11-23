@@ -3,13 +3,15 @@
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ClosureController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\TimeOffController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\WorkOrderController;
+use App\Http\Controllers\WorkOrderLineController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::middleware('auth')->group(function () {
     Route::get('/', OverviewController::class)->name('overview');
@@ -44,10 +46,17 @@ Route::middleware('auth')->group(function () {
     Route::post('jobs/{workOrder}/informed', [WorkOrderController::class, 'informed'])->name('jobs.informed');
     Route::post('jobs/{workOrder}/move', [WorkOrderController::class, 'move'])->name('jobs.move');
 
-    // Built in later phases (docs/ROADMAP.md); for now they show a placeholder so navigation works.
-    foreach (['jobs', 'invoices'] as $page) {
-        Route::get($page, fn () => Inertia::render('placeholder', ['page' => $page]))->name($page);
-    }
+    Route::get('jobs', [JobController::class, 'index'])->name('jobs');
+    Route::get('jobs/{workOrder}', [JobController::class, 'show'])->name('jobs.show');
+    Route::get('jobs/{workOrder}/card', [JobController::class, 'card'])->name('jobs.card');
+    Route::post('jobs/{workOrder}/lines', [WorkOrderLineController::class, 'store'])->name('lines.store');
+    Route::patch('lines/{workOrderLine}', [WorkOrderLineController::class, 'update'])->name('lines.update');
+    Route::delete('lines/{workOrderLine}', [WorkOrderLineController::class, 'destroy'])->name('lines.destroy');
+
+    Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices');
+    Route::post('jobs/{workOrder}/invoice', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::post('invoices/{invoice}/void', [InvoiceController::class, 'void'])->name('invoices.void');
 });
 
 require __DIR__.'/settings.php';

@@ -108,3 +108,45 @@ export interface JobDetail extends JobRow {
 }
 
 export type Hours = Record<string, { open: string; quarters: number }>;
+
+export type LineKind = 'labour' | 'part';
+
+/** A labour or parts line of a job; prices in cents, without VAT. */
+export interface JobLine {
+    id: number;
+    kind: LineKind;
+    description: string;
+    quantity: number;
+    unit: string;
+    unitPrice: number;
+    total: number;
+}
+
+export interface InvoiceSummary {
+    id: number;
+    number: string;
+    issuedOn: string;
+    dueOn: string;
+    total: number;
+    voidedAt: string | null;
+}
+
+export interface Party {
+    name?: string;
+    code?: string;
+    company_code?: string | null;
+    vat_code?: string | null;
+    address?: string | null;
+    bank?: string;
+    phone?: string | null;
+    email?: string | null;
+}
+
+export interface Paged<T> {
+    data: T[];
+    total: number;
+    from: number | null;
+    to: number | null;
+    prev: string | null;
+    next: string | null;
+}

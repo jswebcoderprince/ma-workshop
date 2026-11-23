@@ -337,7 +337,7 @@ export default function AppLayout({
                         </form>
                         <span className="bg-line hidden h-5 w-px xl:block" />
                         <Link
-                            href={route('jobs', { filter: 'notify' })}
+                            href={route('jobs', { flag: 'call' })}
                             aria-label={t('Customers to call')}
                             title={t('Customers to call')}
                             className="text-fg-2 hover:bg-subtle hover:text-fg relative grid size-9 place-items-center rounded-lg"

@@ -67,7 +67,10 @@ class OverviewTest extends TestCase
             ->where('shell.counts.toCall', 2)
             ->where('shell.counts.warnings', 2)
             ->has('shell.roster', 4)
-            ->where('shell.roster.0.status', 'working'));
+            ->where('shell.roster.0.status', 'working')
+            // Sidebar cells: Tomas's demo job covers the first two quarters today.
+            ->where('shell.roster.0.slots', [true, true, false, false])
+            ->where('shell.roster.0.booked', 2));
     }
 
     public function test_mechanics_off_today_show_their_reason(): void
@@ -79,13 +82,15 @@ class OverviewTest extends TestCase
             ->where('lanes.0.off', 'holiday')
             ->where('stats.mechanics.working', 0)
             ->where('stats.mechanics.off.0.reason', 'holiday')
-            ->where('shell.roster.0.status', 'holiday'));
+            ->where('shell.roster.0.status', 'holiday')
+            ->where('shell.roster.0.slots', []));
     }
 
-    public function test_placeholder_pages_render_for_later_phases(): void
+    public function test_every_menu_page_renders(): void
     {
-        foreach (['jobs', 'invoices'] as $page) {
-            $this->get("/$page")->assertOk()->assertInertia(fn ($p) => $p->component('placeholder')->where('page', $page));
+        foreach (['/' => 'overview', '/calendar' => 'calendar/index', '/jobs' => 'jobs/index', '/customers' => 'customers/index',
+            '/mechanics' => 'mechanics/index', '/invoices' => 'invoices/index'] as $url => $component) {
+            $this->get($url)->assertOk()->assertInertia(fn ($p) => $p->component($component));
         }
     }
 }

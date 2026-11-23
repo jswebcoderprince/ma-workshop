@@ -170,7 +170,7 @@ class WorkOrderController extends Controller
 
     public function destroy(WorkOrder $workOrder): RedirectResponse
     {
-        if ($workOrder->invoice()->exists()) {
+        if ($workOrder->invoices()->exists()) {
             return back()->withErrors(['job' => __('This job has an invoice and cannot be deleted.')]);
         }
         ActivityLog::record('job.deleted', null, $workOrder->only(['id', 'number', 'customer_id', 'mechanic_id', 'description']) + [

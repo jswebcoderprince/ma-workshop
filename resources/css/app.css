@@ -295,3 +295,34 @@
     background-image: repeating-linear-gradient(135deg, var(--off-stripe) 0 6px, transparent 6px 12px);
     background-color: var(--off);
 }
+
+/* Job cards and invoices (components/print-sheet.tsx): A4, black on white, no app chrome. */
+@page {
+    size: A4;
+    margin: 12mm 15mm;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    html,
+    body,
+    .print-root {
+        background: #fff !important;
+        color: #111 !important;
+    }
+
+    .sheet {
+        width: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    .sheet table tr {
+        break-inside: avoid;
+    }
+}

@@ -1,13 +1,27 @@
 import { ConfirmButton } from '@/components/confirm-button';
 import { useStatusLabel } from '@/components/job-table';
-import { Button, DurationChip, Field, MechanicAvatar, Plate, SelectInput, Tag, TextInput } from '@/components/ui-kit';
+import { Button, buttonClasses, ButtonLink, DurationChip, Field, MechanicAvatar, Plate, SelectInput, Tag, TextInput } from '@/components/ui-kit';
 import { daysLabel, quartersOn, quarterTime } from '@/lib/calendar';
 import { formatDate, formatShortDate } from '@/lib/format';
 import { useLocale, useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import type { Hours, JobDetail, JobStatus, MechanicView } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
-import { ArrowRight, Check, CircleCheck, MoveLeft, MoveRight, Pencil, Phone, PhoneCall, Sparkles, TriangleAlert, X } from 'lucide-react';
+import {
+    ArrowRight,
+    Check,
+    CircleCheck,
+    MoveLeft,
+    MoveRight,
+    Pencil,
+    Phone,
+    PhoneCall,
+    Printer,
+    ReceiptText,
+    Sparkles,
+    TriangleAlert,
+    X,
+} from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 
 const opts = { preserveScroll: true, preserveState: true };
@@ -323,6 +337,19 @@ export function JobInspector({
                 <Button size="sm" icon={MoveRight} onClick={() => setMoving(true)}>
                     {t('Move')}
                 </Button>
+                <ButtonLink size="sm" href={route('jobs.show', job.id)} icon={ReceiptText}>
+                    {t('Parts & invoice')}
+                </ButtonLink>
+                <a
+                    href={route('jobs.card', job.id)}
+                    target="_blank"
+                    rel="noopener"
+                    className={buttonClasses('ghost', 'sm')}
+                    title={t('Job card')}
+                    aria-label={t('Job card')}
+                >
+                    <Printer className="size-4" strokeWidth={1.8} />
+                </a>
                 <span className="flex-1" />
                 <ConfirmButton
                     size="sm"
@@ -396,7 +423,13 @@ function MoveForm({ job, mechanics, hours, onDone }: { job: JobDetail; mechanics
     );
 }
 
-function DetailsForm({ job, onDone }: { job: JobDetail; onDone: () => void }) {
+export function DetailsForm({
+    job,
+    onDone,
+}: {
+    job: Pick<JobDetail, 'id' | 'description' | 'mileage'> & { vehicle: { id: number } | null };
+    onDone: () => void;
+}) {
     const t = useT();
     const form = useForm({ description: job.description, mileage: job.mileage ?? '', vehicle_id: job.vehicle?.id ?? null });
     return (
