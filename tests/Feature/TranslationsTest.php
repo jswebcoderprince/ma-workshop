@@ -43,7 +43,7 @@ class TranslationsTest extends TestCase
 
     public function test_every_php_string_has_a_lithuanian_translation(): void
     {
-        $keys = $this->keysIn('app', '*.php', "/__\\(\\s*'((?:[^'\\\\]|\\\\.)+)'/");
+        $keys = $this->keysIn('app', '*.php', "/(?:__|trans_choice)\\(\\s*'((?:[^'\\\\]|\\\\.)+)'/");
         $missing = [];
         foreach ($keys as $key) {
             // "auth.failed" style keys live in lang/lt/auth.php, sentences live in lang/lt.json.

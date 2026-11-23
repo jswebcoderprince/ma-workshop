@@ -15,7 +15,8 @@ export function useT() {
         (key: string, replace?: Record<string, string | number>) => {
             let text = translations?.[key] ?? key;
             if (replace) {
-                for (const [k, v] of Object.entries(replace)) {
+                // Longest names first, like Laravel: otherwise ":to" would eat the start of ":total".
+                for (const [k, v] of Object.entries(replace).sort(([a], [b]) => b.length - a.length)) {
                     text = text.replaceAll(`:${k}`, String(v));
                 }
             }

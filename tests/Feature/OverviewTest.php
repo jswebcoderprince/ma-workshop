@@ -53,7 +53,7 @@ class OverviewTest extends TestCase
 
     public function test_placeholder_pages_render_for_later_phases(): void
     {
-        foreach (['calendar', 'jobs', 'customers', 'mechanics', 'invoices'] as $page) {
+        foreach (['calendar', 'jobs', 'invoices'] as $page) {
             $this->get("/$page")->assertOk()->assertInertia(fn ($p) => $p->component('placeholder')->where('page', $page));
         }
     }

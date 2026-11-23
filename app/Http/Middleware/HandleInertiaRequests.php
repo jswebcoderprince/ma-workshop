@@ -43,7 +43,10 @@ class HandleInertiaRequests extends Middleware
                 'openJobs' => WorkOrder::where('status', '!=', 'completed')->count(),
                 'toCall' => WorkOrder::whereNotNull('notify_customer')->count(),
             ] : null,
-            'flash' => ['status' => fn () => $request->session()->get('status')],
+            'flash' => [
+                'status' => fn () => $request->session()->get('status'),
+                'warning' => fn () => $request->session()->get('warning'),
+            ],
         ]);
     }
 }

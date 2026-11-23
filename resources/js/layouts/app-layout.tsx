@@ -29,9 +29,11 @@ import {
     ReceiptText,
     Search,
     Settings,
+    TriangleAlert,
     UserRound,
     Users,
     Wrench,
+    X,
     type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -85,7 +87,7 @@ export default function AppLayout({
     const nav = useNav();
     const { appearance, updateAppearance } = useAppearance();
     const [mini, setMini] = useState(() => typeof window !== 'undefined' && localStorage.getItem('sidebar-mini') === '1');
-    const [toast, setToast] = useState<string | null>(null);
+    const [toast, setToast] = useState<{ text: string; warn: boolean } | null>(null);
 
     useEffect(() => {
         // The server sets these on the first load; keep them right after client-side navigation too.
@@ -94,9 +96,10 @@ export default function AppLayout({
     }, [workshop.accent, page.props.locale]);
 
     useEffect(() => {
-        if (!flash?.status) return;
-        setToast(t('Saved'));
-        const id = setTimeout(() => setToast(null), 2200);
+        if (!flash?.status && !flash?.warning) return;
+        // A warning (e.g. "3 jobs fall in this time off") stays longer than a plain "Saved".
+        setToast(flash.warning ? { text: flash.warning, warn: true } : { text: t('Saved'), warn: false });
+        const id = setTimeout(() => setToast(null), flash.warning ? 9000 : 2200);
         return () => clearTimeout(id);
     }, [flash, t]);
 
@@ -314,10 +317,27 @@ export default function AppLayout({
             {toast && (
                 <div
                     role="status"
-                    className="fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-xl bg-[#1d1b38] px-4 py-[11px] text-white shadow-lg md:bottom-6"
+                    className={cn(
+                        'fixed bottom-24 left-1/2 z-[60] flex max-w-[calc(100vw-24px)] -translate-x-1/2 items-start gap-2 rounded-xl px-4 py-[11px] shadow-lg md:bottom-6',
+                        toast.warn ? 'border-parts-line bg-parts-bg text-parts-ink w-[440px] border' : 'bg-[#1d1b38] text-white',
+                    )}
                 >
-                    <CircleCheck className="size-[17px]" strokeWidth={1.7} />
-                    {toast}
+                    {toast.warn ? (
+                        <TriangleAlert className="mt-0.5 size-[17px] shrink-0" strokeWidth={1.7} />
+                    ) : (
+                        <CircleCheck className="size-[17px]" strokeWidth={1.7} />
+                    )}
+                    <span className="flex-1">{toast.text}</span>
+                    {toast.warn && (
+                        <button
+                            type="button"
+                            onClick={() => setToast(null)}
+                            aria-label={t('Close')}
+                            className="-mr-1 grid size-6 place-items-center rounded-md hover:bg-black/5"
+                        >
+                            <X className="size-4" />
+                        </button>
+                    )}
                 </div>
             )}
         </>

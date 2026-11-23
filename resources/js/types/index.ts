@@ -10,7 +10,7 @@ export interface SharedData {
     translations: Record<string, string>;
     workshop: { name: string; accent: 'violet' | 'teal'; timezone: string };
     counts: { openJobs: number; toCall: number } | null;
-    flash: { status: string | null };
+    flash: { status: string | null; warning: string | null };
     [key: string]: unknown;
 }
 
@@ -23,6 +23,24 @@ export interface MechanicView {
     color: string;
     vehicleTypes: VehicleType[];
     workDays: number[];
+}
+
+export interface VehicleView {
+    id: number;
+    type: VehicleType;
+    make: string;
+    year: number | null;
+    plate: string | null;
+    vin: string | null;
+    canDelete?: boolean;
+}
+
+export interface TimeOffView {
+    id: number;
+    type: 'holiday' | 'day_off' | 'sick';
+    from: string;
+    to: string;
+    note: string | null;
 }
 
 export interface JobRow {

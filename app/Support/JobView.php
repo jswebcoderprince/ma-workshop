@@ -10,7 +10,7 @@ use App\Scheduling\Schedule;
 /** Shapes work orders and mechanics for the React pages. */
 final class JobView
 {
-    private const PALETTE = ['#6c5dd3', '#3b82f6', '#22b07d', '#ec4899', '#e59a1a', '#0ea5e9', '#8b5cf6', '#14b8a6'];
+    public const PALETTE = ['#6c5dd3', '#3b82f6', '#22b07d', '#ec4899', '#e59a1a', '#0ea5e9', '#8b5cf6', '#14b8a6'];
 
     /** @return array<string, mixed> */
     public static function row(WorkOrder $w, Schedule $schedule): array
