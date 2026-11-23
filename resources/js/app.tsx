@@ -2,6 +2,7 @@ import '../css/app.css';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { MotionConfig } from 'motion/react';
 import { createRoot } from 'react-dom/client';
 import { route as routeFn } from 'ziggy-js';
 import { initializeTheme } from './hooks/use-appearance';
@@ -18,7 +19,12 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        // Animations follow the system setting "reduce motion" (docs/DESIGN.md "Motion").
+        root.render(
+            <MotionConfig reducedMotion="user">
+                <App {...props} />
+            </MotionConfig>,
+        );
     },
     progress: {
         color: '#1fa5a8',

@@ -96,7 +96,7 @@ export default function JobPage({ job, lines, totals, invoice, voided, billing }
             {(job.warning || job.notify) && (
                 <div className="flex flex-wrap gap-2">
                     {job.warning && (
-                        <Tag tone="parts" icon={TriangleAlert}>
+                        <Tag tone="over" icon={TriangleAlert}>
                             {job.warning === 'overlap' ? t('Overlaps another job of this mechanic') : t('Mechanic is off during part of this job')}
                         </Tag>
                     )}

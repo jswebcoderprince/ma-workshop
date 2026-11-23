@@ -34,6 +34,7 @@ import {
     X,
     type LucideIcon,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 type NavItem = { name: string; label: string; icon: LucideIcon; match: string };
@@ -177,24 +178,34 @@ export default function AppLayout({
                                 title={mini ? item.label : undefined}
                                 aria-current={active ? 'page' : undefined}
                                 className={cn(
-                                    'group relative flex h-9 items-center gap-3 rounded-md text-[14px] transition-colors',
+                                    'group relative flex h-9 items-center gap-3 rounded-md text-[14px] transition-[background-color,color,transform] duration-150 active:scale-[.98]',
                                     mini ? 'justify-center' : 'px-2.5',
-                                    active ? 'bg-side-3 font-medium text-white' : 'text-side-muted hover:bg-side-2 hover:text-side-fg',
+                                    active ? 'font-medium text-white' : 'text-side-muted hover:bg-side-2 hover:text-side-fg',
                                 )}
                             >
+                                {active && (
+                                    <motion.span
+                                        layoutId="nav-active"
+                                        className="bg-side-3 absolute inset-0 rounded-md"
+                                        transition={{ type: 'spring', stiffness: 520, damping: 40 }}
+                                    />
+                                )}
                                 <item.icon
-                                    className={cn('size-[18px] shrink-0', active ? 'text-brand' : 'text-side-dim group-hover:text-side-muted')}
+                                    className={cn(
+                                        'relative size-[18px] shrink-0 transition-[color,transform] duration-200 group-hover:translate-x-px',
+                                        active ? 'text-brand' : 'text-side-dim group-hover:text-side-muted',
+                                    )}
                                     strokeWidth={1.75}
                                 />
-                                {!mini && <span className="flex-1 truncate">{item.label}</span>}
+                                {!mini && <span className="relative flex-1 truncate">{item.label}</span>}
                                 {!mini && item.name === 'jobs' && !!counts?.openJobs && (
-                                    <span className={cn('text-[12.5px] tabular-nums', active ? 'text-side-muted' : 'text-side-dim')}>
+                                    <span className={cn('relative text-[12.5px] tabular-nums', active ? 'text-side-muted' : 'text-side-dim')}>
                                         {counts.openJobs}
                                     </span>
                                 )}
                                 {item.name === 'calendar' && !!counts?.warnings && (
                                     <span
-                                        className={cn('bg-parts size-1.5 rounded-full', mini && 'absolute top-2 right-2')}
+                                        className={cn('bg-over relative size-1.5 rounded-full', mini && 'absolute top-2 right-2')}
                                         title={t('Overlaps: :n', { n: counts.warnings })}
                                     />
                                 )}
@@ -397,7 +408,11 @@ export default function AppLayout({
                 </header>
 
                 {/* ---------- page ---------- */}
-                <main id="main" tabIndex={-1} className="flex min-w-0 flex-col gap-5 px-4 pt-4 pb-24 outline-none md:px-6 md:pt-5 md:pb-10">
+                <main
+                    id="main"
+                    tabIndex={-1}
+                    className="page-enter flex min-w-0 flex-col gap-5 px-4 pt-4 pb-24 outline-none md:px-6 md:pt-5 md:pb-10"
+                >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
@@ -432,10 +447,17 @@ export default function AppLayout({
                                 key={item.name}
                                 href={route(item.name)}
                                 className={cn(
-                                    'flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold',
+                                    'relative flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition-[color,transform] duration-150 active:scale-[.94]',
                                     active ? 'text-p' : 'text-muted-foreground',
                                 )}
                             >
+                                {active && (
+                                    <motion.span
+                                        layoutId="tab-active"
+                                        className="bg-p absolute -top-px h-[3px] w-8 rounded-b-full"
+                                        transition={{ type: 'spring', stiffness: 520, damping: 40 }}
+                                    />
+                                )}
                                 <item.icon className="size-[22px]" strokeWidth={1.8} />
                                 {item.label}
                             </Link>
@@ -444,32 +466,39 @@ export default function AppLayout({
                 </div>
             </nav>
 
-            {toast && (
-                <div
-                    role="status"
-                    className={cn(
-                        'fixed bottom-24 left-1/2 z-[60] flex max-w-[calc(100vw-24px)] -translate-x-1/2 items-start gap-2 rounded-lg px-4 py-[11px] text-[13.5px] shadow-lg md:bottom-6',
-                        toast.warn ? 'border-parts-line bg-parts-bg text-parts-ink w-[440px] border' : 'bg-[#0f172a] text-white',
-                    )}
-                >
-                    {toast.warn ? (
-                        <TriangleAlert className="mt-0.5 size-[17px] shrink-0" strokeWidth={1.8} />
-                    ) : (
-                        <CircleCheck className="size-[17px]" strokeWidth={1.8} />
-                    )}
-                    <span className="flex-1">{toast.text}</span>
-                    {toast.warn && (
-                        <button
-                            type="button"
-                            onClick={() => setToast(null)}
-                            aria-label={t('Close')}
-                            className="-mr-1 grid size-6 place-items-center rounded-md hover:bg-black/5"
-                        >
-                            <X className="size-4" />
-                        </button>
-                    )}
-                </div>
-            )}
+            <AnimatePresence>
+                {toast && (
+                    <motion.div
+                        key={toast.text}
+                        role="status"
+                        initial={{ opacity: 0, y: 16, scale: 0.96, x: '-50%' }}
+                        animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+                        exit={{ opacity: 0, y: 8, scale: 0.98, x: '-50%', transition: { duration: 0.15 } }}
+                        transition={{ type: 'spring', stiffness: 460, damping: 30 }}
+                        className={cn(
+                            'fixed bottom-24 left-1/2 z-[60] flex max-w-[calc(100vw-24px)] items-start gap-2 rounded-lg px-4 py-[11px] text-[13.5px] shadow-lg md:bottom-6',
+                            toast.warn ? 'border-parts-line bg-parts-bg text-parts-ink w-[440px] border' : 'bg-[#141618] text-white',
+                        )}
+                    >
+                        {toast.warn ? (
+                            <TriangleAlert className="mt-0.5 size-[17px] shrink-0" strokeWidth={1.8} />
+                        ) : (
+                            <CircleCheck className="size-[17px]" strokeWidth={1.8} />
+                        )}
+                        <span className="flex-1">{toast.text}</span>
+                        {toast.warn && (
+                            <button
+                                type="button"
+                                onClick={() => setToast(null)}
+                                aria-label={t('Close')}
+                                className="-mr-1 grid size-6 place-items-center rounded-md hover:bg-black/5"
+                            >
+                                <X className="size-4" />
+                            </button>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     );
 }

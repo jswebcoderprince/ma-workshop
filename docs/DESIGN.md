@@ -75,3 +75,38 @@ time range in mono, status text. Free time: dashed indigo card with "+ Book".
 - Print pages (`components/print-sheet.tsx`): A4 sheet, black on white in both themes, toolbar hidden on paper.
   Job card has no prices; the invoice follows the usual Lithuanian layout (seller and buyer side by side, `Serija MAE Nr. 0001`).
 - App icon: MA mark on a graphite square (`public/icon-*.png`, maskable variant with a wider margin, `favicon.svg`).
+
+## Calendar (redesigned 2026-11-24)
+
+The owner found the board cluttered. Rules now (`components/calendar/board.tsx`, `status-style.ts`):
+
+- **One look per state**, shared by board, phone agenda and legend: scheduled = white bar, in progress = light blue,
+  waiting for parts = amber stripes, completed = grey, **overlap / mechanic off = red** (no longer amber, so it does not
+  mix with "waiting for parts").
+- **Week**: one header row (weekday + date, today in a filled circle). No quarter-time row; an empty quarter shows
+  "+ 10:30" on hover and books there. Bars show make + number (+ surname when wide); 1-quarter bars show the number.
+- **Month**: no text in bars any more. Each day is one bar of four segments (booked segments coloured). Hovering a
+  job's segment dims the others so the whole job stands out.
+- **Hover card** for every job (number, status, make, plate, customer, phone, work, dates, length). Clicking opens
+  the inspector.
+- Mechanic column: avatar, name, one load bar with %. Free time row: one number per day.
+- Inspector floats in from the right over the board (board keeps its width); Esc closes. Phones: bottom sheet.
+- Toolbar holds view switch, ‹ Today ›, range, "Booked % | Free time", mechanic filter. Legend and hint sit under the board.
+
+## Motion
+
+Library: `motion` (Framer Motion). `MotionConfig reducedMotion="user"`, and CSS turns animations off under
+`prefers-reduced-motion`.
+
+| What | How |
+|---|---|
+| Buttons, chips, nav items | press: scale 0.97 in 120–150 ms |
+| Clickable cards (KPI cards, today's jobs) | `.lift`: rise 2px + soft shadow on hover (mouse only) |
+| Segmented controls, Jobs tabs, sidebar, phone tab bar | active pill / underline slides with a spring (`layoutId`) |
+| Page content | `.page-enter`: blocks rise in one after another (40 ms apart) |
+| Calendar bars and month cells | fade / rise in when a new range is shown |
+| Inspector, sheets, toasts | spring in from the side or bottom, quicker ease out |
+| KPI numbers | count up from 0 (`CountUp`) |
+
+Only transform and opacity animate. Entrance animations use `animation-fill-mode: backwards`: a transform left on a
+block would become the frame for fixed popups (the hover card was misplaced because of that).

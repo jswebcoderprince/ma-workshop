@@ -1,3 +1,4 @@
+import { ACCENT, toneOf } from '@/components/calendar/status-style';
 import { useStatusLabel } from '@/components/job-table';
 import { Button, ButtonLink, Card, CardHeader, DurationChip, EmptyState, MechanicAvatar, StatCard, Tag } from '@/components/ui-kit';
 import { WorkloadChart, type WorkloadWeek } from '@/components/workload-chart';
@@ -154,9 +155,9 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                     </div>
                 </StatCard>
 
-                <StatCard label={t('Overlaps')} icon={TriangleAlert} tone={stats.warnings.total ? 'parts' : 'ok'} value={stats.warnings.total}>
+                <StatCard label={t('Overlaps')} icon={TriangleAlert} tone={stats.warnings.total ? 'over' : 'ok'} value={stats.warnings.total}>
                     {stats.warnings.first ? (
-                        <div className="bg-parts-bg/70 text-parts-ink flex items-center gap-2 rounded-lg p-2 text-[12px]">
+                        <div className="bg-over-bg/70 text-over-ink flex items-center gap-2 rounded-lg p-2 text-[12px]">
                             <ArrowRight className="size-4 shrink-0" />
                             <span className="truncate">
                                 #{stats.warnings.first.number} ({stats.warnings.first.vehicle}):{' '}
@@ -335,25 +336,16 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                 </div>
                 <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
                     {lane.jobs.map((job) => {
-                        const strip =
-                            job.warning !== null
-                                ? 'bg-parts'
-                                : job.status === 'completed'
-                                  ? 'bg-ok'
-                                  : job.status === 'waiting_parts'
-                                    ? 'bg-hold'
-                                    : job.status === 'in_progress'
-                                      ? 'bg-p'
-                                      : 'bg-p-line';
                         return (
-                            <div
+                            <Link
                                 key={job.id}
+                                href={route('jobs.show', job.id)}
                                 className={cn(
-                                    'bg-panel relative overflow-hidden rounded-md p-2.5 pl-4 shadow-[0_1px_2px_rgba(15,23,42,.06)]',
-                                    job.warning && 'bg-parts-bg/40',
+                                    'lift press relative block overflow-hidden rounded-md p-2.5 pl-4 shadow-[0_1px_2px_rgba(15,23,42,.06)]',
+                                    job.warning ? 'bg-over-bg' : 'bg-panel',
                                 )}
                             >
-                                <span className={cn('absolute inset-y-0 left-0 w-1', strip)} />
+                                <span className={cn('absolute inset-y-0 left-0 w-[3px]', ACCENT[toneOf(job)])} />
                                 <div className="flex items-center justify-between gap-2">
                                     <span className="truncate text-[12.5px] font-semibold">
                                         <span className="text-p font-mono">#{job.number}</span> · {job.vehicle?.make ?? job.customer.name}
@@ -365,7 +357,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                                         {job.from} – {job.to}
                                     </span>
                                     {job.warning ? (
-                                        <span className="text-parts-ink flex items-center gap-1 font-semibold">
+                                        <span className="text-over-ink flex items-center gap-1 font-semibold">
                                             <TriangleAlert className="size-3.5" />
                                             {job.warning === 'overlap' ? t('Overlap') : t('Mechanic off')}
                                         </span>
@@ -374,7 +366,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                                     )}
                                 </div>
                                 <div className="text-fg-2 mt-0.5 truncate text-[12px]">{job.description}</div>
-                            </div>
+                            </Link>
                         );
                     })}
                     {lane.free.map((f) => (
@@ -402,7 +394,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                                         q: f.quarter,
                                         len: f.quarters,
                                     })}
-                                    className="bg-open rounded px-2 py-1 text-[11px] font-semibold text-white hover:brightness-110"
+                                    className="bg-open press rounded px-2 py-1 text-[11px] font-semibold text-white transition-[filter,transform] hover:brightness-110"
                                 >
                                     + {t('Book')}
                                 </Link>
@@ -423,9 +415,9 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
 
         if (item.kind === 'warning') {
             return (
-                <div className="bg-parts-bg/50 space-y-1.5 rounded-lg p-3">
+                <div className="bg-over-bg/40 space-y-1.5 rounded-lg p-3">
                     <div className="flex items-center justify-between">
-                        <Tag tone="parts" icon={TriangleAlert}>
+                        <Tag tone="over" icon={TriangleAlert}>
                             {item.warning === 'overlap' ? t('Overlap') : t('Mechanic off')}
                         </Tag>
                         <span className="text-muted-foreground text-[11.5px]">{item.mechanic?.name}</span>

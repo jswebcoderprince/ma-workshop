@@ -9,6 +9,7 @@ import { visitWith } from '@/lib/visit';
 import type { JobRow, MechanicView, Paged } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import { Phone, Plus, ReceiptText, Search, TriangleAlert, Wrench } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
 type Status = 'open' | 'scheduled' | 'in_progress' | 'waiting_parts' | 'completed' | 'all';
@@ -72,10 +73,17 @@ export default function Jobs({ filters, jobs, counts, mechanics }: Props) {
                                 aria-selected={active}
                                 onClick={() => visitWith('status', tab.value === 'open' ? null : tab.value, ONLY)}
                                 className={cn(
-                                    '-mb-px flex h-11 shrink-0 items-center gap-1.5 border-b-2 px-2.5 text-[13.5px] whitespace-nowrap',
-                                    active ? 'border-p text-fg font-semibold' : 'text-muted-foreground hover:text-fg border-transparent',
+                                    'relative flex h-11 shrink-0 items-center gap-1.5 px-2.5 text-[13.5px] whitespace-nowrap transition-colors duration-150',
+                                    active ? 'text-fg font-semibold' : 'text-muted-foreground hover:text-fg',
                                 )}
                             >
+                                {active && (
+                                    <motion.span
+                                        layoutId="jobs-tab"
+                                        className="bg-p absolute inset-x-1 -bottom-px h-0.5 rounded-full"
+                                        transition={{ type: 'spring', stiffness: 520, damping: 40 }}
+                                    />
+                                )}
                                 {tab.label}
                                 <span className={cn('text-[12px] tabular-nums', active ? 'text-fg-2' : 'text-faint')}>{counts[tab.value]}</span>
                             </button>
@@ -153,7 +161,7 @@ export default function Jobs({ filters, jobs, counts, mechanics }: Props) {
                                             tabIndex={0}
                                             onClick={() => open(j.id)}
                                             onKeyDown={(e) => e.key === 'Enter' && open(j.id)}
-                                            className="hover:bg-hover cursor-pointer align-top [&:last-child>td]:border-b-0"
+                                            className="hover:bg-hover cursor-pointer align-top transition-colors duration-150 [&:last-child>td]:border-b-0"
                                         >
                                             <td className="border-line max-w-[300px] border-b py-3 pr-3 pl-5">
                                                 <Link
@@ -201,7 +209,7 @@ export default function Jobs({ filters, jobs, counts, mechanics }: Props) {
                                                 <div className="flex items-center gap-1.5">
                                                     <StatusDot status={j.status} label={status(j.status)} />
                                                     {j.notify && <Tag tone="call" icon={Phone} title={t('Customer to call')} />}
-                                                    {j.warning && <Tag tone="parts" icon={TriangleAlert} title={warningText(j.warning)} />}
+                                                    {j.warning && <Tag tone="over" icon={TriangleAlert} title={warningText(j.warning)} />}
                                                 </div>
                                             </td>
                                             <td className="border-line border-b py-3 pr-5 pl-3 whitespace-nowrap">
@@ -241,7 +249,7 @@ export default function Jobs({ filters, jobs, counts, mechanics }: Props) {
                                             <span>·</span>
                                             <span>{j.mechanic?.name}</span>
                                             {j.notify && <Phone className="text-over size-3.5" />}
-                                            {j.warning && <TriangleAlert className="text-parts size-3.5" />}
+                                            {j.warning && <TriangleAlert className="text-over size-3.5" />}
                                         </div>
                                     </Link>
                                 </li>

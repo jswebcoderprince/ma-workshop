@@ -3,7 +3,17 @@ import { cn } from '@/lib/utils';
 import type { JobStatus, MechanicView } from '@/types';
 import { Link } from '@inertiajs/react';
 import { EllipsisVertical, type LucideIcon } from 'lucide-react';
-import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
+import { animate, motion, useReducedMotion } from 'motion/react';
+import {
+    forwardRef,
+    useEffect,
+    useId,
+    useRef,
+    type ButtonHTMLAttributes,
+    type InputHTMLAttributes,
+    type ReactNode,
+    type SelectHTMLAttributes,
+} from 'react';
 
 /* Building blocks for the Engine Precision Planner design (design/stitch/engine_precision_planner/DESIGN.md). */
 
@@ -55,7 +65,7 @@ const btnVariants: Record<BtnVariant, string> = {
 
 export function buttonClasses(variant: BtnVariant = 'default', size: 'md' | 'sm' = 'md', className?: string) {
     return cn(
-        'inline-flex items-center justify-center gap-1.5 rounded-md border font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex items-center justify-center gap-1.5 rounded-md border font-semibold whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100',
         size === 'md' ? 'h-[38px] px-3.5 text-[13px]' : 'h-8 px-2.5 text-[12.5px]',
         btnVariants[variant],
         className,
@@ -100,7 +110,8 @@ export function ButtonLink({
     );
 }
 
-const iconBtn = 'relative grid size-9 place-items-center rounded-lg text-fg-2 hover:bg-subtle hover:text-fg';
+const iconBtn =
+    'relative grid size-9 place-items-center rounded-lg text-fg-2 transition-[background-color,color,transform] duration-150 hover:bg-subtle hover:text-fg active:scale-[.92]';
 function Badge({ n }: { n?: number }) {
     return n ? (
         <span className="bg-over border-panel absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full border-2 px-1 font-mono text-[10px] font-bold text-white">
@@ -245,6 +256,8 @@ export function Segmented<T extends string | number>({
     options: { value: T; label: ReactNode }[];
     className?: string;
 }) {
+    // Each control needs its own id so its pill slides only inside itself.
+    const id = useId();
     return (
         <div className={cn('border-line bg-subtle inline-flex gap-0.5 rounded-lg border p-[3px]', className)}>
             {options.map((o) => (
@@ -254,11 +267,18 @@ export function Segmented<T extends string | number>({
                     aria-pressed={value === o.value}
                     onClick={() => onChange(o.value)}
                     className={cn(
-                        'text-fg-2 hover:text-fg inline-flex h-[30px] items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium',
-                        value === o.value && 'bg-panel text-p font-bold shadow-[0_1px_2px_rgba(15,23,42,.1)]',
+                        'relative inline-flex h-[30px] items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium transition-colors duration-150 active:scale-[.96]',
+                        value === o.value ? 'text-p font-semibold' : 'text-fg-2 hover:text-fg',
                     )}
                 >
-                    {o.label}
+                    {value === o.value && (
+                        <motion.span
+                            layoutId={`seg-${id}`}
+                            className="bg-panel absolute inset-0 rounded-md shadow-[0_1px_3px_rgba(15,23,42,.12)]"
+                            transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                        />
+                    )}
+                    <span className="relative inline-flex items-center gap-1.5">{o.label}</span>
                 </button>
             ))}
         </div>
@@ -421,12 +441,14 @@ export function StatCard({
     children?: ReactNode;
 }) {
     return (
-        <Card className="flex flex-col justify-between p-4 transition-shadow hover:shadow-[0_4px_6px_-1px_rgba(15,23,42,.08)]">
+        <Card className="lift flex flex-col justify-between p-4">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 space-y-1">
                     <Eyebrow className={toneLabel[tone]}>{label}</Eyebrow>
                     <div className="flex flex-wrap items-baseline gap-2">
-                        <span className={cn('text-[30px] leading-[38px] font-bold tracking-[-0.02em] tabular-nums', toneValue[tone])}>{value}</span>
+                        <span className={cn('text-[30px] leading-[38px] font-bold tracking-[-0.02em] tabular-nums', toneValue[tone])}>
+                            {typeof value === 'number' ? <CountUp value={value} /> : value}
+                        </span>
                         {note && <span className="text-fg-2 text-[13px]">{note}</span>}
                     </div>
                 </div>
@@ -449,4 +471,23 @@ export function EmptyState({ icon: Icon, title, children }: { icon: LucideIcon; 
             {children && <div className="text-muted-foreground max-w-md text-[13.5px]">{children}</div>}
         </div>
     );
+}
+
+/** A number that counts up from 0 when it first shows (and glides when it changes). */
+export function CountUp({ value, duration = 0.7 }: { value: number; duration?: number }) {
+    const ref = useRef<HTMLSpanElement>(null);
+    const from = useRef(0);
+    const reduce = useReducedMotion();
+    useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const controls = animate(from.current, value, {
+            duration: reduce ? 0 : duration,
+            ease: [0.22, 1, 0.36, 1],
+            onUpdate: (v) => (el.textContent = String(Math.round(v))),
+        });
+        from.current = value;
+        return () => controls.stop();
+    }, [value, duration, reduce]);
+    return <span ref={ref}>{reduce ? value : 0}</span>;
 }

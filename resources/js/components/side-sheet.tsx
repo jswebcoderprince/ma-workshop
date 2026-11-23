@@ -27,10 +27,10 @@ export function SideSheet({
     return (
         <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
             <Dialog.Portal>
-                <Dialog.Overlay className="data-[state=open]:animate-in data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-[rgba(29,27,56,.35)]" />
+                <Dialog.Overlay className="data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fixed inset-0 z-40 bg-[rgba(15,23,42,.35)] duration-200" />
                 <Dialog.Content
                     aria-describedby={undefined}
-                    className="bg-panel data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-4 md:data-[state=open]:slide-in-from-right-4 fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col overflow-hidden rounded-t-[20px] shadow-[0_18px_40px_-12px_rgba(29,27,56,.22)] outline-none md:inset-x-auto md:top-2.5 md:right-2.5 md:bottom-2.5 md:max-h-none md:w-[500px] md:rounded-[18px]"
+                    className="bg-panel data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-6 md:data-[state=open]:slide-in-from-right-8 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-6 md:data-[state=closed]:slide-out-to-right-8 fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col overflow-hidden rounded-t-[20px] shadow-[0_18px_40px_-12px_rgba(29,27,56,.22)] duration-300 ease-[cubic-bezier(.22,1,.36,1)] outline-none data-[state=closed]:duration-200 md:inset-x-auto md:top-2.5 md:right-2.5 md:bottom-2.5 md:max-h-none md:w-[500px] md:rounded-[18px]"
                 >
                     <div className="border-line flex items-start gap-3 border-b px-5 pt-[18px] pb-4">
                         <div className="min-w-0 flex-1">

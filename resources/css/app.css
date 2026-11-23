@@ -344,3 +344,100 @@
         break-inside: avoid;
     }
 }
+
+/* ---------- motion (docs/DESIGN.md "Motion") ----------
+   Short and quiet: 120–250 ms, ease-out to enter, a small spring only for panels and toasts.
+   Only transform and opacity move. Everything stops for people who ask the system for less motion. */
+:root {
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Page content comes in one block after another (AppLayout's <main>). */
+.page-enter > * {
+    /* "backwards", not "both": a transform left behind would turn the block into a frame for fixed popups. */
+    animation: rise-in 0.32s var(--ease-out) backwards;
+}
+.page-enter > *:nth-child(2) {
+    animation-delay: 40ms;
+}
+.page-enter > *:nth-child(3) {
+    animation-delay: 80ms;
+}
+.page-enter > *:nth-child(4) {
+    animation-delay: 120ms;
+}
+.page-enter > *:nth-child(n + 5) {
+    animation-delay: 160ms;
+}
+
+/* Calendar bars and cells fade in when a new week or month is shown. */
+.bar-in {
+    animation: rise-in 0.28s var(--ease-out) backwards;
+}
+.cell-in {
+    animation: fade-in 0.3s var(--ease-out) backwards;
+}
+
+/* Cards and tiles that can be clicked rise a little under the mouse (not on touch screens). */
+@media (hover: hover) {
+    .lift {
+        transition:
+            transform 0.18s var(--ease-out),
+            box-shadow 0.18s var(--ease-out);
+    }
+    .lift:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.22);
+    }
+}
+.press {
+    transition: transform 0.12s var(--ease-out);
+}
+.press:active {
+    transform: scale(0.97);
+}
+
+/* Waiting for parts: amber stripes (bar body, and stronger in the month cells). */
+@utility stripes-parts {
+    background-color: var(--parts-bg);
+    background-image: repeating-linear-gradient(135deg, color-mix(in srgb, var(--parts) 16%, transparent) 0 6px, transparent 6px 12px);
+}
+@utility stripes-parts-strong {
+    background-color: color-mix(in srgb, var(--parts) 55%, transparent);
+    background-image: repeating-linear-gradient(135deg, var(--parts) 0 3px, transparent 3px 6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+    }
+    .lift:hover,
+    .press:active {
+        transform: none;
+    }
+}

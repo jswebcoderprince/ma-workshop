@@ -556,7 +556,7 @@ export function JobForm({
                                             {check.end && `${formatDate(check.end.date, locale)} ${check.end.time}`}
                                             {check.warning && (
                                                 <span className="mt-1 block">
-                                                    <Tag tone="parts">{check.warning === 'overlap' ? t('Overlap') : t('Mechanic off')}</Tag>{' '}
+                                                    <Tag tone="over">{check.warning === 'overlap' ? t('Overlap') : t('Mechanic off')}</Tag>{' '}
                                                     {check.warning === 'overlap'
                                                         ? t('It overlaps another job. You can still book it; nothing will be moved.')
                                                         : t('The mechanic is off during part of this time.')}

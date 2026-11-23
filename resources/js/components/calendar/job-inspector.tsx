@@ -78,7 +78,7 @@ export function JobInspector({
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         {job.warning ? (
-                            <Tag tone="parts" icon={TriangleAlert}>
+                            <Tag tone="over" icon={TriangleAlert}>
                                 {job.warning === 'overlap' ? t('Overlap') : t('Mechanic off')}
                             </Tag>
                         ) : (

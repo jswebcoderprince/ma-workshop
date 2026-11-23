@@ -1,18 +1,20 @@
-import { Board, type View } from '@/components/calendar/board';
+import { Board, BoardLegend, type View } from '@/components/calendar/board';
 import { FindSlot } from '@/components/calendar/find-slot';
 import { JobForm, type Prefill } from '@/components/calendar/job-form';
 import { JobInspector } from '@/components/calendar/job-inspector';
+import { ACCENT, BAR, toneOf } from '@/components/calendar/status-style';
 import { useStatusLabel } from '@/components/job-table';
-import { Button, ButtonLink, Card, DurationChip, EmptyState, MechanicAvatar, Segmented, SelectInput, Tag } from '@/components/ui-kit';
+import { Button, ButtonLink, Card, EmptyState, MechanicAvatar, Segmented, SelectInput, Tag } from '@/components/ui-kit';
 import AppLayout from '@/layouts/app-layout';
-import { addDays, daysLabel } from '@/lib/calendar';
-import { formatDate, formatShortDate } from '@/lib/format';
+import { addDays } from '@/lib/calendar';
+import { formatDate, formatDays, formatShortDate } from '@/lib/format';
 import { useLocale, useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import type { CalendarDay, CalendarJob, CalendarLane, Hours, JobDetail, MechanicView, OffReason } from '@/types';
 import { router } from '@inertiajs/react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { CalendarDays, ChevronLeft, ChevronRight, HardHat, Package, Phone, Plus, Search, TriangleAlert } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HardHat, MousePointerClick, Package, Phone, Plus, Search, TriangleAlert } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
 interface Props {
@@ -58,7 +60,6 @@ export default function Calendar(props: Props) {
     const { view, anchor, today, from, days, mechanics, jobs, summary, filters, options, next, hours, selected } = props;
     const t = useT();
     const locale = useLocale();
-    const wide = useMedia('(min-width: 1280px)');
     const desktop = useMedia('(min-width: 768px)');
     const [focus, setFocus] = useState<Focus>('all');
     const [form, setForm] = useState<{ open: boolean; key: number; prefill: Prefill }>({ open: false, key: 0, prefill: {} });
@@ -106,6 +107,16 @@ export default function Calendar(props: Props) {
     const openJob = (id: number) => (selected?.id === id ? setParam('job', null, ['selected']) : setParam('job', id, ['selected']));
     const closeJob = () => setParam('job', null, ['selected']);
 
+    // Esc closes the job panel (on desktop it floats over the board and has no backdrop to click).
+    useEffect(() => {
+        if (!selected || !desktop) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && !(e.target as HTMLElement).closest('[role="dialog"]')) closeJob();
+        };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [selected, desktop]);
+
     const dim = (j: CalendarJob) =>
         focus === 'all' ? false : focus === 'warning' ? j.warning === null : focus === 'call' ? j.notify === null : j.status !== focus;
 
@@ -150,7 +161,7 @@ export default function Calendar(props: Props) {
             }
         >
             {/* toolbar */}
-            <Card className="mb-4 flex flex-col gap-3 p-3 lg:flex-row lg:items-center">
+            <Card className="flex flex-col gap-3 p-3 lg:flex-row lg:items-center">
                 <div className="flex flex-wrap items-center gap-2">
                     <Segmented<View>
                         value={view}
@@ -186,14 +197,20 @@ export default function Calendar(props: Props) {
                             <ChevronRight className="size-[18px]" />
                         </button>
                     </div>
-                    <div className="flex items-center gap-2 px-1">
-                        <CalendarDays className="text-p size-[18px]" />
-                        <span className="text-[14.5px] font-bold">{range}</span>
-                        <span className="bg-p-soft text-p-ink rounded px-1.5 py-0.5 font-mono text-[11px] font-bold">{weekLabel}</span>
+                    <div className="flex items-baseline gap-2 px-1">
+                        <span className="text-[16px] font-semibold tracking-[-0.01em]">{range}</span>
+                        <span className="text-muted-foreground text-[12.5px]">{weekLabel}</span>
                     </div>
                 </div>
                 <span className="flex-1" />
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3">
+                    {summary.available > 0 && (
+                        <span className="text-muted-foreground hidden text-[12.5px] whitespace-nowrap xl:inline">
+                            {t('Booked')} <b className="text-fg font-semibold">{pct}%</b>
+                            <span className="text-line-strong mx-2">|</span>
+                            {t('Free time')} <b className="text-open-ink font-semibold">{formatDays(summary.free, locale)}</b>
+                        </span>
+                    )}
                     <SelectInput
                         aria-label={t('Mechanic')}
                         className="h-[34px] w-auto min-w-[160px] text-[13px]"
@@ -210,37 +227,39 @@ export default function Calendar(props: Props) {
                 </div>
             </Card>
 
-            {/* focus filters + legend */}
-            <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                {/* phones: one row that scrolls sideways */}
-                <div className="-mx-4 flex max-w-[calc(100%+2rem)] gap-1.5 overflow-x-auto px-4 whitespace-nowrap md:mx-0 md:max-w-none md:flex-wrap md:overflow-visible md:px-0">
-                    {(Object.keys(focusLabel) as Focus[]).map((f) => (
-                        <button
-                            key={f}
-                            type="button"
-                            aria-pressed={focus === f}
-                            onClick={() => setFocus(f)}
-                            className={cn(
-                                'flex h-[30px] items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-semibold',
-                                focus === f ? 'border-fg bg-fg text-panel' : 'border-line bg-panel text-fg-2 hover:bg-subtle',
-                            )}
-                        >
-                            {f === 'warning' && <TriangleAlert className={cn('size-3.5', focus !== f && 'text-parts')} />}
+            {/* show only some jobs (the rest fade); phones: one row that scrolls sideways */}
+            <div className="-mx-4 flex max-w-[calc(100%+2rem)] gap-1.5 overflow-x-auto px-4 pb-0.5 whitespace-nowrap md:mx-0 md:max-w-none md:flex-wrap md:overflow-visible md:px-0">
+                {(Object.keys(focusLabel) as Focus[]).map((f) => (
+                    <button
+                        key={f}
+                        type="button"
+                        aria-pressed={focus === f}
+                        onClick={() => setFocus(focus === f && f !== 'all' ? 'all' : f)}
+                        className={cn(
+                            'relative flex h-8 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-medium transition-[background-color,border-color,color,transform] duration-150 active:scale-[.96]',
+                            focus === f ? 'text-panel border-transparent' : 'border-line bg-panel text-fg-2 hover:border-line-strong',
+                        )}
+                    >
+                        {focus === f && (
+                            <motion.span
+                                layoutId="calendar-focus"
+                                className="bg-fg absolute inset-0 rounded-full"
+                                transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                            />
+                        )}
+                        <span className="relative flex items-center gap-1.5">
+                            {f === 'warning' && <TriangleAlert className={cn('size-3.5', focus !== f && 'text-over')} />}
                             {f === 'call' && <Phone className={cn('size-3.5', focus !== f && 'text-over')} />}
-                            {f === 'waiting_parts' && <Package className="size-3.5" />}
+                            {f === 'waiting_parts' && <Package className={cn('size-3.5', focus !== f && 'text-parts')} />}
                             {focusLabel[f]}
-                            <span className={cn('font-mono text-[11px]', focus === f ? 'opacity-80' : 'text-muted-foreground')}>{count(f)}</span>
-                        </button>
-                    ))}
-                </div>
-                <span className="flex-1" />
-                <div className="hidden md:block">
-                    <Legend />
-                </div>
+                            <span className={cn('text-[11.5px] tabular-nums', focus === f ? 'opacity-70' : 'text-muted-foreground')}>{count(f)}</span>
+                        </span>
+                    </button>
+                ))}
             </div>
 
-            <div className="flex items-start gap-4">
-                <div className="min-w-0 flex-1">
+            <div>
+                <div className="min-w-0">
                     {mechanics.length === 0 ? (
                         <Card>
                             <EmptyState icon={HardHat} title={t('No mechanics yet')}>
@@ -253,6 +272,7 @@ export default function Calendar(props: Props) {
                     ) : desktop ? (
                         <Card className="overflow-hidden">
                             <Board
+                                key={`${view}-${from}`}
                                 view={view}
                                 days={days}
                                 lanes={mechanics}
@@ -263,6 +283,14 @@ export default function Calendar(props: Props) {
                                 onJob={openJob}
                                 onEmpty={(m, d, q) => openForm({ mechanicId: m, date: d, quarter: q })}
                             />
+                            <div className="border-line flex flex-wrap items-center gap-x-6 gap-y-2 border-t px-4 py-3">
+                                <BoardLegend view={view} />
+                                <span className="flex-1" />
+                                <span className="text-muted-foreground flex items-center gap-1.5 text-[12px]">
+                                    <MousePointerClick className="size-3.5" />
+                                    {t('Click an empty spot to book there.')}
+                                </span>
+                            </div>
                         </Card>
                     ) : (
                         <Agenda
@@ -275,54 +303,44 @@ export default function Calendar(props: Props) {
                             onAdd={(d) => openForm({ date: d })}
                         />
                     )}
-
-                    {/* footer metrics */}
-                    <div className="text-fg-2 mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px]">
-                        <span>
-                            {t('Booked')}: <b className="font-mono">{pct}%</b>{' '}
-                            <span className="text-muted-foreground font-mono">
-                                ({daysLabel(summary.booked)} / {daysLabel(summary.available)})
-                            </span>
-                        </span>
-                        <span>
-                            {t('Free time')}: <b className="text-open-ink font-mono">{daysLabel(summary.free)}</b>
-                        </span>
-                        {summary.toCall > 0 && (
-                            <span className="text-over-ink font-semibold">
-                                <Phone className="mr-1 inline size-3.5" />
-                                {t('Customers to call: :n', { n: summary.toCall })}
-                            </span>
-                        )}
-                        {summary.warnings > 0 && (
-                            <span className="text-parts-ink font-semibold">
-                                <TriangleAlert className="mr-1 inline size-3.5" />
-                                {t('Overlaps: :n', { n: summary.warnings })}
-                            </span>
-                        )}
-                        <span className="flex-1" />
-                        <span className="text-muted-foreground hidden md:inline">{t('Click an empty spot to book there.')}</span>
-                    </div>
                 </div>
-
-                {/* docked inspector on wide screens */}
-                {wide && selected && (
-                    <aside
-                        className="border-line bg-panel sticky top-4 w-[360px] shrink-0 overflow-hidden rounded-lg border shadow-[0_4px_12px_-2px_rgba(15,23,42,.08)]"
-                        style={{ height: 'calc(100vh - 140px)' }}
-                    >
-                        {inspector}
-                    </aside>
-                )}
             </div>
 
-            {/* inspector as a drawer on smaller screens */}
-            {!wide && (
+            {/* desktop: the job floats in from the right over the board, which keeps its full width */}
+            {desktop && (
+                <AnimatePresence>
+                    {selected && (
+                        <motion.aside
+                            key="inspector"
+                            aria-label={`#${selected.number}`}
+                            initial={{ opacity: 0, x: 48 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 48, transition: { duration: 0.16, ease: [0.65, 0, 0.35, 1] } }}
+                            transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                            className="border-line bg-panel fixed top-[76px] right-4 bottom-4 z-40 w-[380px] overflow-hidden rounded-xl border shadow-[0_24px_60px_-20px_rgba(15,23,42,.45)]"
+                        >
+                            <motion.div
+                                key={selected.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.18 }}
+                                className="h-full"
+                            >
+                                {inspector}
+                            </motion.div>
+                        </motion.aside>
+                    )}
+                </AnimatePresence>
+            )}
+
+            {/* phones: the job slides up as a sheet */}
+            {!desktop && (
                 <Dialog.Root open={!!selected} onOpenChange={(v) => !v && closeJob()}>
                     <Dialog.Portal>
-                        <Dialog.Overlay className="fixed inset-0 z-40 bg-[rgba(15,23,42,.35)]" />
+                        <Dialog.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-40 bg-[rgba(15,23,42,.35)]" />
                         <Dialog.Content
                             aria-describedby={undefined}
-                            className="bg-panel fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col overflow-hidden rounded-t-[16px] shadow-xl outline-none md:inset-x-auto md:top-2.5 md:right-2.5 md:bottom-2.5 md:max-h-none md:w-[400px] md:rounded-[14px]"
+                            className="bg-panel data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom fixed inset-x-0 bottom-0 z-50 flex max-h-[92vh] flex-col overflow-hidden rounded-t-[16px] shadow-xl outline-none data-[state=closed]:duration-200 data-[state=open]:duration-300"
                         >
                             <Dialog.Title className="sr-only">{selected ? `#${selected.number}` : t('Job')}</Dialog.Title>
                             {inspector}
@@ -343,29 +361,6 @@ export default function Calendar(props: Props) {
             />
             <FindSlot open={finding} onClose={() => setFinding(false)} onBook={openForm} />
         </AppLayout>
-    );
-}
-
-function Legend() {
-    const t = useT();
-    const item = (cls: string, label: string) => (
-        <span className="inline-flex items-center gap-1.5">
-            <i className={cn('h-3 w-1 rounded-sm', cls)} />
-            {label}
-        </span>
-    );
-    return (
-        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px]">
-            {item('bg-p/70', t('Scheduled'))}
-            {item('bg-p', t('In progress'))}
-            {item('bg-hold', t('Waiting for parts'))}
-            {item('bg-ok', t('Completed'))}
-            {item('bg-parts', t('Overlap'))}
-            <span className="inline-flex items-center gap-1.5">
-                <i className="hatch border-line size-3 rounded-sm border" />
-                {t('Off or closed')}
-            </span>
-        </div>
     );
 }
 
@@ -421,9 +416,7 @@ function Agenda({
                         <div className="border-line flex items-center gap-2 border-b px-3 py-2">
                             <span className={cn('text-[13.5px] font-bold', d.date === today && 'text-p')}>{formatDate(d.date, locale)}</span>
                             {d.quarters > 0 && d.date >= today && (
-                                <span className="text-open-ink font-mono text-[11px] font-semibold">
-                                    {t(':free free', { free: daysLabel(d.free) })}
-                                </span>
+                                <span className="text-open-ink text-[12px] font-medium">{t(':free free', { free: formatDays(d.free, locale) })}</span>
                             )}
                             <span className="flex-1" />
                             {d.quarters > 0 && (
@@ -454,33 +447,20 @@ function Agenda({
                                     type="button"
                                     onClick={() => onJob(j.id)}
                                     className={cn(
-                                        'border-line bg-panel relative flex flex-col gap-0.5 overflow-hidden rounded-md border py-2 pr-3 pl-4 text-left',
-                                        j.warning && 'border-parts-line bg-parts-bg/50',
+                                        'relative flex flex-col gap-0.5 overflow-hidden rounded-md border py-2 pr-3 pl-4 text-left transition-[transform,opacity] duration-150 active:scale-[.98]',
+                                        BAR[toneOf(j)],
                                         dim(j) && 'opacity-30',
                                     )}
                                 >
-                                    <span
-                                        className={cn(
-                                            'absolute inset-y-0 left-0 w-1',
-                                            j.warning
-                                                ? 'bg-parts'
-                                                : j.status === 'completed'
-                                                  ? 'bg-ok'
-                                                  : j.status === 'waiting_parts'
-                                                    ? 'bg-hold'
-                                                    : j.status === 'in_progress'
-                                                      ? 'bg-p'
-                                                      : 'bg-p/70',
-                                        )}
-                                    />
+                                    <span className={cn('absolute inset-y-0 left-0 w-[3px]', ACCENT[toneOf(j)])} />
                                     <span className="flex items-center gap-2">
-                                        <span className="font-mono text-[12px] font-bold">
+                                        <span className="text-[12.5px] font-semibold tabular-nums">
                                             {d.times[first]}–{d.times[last + 1] ?? d.close}
                                         </span>
-                                        <span className="text-p font-mono text-[11.5px] font-bold">#{j.number}</span>
+                                        <span className="text-muted-foreground text-[12px] tabular-nums">#{j.number}</span>
                                         {j.notify && <Phone className="text-over size-3.5" />}
                                         <span className="flex-1" />
-                                        <DurationChip quarters={j.duration} />
+                                        <span className="text-muted-foreground text-[12px]">{formatDays(j.duration, locale)}</span>
                                     </span>
                                     <span className="truncate text-[13px] font-semibold">
                                         {j.vehicle?.make} · {j.customer.name}
