@@ -1,4 +1,4 @@
-import { Switch } from '@/components/ui-kit';
+import { LogoMark } from '@/components/logo';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,16 +16,17 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Bell,
     CalendarRange,
-    ChevronsLeft,
-    ChevronsRight,
     CircleCheck,
     HardHat,
     LayoutGrid,
     LogOut,
     Moon,
+    PanelLeftClose,
+    PanelLeftOpen,
     ReceiptText,
     Search,
     Settings,
+    Sun,
     TriangleAlert,
     UserRound,
     Users,
@@ -57,32 +58,19 @@ function isActive(url: string, match: string) {
 
 export type Crumb = { label: string; href?: string };
 
-/** A mechanic's state today as a short badge for the sidebar roster. */
-function useRosterBadge() {
+/** Why a mechanic is not working today, for the sidebar list. */
+function useOffLabel() {
     const t = useT();
-    return (r: RosterEntry): { text: string; dot: string; badge: string } => {
-        if (r.status !== 'working') {
-            const text =
-                r.status === 'holiday'
-                    ? t('Holiday')
-                    : r.status === 'day_off'
-                      ? t('Day off')
-                      : r.status === 'sick'
-                        ? t('Sick leave')
-                        : r.status === 'closed'
-                          ? t('Closed')
-                          : t('Not working');
-            return { text, dot: 'bg-hold', badge: 'bg-side-2 text-side-muted' };
-        }
-        const pct = r.available ? Math.round((r.booked / r.available) * 100) : 0;
-        if (pct >= 100) return { text: t(':n% load', { n: pct }), dot: 'bg-over', badge: 'bg-over-bg text-over-ink' };
-        if (pct === 0) return { text: t('Free today'), dot: 'bg-open', badge: 'bg-open-bg text-open-ink' };
-        return {
-            text: t(':n% load', { n: pct }),
-            dot: pct >= 75 ? 'bg-parts' : 'bg-ok',
-            badge: pct >= 75 ? 'bg-parts-bg text-parts-ink' : 'bg-ok-soft text-ok-ink',
-        };
-    };
+    return (status: RosterEntry['status']) =>
+        status === 'holiday'
+            ? t('Holiday')
+            : status === 'day_off'
+              ? t('Day off')
+              : status === 'sick'
+                ? t('Sick leave')
+                : status === 'closed'
+                  ? t('Closed')
+                  : t('Not working');
 }
 
 export default function AppLayout({
@@ -105,7 +93,7 @@ export default function AppLayout({
     const page = usePage<SharedData>();
     const { auth, shell, workshop, flash } = page.props;
     const nav = useNav();
-    const rosterBadge = useRosterBadge();
+    const offLabel = useOffLabel();
     const { appearance, updateAppearance } = useAppearance();
     const [mini, setMini] = useState(() => typeof window !== 'undefined' && localStorage.getItem('sidebar-mini') === '1');
     const [toast, setToast] = useState<{ text: string; warn: boolean } | null>(null);
@@ -148,173 +136,146 @@ export default function AppLayout({
     const working = roster.filter((r) => r.status === 'working');
     const booked = working.reduce((a, r) => a + r.booked, 0);
     const available = working.reduce((a, r) => a + r.available, 0);
-    const bookedPct = available ? Math.round((booked / available) * 100) : 0;
     const counts = shell?.counts;
 
     return (
         <>
             <Head title={title} />
 
-            {/* ---------- dark sidebar (desktop) ---------- */}
+            {/* ---------- sidebar (desktop): graphite, after the black and teal of maenginelab.lt ---------- */}
             <aside
                 className={cn(
-                    'bg-side text-side-fg fixed inset-y-0 left-0 z-40 hidden flex-col justify-between overflow-y-auto md:flex',
-                    mini ? 'w-16' : 'w-[264px]',
+                    'bg-side text-side-fg fixed inset-y-0 left-0 z-40 hidden flex-col overflow-y-auto md:flex',
+                    mini ? 'w-[60px]' : 'w-[248px]',
                 )}
             >
-                <div className="flex flex-col">
-                    <div className={cn('border-side-line flex h-16 items-center gap-2.5 border-b', mini ? 'justify-center' : 'px-4')}>
-                        <span className="bg-p grid size-9 shrink-0 place-items-center rounded-lg text-[13px] font-bold tracking-wider text-white shadow-md">
-                            MA
-                        </span>
+                <div className={cn('flex h-16 shrink-0 items-center gap-3', mini ? 'justify-center' : 'pr-3 pl-5')}>
+                    <Link href={route('overview')} className="flex min-w-0 items-center gap-3" title={workshop.name}>
+                        <LogoMark size={mini ? 30 : 34} className="text-white" />
                         {!mini && (
-                            <>
-                                <div className="min-w-0 leading-tight">
-                                    <div className="truncate text-[14px] font-semibold text-white">{workshop.name}</div>
-                                    <div className="text-side-muted text-[10.5px] font-semibold tracking-[0.08em] uppercase">
-                                        {t('Workshop planner')}
-                                    </div>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={toggleMini}
-                                    aria-label={t('Collapse menu')}
-                                    className="text-side-muted hover:bg-side-2 ml-auto grid size-7 place-items-center rounded-md hover:text-white"
-                                >
-                                    <ChevronsLeft className="size-4" />
-                                </button>
-                            </>
-                        )}
-                    </div>
-
-                    {mini && (
-                        <button
-                            type="button"
-                            onClick={toggleMini}
-                            aria-label={t('Expand menu')}
-                            className="text-side-muted hover:bg-side-2 mx-auto mt-3 grid size-8 place-items-center rounded-md hover:text-white"
-                        >
-                            <ChevronsRight className="size-4" />
-                        </button>
-                    )}
-
-                    {!mini && shell && (
-                        <div className="bg-side-2/70 border-side-line mx-3 mt-4 rounded-lg border p-3">
-                            <div className="mb-1.5 flex items-center justify-between text-[12px]">
-                                <span className="text-side-muted font-medium">{t('Booked today')}</span>
-                                <span className="font-mono font-semibold text-emerald-400">
-                                    {shell.hours ? t(':booked of :total quarters', { booked, total: available }) : t('Closed')}
-                                </span>
-                            </div>
-                            <div className="bg-side h-1.5 overflow-hidden rounded-full">
-                                <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${bookedPct}%` }} />
-                            </div>
-                            <div className="text-side-muted mt-1.5 flex items-center justify-between text-[11px]">
-                                <span>{shell.hours ? `${shell.hours.open} – ${shell.hours.close}` : t('Workshop closed today')}</span>
-                                <span className="font-mono">{bookedPct}%</span>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className={cn('pt-4', mini ? 'px-2' : 'px-3')}>
-                        {!mini && (
-                            <div className="text-side-muted px-2 pb-1.5 text-[10px] font-bold tracking-[0.08em] uppercase">{t('Navigation')}</div>
-                        )}
-                        <nav className="flex flex-col gap-1">
-                            {nav.map((item) => {
-                                const active = isActive(page.url, item.match);
-                                return (
-                                    <Link
-                                        key={item.name}
-                                        href={route(item.name)}
-                                        title={item.label}
-                                        aria-current={active ? 'page' : undefined}
-                                        className={cn(
-                                            'flex items-center gap-2.5 rounded-lg py-2 text-[13px] font-medium transition-colors',
-                                            mini ? 'justify-center px-0' : 'px-3',
-                                            active ? 'bg-p font-semibold text-white shadow-sm' : 'text-side-muted hover:bg-side-2 hover:text-white',
-                                        )}
-                                    >
-                                        <item.icon className="size-[18px] shrink-0" strokeWidth={1.8} />
-                                        {!mini && <span className="flex-1">{item.label}</span>}
-                                        {!mini && item.name === 'jobs' && counts && (
-                                            <span
-                                                className={cn(
-                                                    'rounded px-1.5 py-0.5 font-mono text-[10.5px] font-semibold',
-                                                    active ? 'bg-white/20' : 'bg-side-2 text-side-fg',
-                                                )}
-                                            >
-                                                {counts.openJobs}
-                                            </span>
-                                        )}
-                                        {!mini && item.name === 'calendar' && !!counts?.warnings && (
-                                            <span className="bg-parts size-2 rounded-full" title={t('Overlaps')} />
-                                        )}
-                                    </Link>
-                                );
-                            })}
-                        </nav>
-                    </div>
-
-                    {!mini && roster.length > 0 && (
-                        <div className="px-3 pt-5 pb-3">
-                            <div className="text-side-muted flex items-center justify-between px-2 pb-2 text-[10px] font-bold tracking-[0.08em] uppercase">
-                                <span>{t('Mechanics today')}</span>
-                                <span className="font-mono text-[11px] normal-case">
-                                    {t(':n / :total in', { n: working.length, total: roster.length })}
-                                </span>
-                            </div>
-                            <div className="flex flex-col gap-0.5 px-1">
-                                {roster.map((r) => {
-                                    const b = rosterBadge(r);
-                                    return (
-                                        <div
-                                            key={r.id}
-                                            className={cn(
-                                                'flex items-center justify-between py-1 text-[12.5px]',
-                                                r.status !== 'working' && 'opacity-60',
-                                            )}
-                                        >
-                                            <span className="flex min-w-0 items-center gap-2">
-                                                <span className={cn('size-2 shrink-0 rounded-full', b.dot)} />
-                                                <span className="truncate font-medium">{r.name}</span>
-                                            </span>
-                                            <span
-                                                className={cn('rounded px-1.5 py-px font-mono text-[10px] font-semibold whitespace-nowrap', b.badge)}
-                                            >
-                                                {b.text}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className={cn('border-side-line border-t p-3', mini && 'px-2')}>
-                    <div
-                        className={cn(
-                            'bg-side-2/60 border-side-line flex items-center rounded-lg border p-2',
-                            mini ? 'justify-center' : 'justify-between',
-                        )}
-                    >
-                        {!mini && (
-                            <span className="text-side-fg flex items-center gap-2 text-[11.5px] font-medium">
-                                <Moon className="size-4" />
-                                {t('Dark mode')}
+                            <span className="min-w-0 leading-[1.15]">
+                                <span className="block truncate text-[15px] font-semibold tracking-[-0.01em] text-white">{workshop.name}</span>
+                                <span className="text-side-muted block text-[12px]">{t('Workshop planner')}</span>
                             </span>
                         )}
-                        <Switch checked={dark} onChange={(v) => updateAppearance(v ? 'dark' : 'light')} label={t('Dark mode')} />
-                    </div>
+                    </Link>
+                </div>
+
+                <nav className={cn('flex flex-col gap-px pt-2', mini ? 'px-2.5' : 'px-3')} aria-label={t('Navigation')}>
+                    {nav.map((item) => {
+                        const active = isActive(page.url, item.match);
+                        return (
+                            <Link
+                                key={item.name}
+                                href={route(item.name)}
+                                title={mini ? item.label : undefined}
+                                aria-current={active ? 'page' : undefined}
+                                className={cn(
+                                    'group relative flex h-9 items-center gap-3 rounded-md text-[14px] transition-colors',
+                                    mini ? 'justify-center' : 'px-2.5',
+                                    active ? 'bg-side-3 font-medium text-white' : 'text-side-muted hover:bg-side-2 hover:text-side-fg',
+                                )}
+                            >
+                                <item.icon
+                                    className={cn('size-[18px] shrink-0', active ? 'text-brand' : 'text-side-dim group-hover:text-side-muted')}
+                                    strokeWidth={1.75}
+                                />
+                                {!mini && <span className="flex-1 truncate">{item.label}</span>}
+                                {!mini && item.name === 'jobs' && !!counts?.openJobs && (
+                                    <span className={cn('text-[12.5px] tabular-nums', active ? 'text-side-muted' : 'text-side-dim')}>
+                                        {counts.openJobs}
+                                    </span>
+                                )}
+                                {item.name === 'calendar' && !!counts?.warnings && (
+                                    <span
+                                        className={cn('bg-parts size-1.5 rounded-full', mini && 'absolute top-2 right-2')}
+                                        title={t('Overlaps: :n', { n: counts.warnings })}
+                                    />
+                                )}
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                {!mini && shell && (
+                    <section className="border-side-line mx-3 mt-6 border-t pt-4" aria-label={t('Mechanics today')}>
+                        <div className="flex items-baseline justify-between px-2.5 pb-2">
+                            <span className="text-side-fg text-[13px] font-medium">{t('Today')}</span>
+                            <span className="text-side-dim text-[12px] tabular-nums">
+                                {shell.hours ? `${shell.hours.open}–${shell.hours.close}` : t('Closed')}
+                            </span>
+                        </div>
+                        <ul className="flex flex-col">
+                            {roster.map((r) => (
+                                <li key={r.id} className="flex h-8 items-center gap-2.5 px-2.5 text-[13px]">
+                                    <span
+                                        className={cn(
+                                            'grid size-5 shrink-0 place-items-center rounded-[5px] text-[10px] font-semibold text-white',
+                                            r.status !== 'working' && 'opacity-40',
+                                        )}
+                                        style={{ background: r.color }}
+                                        aria-hidden="true"
+                                    >
+                                        {initials(r.name).slice(0, 1)}
+                                    </span>
+                                    <span className={cn('min-w-0 flex-1 truncate', r.status === 'working' ? 'text-side-fg' : 'text-side-dim')}>
+                                        {r.name}
+                                    </span>
+                                    {r.status === 'working' ? (
+                                        <span
+                                            className="flex gap-[3px]"
+                                            role="img"
+                                            aria-label={t(':booked of :total quarters', { booked: r.booked, total: r.available })}
+                                            title={t(':booked of :total quarters', { booked: r.booked, total: r.available })}
+                                        >
+                                            {r.slots.map((busy, i) => (
+                                                <span key={i} className={cn('h-2.5 w-3 rounded-[2px]', busy ? 'bg-brand' : 'bg-white/10')} />
+                                            ))}
+                                        </span>
+                                    ) : (
+                                        <span className="text-side-dim text-[12px]">{offLabel(r.status)}</span>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                        {shell.hours && available > 0 && (
+                            <p className="text-side-dim mt-1.5 px-2.5 text-[12px]">
+                                {t(':booked of :total quarters booked', { booked, total: available })}
+                            </p>
+                        )}
+                    </section>
+                )}
+
+                <div className={cn('border-side-line mt-auto flex items-center gap-1 border-t py-3', mini ? 'flex-col px-2' : 'px-3')}>
+                    <button
+                        type="button"
+                        onClick={() => updateAppearance(dark ? 'light' : 'dark')}
+                        title={dark ? t('Light mode') : t('Dark mode')}
+                        className={cn(
+                            'text-side-muted hover:bg-side-2 hover:text-side-fg flex h-8 items-center gap-2.5 rounded-md text-[13px]',
+                            mini ? 'w-9 justify-center' : 'flex-1 px-2.5',
+                        )}
+                    >
+                        {dark ? <Sun className="size-4" strokeWidth={1.75} /> : <Moon className="size-4" strokeWidth={1.75} />}
+                        {!mini && (dark ? t('Light mode') : t('Dark mode'))}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={toggleMini}
+                        aria-label={mini ? t('Expand menu') : t('Collapse menu')}
+                        title={mini ? t('Expand menu') : t('Collapse menu')}
+                        className="text-side-dim hover:bg-side-2 hover:text-side-fg grid size-8 place-items-center rounded-md"
+                    >
+                        {mini ? <PanelLeftOpen className="size-4" strokeWidth={1.75} /> : <PanelLeftClose className="size-4" strokeWidth={1.75} />}
+                    </button>
                 </div>
             </aside>
 
-            <div className={cn('min-h-screen', mini ? 'md:pl-16' : 'md:pl-[264px]')}>
+            <div className={cn('min-h-screen', mini ? 'md:pl-[60px]' : 'md:pl-[248px]')}>
                 {/* ---------- header ---------- */}
                 <header className="border-line bg-panel/95 sticky top-0 z-30 flex h-14 items-center gap-3 border-b px-4 shadow-[0_1px_8px_rgba(0,0,0,.04)] backdrop-blur md:h-16 md:px-6">
                     <span className="flex min-w-0 items-center gap-2 md:hidden">
-                        <span className="bg-p grid size-8 shrink-0 place-items-center rounded-lg text-[12px] font-bold text-white">MA</span>
+                        <LogoMark size={30} className="text-fg" />
                         <span className="truncate text-[15px] font-semibold">{workshop.name}</span>
                     </span>
                     <nav className="hidden min-w-0 items-center gap-2 text-[12.5px] md:flex" aria-label="Breadcrumb">
@@ -343,7 +304,7 @@ export default function AppLayout({
                                 shell.hours ? 'border-p-line bg-p-soft text-p-ink' : 'border-hold-line bg-hold-bg text-hold-ink',
                             )}
                         >
-                            <span className={cn('size-2 rounded-full', shell.hours ? 'bg-p animate-pulse' : 'bg-hold')} />
+                            <span className={cn('size-2 rounded-full', shell.hours ? 'bg-ok' : 'bg-hold')} />
                             {shell.hours ? t('Open today') : t('Closed today')}
                             {shell.hours && (
                                 <span className="font-mono text-[11px] font-normal opacity-80">

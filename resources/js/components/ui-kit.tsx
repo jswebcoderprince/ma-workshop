@@ -39,13 +39,9 @@ export function CardHeader({
     );
 }
 
-/** Small uppercase label used above numbers and sections. */
+/** Small label above numbers and sections (sentence case, no letter-spacing). */
 export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
-    return (
-        <span className={cn('text-muted-foreground text-[11px] leading-[14px] font-semibold tracking-[0.06em] uppercase', className)}>
-            {children}
-        </span>
-    );
+    return <span className={cn('text-muted-foreground text-[13px] leading-4 font-medium', className)}>{children}</span>;
 }
 
 type BtnVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'danger';
@@ -408,7 +404,7 @@ const toneLabel: Record<Tone, string> = {
 };
 const toneValue: Record<Tone, string> = { p: 'text-fg', ok: 'text-fg', parts: 'text-parts-ink', over: 'text-over-ink', open: 'text-open-ink' };
 
-/** KPI card (Stitch overview): uppercase label, big number, tinted icon square, detail area below. */
+/** KPI card (Stitch overview): small label, big number, tinted icon square, detail area below. */
 export function StatCard({
     label,
     icon: Icon,

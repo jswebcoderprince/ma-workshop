@@ -383,7 +383,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                             className="border-open-line bg-open-bg/80 flex flex-col justify-between gap-2 rounded-md border border-dashed p-2.5"
                         >
                             <div className="flex items-center justify-between">
-                                <span className="text-open-ink text-[10.5px] font-bold tracking-[0.06em] uppercase">{t('Open slot')}</span>
+                                <span className="text-open-ink text-[12px] font-semibold">{t('Open slot')}</span>
                                 <span className="text-open-ink font-mono text-[11px] font-semibold">
                                     {(f.quarters / 4).toFixed(2).replace(/0$/, '')}d
                                 </span>

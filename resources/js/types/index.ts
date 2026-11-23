@@ -27,6 +27,8 @@ export interface RosterEntry {
     status: 'working' | 'holiday' | 'day_off' | 'sick' | 'not_working' | 'closed';
     booked: number;
     available: number;
+    /** Today's quarters, true where something is booked. Empty when the mechanic is off. */
+    slots: boolean[];
 }
 
 export type JobStatus = 'scheduled' | 'in_progress' | 'waiting_parts' | 'completed';

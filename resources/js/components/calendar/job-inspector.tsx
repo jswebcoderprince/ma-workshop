@@ -16,7 +16,7 @@ function Section({ title, action, children }: { title: string; action?: ReactNod
     return (
         <section className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-[10.5px] font-bold tracking-[0.06em] uppercase">{title}</span>
+                <span className="text-muted-foreground text-[12px] font-semibold">{title}</span>
                 {action}
             </div>
             {children}
@@ -94,7 +94,7 @@ export function JobInspector({
                 {/* vehicle & client */}
                 <div className="border-line bg-subtle/60 flex flex-col gap-2 rounded-lg border p-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground text-[10.5px] font-bold tracking-[0.06em] uppercase">{t('Vehicle & customer')}</span>
+                        <span className="text-muted-foreground text-[12px] font-semibold">{t('Vehicle & customer')}</span>
                         <Plate value={job.vehicle?.plate} />
                     </div>
                     <div className="text-[13.5px] font-bold">

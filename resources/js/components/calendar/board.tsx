@@ -120,7 +120,7 @@ export function Board({ view, days, lanes, jobs, today, selectedId, dim, onJob, 
                     className="border-line bg-subtle sticky left-0 z-20 flex items-end justify-between border-r border-b px-4 pb-2"
                     style={{ gridColumn: 1, gridRow: `1 / span ${headerRows}` }}
                 >
-                    <span className="text-fg-2 text-[11px] font-bold tracking-[0.06em] uppercase">{t('Mechanic')}</span>
+                    <span className="text-fg-2 text-[12.5px] font-semibold">{t('Mechanic')}</span>
                     <span className="border-line bg-panel text-muted-foreground rounded border px-1.5 py-0.5 font-mono text-[10.5px] font-semibold">
                         {lanes.length}
                     </span>
@@ -354,7 +354,7 @@ export function Board({ view, days, lanes, jobs, today, selectedId, dim, onJob, 
                 {view !== 'day' && (
                     <>
                         <div
-                            className="bg-subtle text-fg-2 border-line sticky left-0 z-10 flex items-center border-r px-4 text-[11px] font-bold tracking-[0.06em] uppercase"
+                            className="bg-subtle text-fg-2 border-line sticky left-0 z-10 flex items-center border-r px-4 text-[12.5px] font-semibold"
                             style={{ gridColumn: 1, gridRow: row }}
                         >
                             {t('Free time')}

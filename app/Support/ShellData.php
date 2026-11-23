@@ -27,14 +27,21 @@ final class ShellData
             if ($status === Availability::NOT_WORKING) {
                 $status = 'not_working';
             }
-            $booked = 0;
+            // One flag per quarter of today, so the sidebar can draw the day as four small cells.
+            $slots = [];
             if ($status === 'working') {
                 for ($q = 0; $q < $quarters; $q++) {
-                    $booked += $schedule->isFree($m->id, new Position($today, $q)) ? 0 : 1;
+                    $slots[] = ! $schedule->isFree($m->id, new Position($today, $q));
                 }
             }
+            $booked = count(array_filter($slots));
 
-            return JobView::mechanic($m) + ['status' => $status, 'booked' => $booked, 'available' => $status === 'working' ? $quarters : 0];
+            return JobView::mechanic($m) + [
+                'status' => $status,
+                'booked' => $booked,
+                'available' => $status === 'working' ? $quarters : 0,
+                'slots' => $slots,
+            ];
         })->values();
 
         $jobs = WorkOrder::query()->where('status', '!=', 'completed')->get(['id', 'notify_customer']);

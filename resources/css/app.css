@@ -9,8 +9,11 @@
 /* Design tokens: docs/DESIGN.md (frame v3). Light is the default, `.dark` on <html> switches,
    `data-accent="teal"` swaps the violet primary for MA Engine Lab teal. */
 @theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    /* IBM Plex: engineering heritage, full Lithuanian set, tabular figures.  */
+    --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    /* Numbers (times, durations, job numbers) stay in Plex Sans with tabular figures; only plates use Plex Mono. */
+    --font-mono: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-plate: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -83,22 +86,25 @@
     --color-side-line: var(--side-line);
     --color-side-fg: var(--side-fg);
     --color-side-muted: var(--side-muted);
+    --color-side-3: var(--side-3);
+    --color-side-dim: var(--side-dim);
+    --color-brand: var(--brand);
 
 }
 
 :root {
     /* Engine Precision Planner (design/stitch/engine_precision_planner/DESIGN.md) */
-    --canvas: #f8fafc;
+    --canvas: #f6f7f8;
     --panel: #ffffff;
-    --subtle: #f1f5f9;
-    --hover: #f8fafc;
+    --subtle: #eff1f3;
+    --hover: #f7f8f9;
     --tint: #eff4ff;
-    --line: #e2e8f0;
-    --line-strong: #cbd5e1;
-    --fg: #0f172a;
-    --fg-2: #334155;
-    --muted-fg: #64748b;
-    --faint: #94a3b8;
+    --line: #e2e5e9;
+    --line-strong: #cbd0d6;
+    --fg: #15181c;
+    --fg-2: #353a41;
+    --muted-fg: #69707a;
+    --faint: #99a0a9;
     --p: #1e40af;
     --p-hover: #1d4ed8;
     --p-soft: #eff6ff;
@@ -137,12 +143,15 @@
     --off: #f1f5f9;
     --off-stripe: rgba(203, 213, 225, 0.45);
     --weekend: #f8fafc;
-    /* dark sidebar */
-    --side: #0f172a;
-    --side-2: #1e293b;
-    --side-line: rgba(51, 65, 85, 0.7);
-    --side-fg: #cbd5e1;
-    --side-muted: #94a3b8;
+    /* graphite sidebar, the black and teal of maenginelab.lt */
+    --side: #141618;
+    --side-2: #1c1f22;
+    --side-3: #262a2e;
+    --side-line: rgba(255, 255, 255, 0.07);
+    --side-fg: #eceef0;
+    --side-muted: #9da3aa;
+    --side-dim: #6c727a;
+    --brand: #1fa5a8;
 
     --background: var(--canvas);
     --foreground: var(--fg);
@@ -177,17 +186,17 @@
 }
 
 .dark {
-    --canvas: #0b1120;
-    --panel: #111827;
-    --subtle: #1f2937;
-    --hover: #172033;
+    --canvas: #0f1113;
+    --panel: #16181b;
+    --subtle: #1f2226;
+    --hover: #1b1e21;
     --tint: #142039;
-    --line: #243042;
-    --line-strong: #334155;
-    --fg: #e2e8f0;
-    --fg-2: #cbd5e1;
-    --muted-fg: #94a3b8;
-    --faint: #64748b;
+    --line: #2a2e33;
+    --line-strong: #3a3f46;
+    --fg: #e8eaed;
+    --fg-2: #c9cdd2;
+    --muted-fg: #9aa1a9;
+    --faint: #6b727a;
     --p: #3b82f6;
     --p-hover: #60a5fa;
     --p-soft: rgba(59, 130, 246, 0.15);
@@ -215,8 +224,9 @@
     --off: #141c2b;
     --off-stripe: rgba(51, 65, 85, 0.5);
     --weekend: #0f172a;
-    --side: #070b14;
-    --side-2: #111827;
+    --side: #0c0d0f;
+    --side-2: #16181b;
+    --side-3: #202327;
     color-scheme: dark;
 }
 
@@ -247,7 +257,7 @@
     body {
         font-size: 14px;
         line-height: 1.45;
-        font-feature-settings: 'cv05' 1;
+        font-variant-numeric: tabular-nums;
     }
 
     /* Times, plates, job numbers and durations line up (DESIGN.md: tabular numerals everywhere). */
@@ -275,7 +285,7 @@
     border-radius: 4px;
     background: #fff;
     color: #111;
-    font: 600 11.5px/1 var(--font-mono);
+    font: 600 11.5px/1 var(--font-plate);
     white-space: nowrap;
     vertical-align: middle;
 }

@@ -1,10 +1,21 @@
-export function LogoMark({ size = 32 }: { size?: number }) {
+import { cn } from '@/lib/utils';
+
+/**
+ * MA Engine Lab mark, drawn after the logo on maenginelab.lt: a white "M" of two peaks with a teal "A"
+ * laid over its last leg. Placeholder until the client sends the logo file; swap the paths then.
+ */
+export function LogoMark({ size = 32, className }: { size?: number; className?: string }) {
     return (
-        <span className="bg-p grid shrink-0 place-items-center rounded-[9px]" style={{ width: size, height: size }} aria-hidden="true">
-            <svg viewBox="0 0 32 20" width={size * 0.66} height={size * 0.41}>
-                <path d="M1 19 9 3l5 9 5-9 5 9" fill="none" stroke="#fff" strokeWidth="3" strokeLinejoin="round" />
-                <path d="M19 19l6-12 6 12" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="3" strokeLinejoin="round" />
-            </svg>
-        </span>
+        <svg viewBox="0 0 48 26" width={size} height={(size * 26) / 48} className={cn('shrink-0', className)} aria-hidden="true">
+            <path
+                d="M2 24 10 4l6.5 11L23 4l4.3 10.8"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3.4"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+            />
+            <path d="M34 2 46 24h-6.8l-5.2-10.2L28.8 24H22z" fill="var(--brand, #1fa5a8)" />
+        </svg>
     );
 }

@@ -39,18 +39,22 @@ The look, layout and components follow Stitch. Some Stitch content contradicts t
 | over / call (urgent) | `#DC2626` · `#FEE2E2` · `#991B1B` | customer to call, errors, fully booked |
 | open (opening) | `#6366F1` · `#EEF2FF` · `#3730A3` | free slots, could start earlier |
 | hold (leave / closed) | `#64748B` · `#F1F5F9` · `#475569` + 45° hatch | holiday, day off, closed, on hold |
-| side | `#0F172A` / `#1E293B` | dark sidebar |
+| side / side-2 / side-3 | `#141618` / `#1C1F22` / `#262A2E` | graphite sidebar (the black of maenginelab.lt), hover, active item |
+| brand | `#1FA5A8` | MA Engine Lab teal: logo "A", active nav icon, booked quarters in the sidebar |
+| neutrals | canvas `#F6F7F8`, line `#E2E5E9`, fg `#15181C`, muted `#69707A` | neutral grey instead of Tailwind's blue slate |
 
 Teal (`#0B7D7F`) replaces cobalt when Settings → General → Accent is "Brand teal". Dark mode has matching tokens.
 
-Fonts: **Inter** (UI) and **JetBrains Mono** (job numbers, times, durations, plates). Tabular numerals everywhere
-in schedules. Radius: 8px cards, 6px buttons and inputs, 4px chips. Buttons and inputs are 38px high (44px touch on phones).
+Fonts: **IBM Plex Sans** for everything, with tabular figures so times, durations and job numbers line up.
+**IBM Plex Mono** only on number plates. (Changed 2026-11-23: the owner said Inter + JetBrains Mono, uppercase
+letter-spaced labels and the slate/cobalt sidebar looked AI-made. Labels are now sentence case.) Radius: 8px cards, 6px buttons and inputs, 4px chips. Buttons and inputs are 38px high (44px touch on phones).
 
 ## Frame (`resources/js/layouts/app-layout.tsx`)
 
-- Dark sidebar (264px, collapsible to 64px): logo square, "Booked today" widget (quarters booked of available + bar),
-  navigation (active = filled primary), jobs count, amber dot on Calendar when there are overlaps,
-  "Mechanics today" roster with a load / holiday / day off badge per mechanic, dark-mode switch.
+- Graphite sidebar (248px, collapsible to 60px): MA mark + name, navigation (active = slightly lighter row,
+  white text, teal icon; no filled pill), open jobs count as plain number, amber dot on Calendar when there are
+  overlaps. "Today" list: each mechanic with four small cells for today's quarters (teal = booked) or the reason
+  they are off, then "14 of 16 quarters booked". Bottom: dark/light mode and collapse.
 - Header: breadcrumb, "Open today · 08:00 – 18:00" pill, search (Ctrl K), bell with customers-to-call count, user menu.
 - Page heading: 30px bold title, optional pills, subtitle "Today · date · Week N", actions on the right.
 - Phones: compact header, 2×2 KPI cards, bottom tab bar (Overview, Calendar, Jobs, Customers, Mechanics), sheets slide up.
