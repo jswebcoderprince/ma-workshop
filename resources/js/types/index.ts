@@ -73,3 +73,36 @@ export interface JobRow {
     vehicle: { type: VehicleType; make: string; year: number | null; plate: string | null } | null;
     mechanic: MechanicView | null;
 }
+
+export interface CalendarDay {
+    date: string;
+    weekday: number;
+    week: number;
+    quarters: number;
+    times: string[];
+    close: string | null;
+    closure: string | null;
+    free: number;
+}
+
+export type OffReason = 'holiday' | 'day_off' | 'sick' | 'not_working';
+
+export interface CalendarLane extends MechanicView {
+    off: Record<string, OffReason>;
+    booked: number;
+    available: number;
+}
+
+export interface CalendarJob extends JobRow {
+    cells: [string, number][];
+}
+
+export interface JobDetail extends JobRow {
+    mileage: number | null;
+    customer: { id: number; name: string; phone: string | null; email: string | null };
+    vehicle: { id: number; type: VehicleType; make: string; year: number | null; plate: string | null; vin: string | null } | null;
+    earlier: { date: string; quarter: number; time: string } | null;
+    log: { action: string; at: string | null; changes: Record<string, unknown> | null }[];
+}
+
+export type Hours = Record<string, { open: string; quarters: number }>;

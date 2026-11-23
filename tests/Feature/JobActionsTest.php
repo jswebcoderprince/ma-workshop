@@ -74,7 +74,7 @@ class JobActionsTest extends TestCase
         $job = $this->job($this->tomas, '2026-11-24', 0, 4);
 
         $this->post("/jobs/{$job->id}/move", ['mechanic_id' => $this->mantas->id, 'date' => '2026-11-25', 'quarter' => 2])
-            ->assertSessionHas('warning', 'Moved, but it now overlaps another job of Mantas.');
+            ->assertSessionHas('warning', 'Saved, but it overlaps another job of Mantas.');
 
         $this->assertSame(['2026-11-25', 0], [$other->fresh()->start_date->format('Y-m-d'), $other->fresh()->start_quarter], 'the other job stays');
     }

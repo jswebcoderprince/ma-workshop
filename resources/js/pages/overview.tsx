@@ -108,7 +108,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                     <ButtonLink href={route('calendar')} icon={CalendarRange}>
                         {t('Open calendar')}
                     </ButtonLink>
-                    <ButtonLink href={route('calendar')} variant="primary" icon={Plus}>
+                    <ButtonLink href={route('calendar', { new: 1 })} variant="primary" icon={Plus}>
                         {t('New job')}
                     </ButtonLink>
                 </>
@@ -393,7 +393,15 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                                     {f.from} – {f.to}
                                 </span>
                                 <Link
-                                    href={route('calendar')}
+                                    href={route('calendar', {
+                                        view: 'day',
+                                        date: today.date,
+                                        new: 1,
+                                        m: lane.id,
+                                        d: today.date,
+                                        q: f.quarter,
+                                        len: f.quarters,
+                                    })}
                                     className="bg-open rounded px-2 py-1 text-[11px] font-semibold text-white hover:brightness-110"
                                 >
                                     + {t('Book')}
@@ -426,7 +434,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                     <p className="text-fg-2 text-[12.5px]">
                         {item.description} · {when} → {formatShortDate(item.end.date, locale)} {item.end.time}
                     </p>
-                    <ButtonLink href={route('calendar')} size="sm" className="mt-1 w-full">
+                    <ButtonLink href={route('calendar', { date: item.start.date, job: item.id })} size="sm" className="mt-1 w-full">
                         {t('Open in calendar')}
                     </ButtonLink>
                 </div>

@@ -58,7 +58,10 @@ class CustomerController extends Controller
     /** Small JSON search used by the job form's customer picker. */
     public function search(Request $request): JsonResponse
     {
-        $results = Customer::query()->search((string) $request->query('q', ''))
+        $query = $request->integer('id')
+            ? Customer::query()->whereKey($request->integer('id'))
+            : Customer::query()->search((string) $request->query('q', ''));
+        $results = $query
             ->with('vehicles')->orderBy('name')->limit(8)->get()
             ->map(fn (Customer $c) => [
                 'id' => $c->id,

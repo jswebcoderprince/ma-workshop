@@ -394,7 +394,7 @@ function CustomerSheet({ customer, onClose }: { customer: Detail; onClose: () =>
                     </>
                 ) : (
                     <>
-                        <ButtonLink href={route('calendar')} variant="primary" icon={Plus}>
+                        <ButtonLink href={route('calendar', { new: 1, customer: customer.id })} variant="primary" icon={Plus}>
                             {t('New job')}
                         </ButtonLink>
                         <span className="flex-1" />
