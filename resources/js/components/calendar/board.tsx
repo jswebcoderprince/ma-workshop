@@ -135,10 +135,7 @@ export function Board({ view, days, lanes, jobs, today, selectedId, dim, onJob, 
                               style={{ gridColumn: `2 / span ${total}`, gridRow: 1 }}
                           >
                               <b className="text-fg font-semibold">{formatShortDate(d.date, locale)}</b>
-                              <span className="text-muted-foreground font-mono">
-                                  {t('W')}
-                                  {d.week}
-                              </span>
+                              <span className="text-muted-foreground">{t('W:n', { n: d.week })}</span>
                               {d.closure && <span className="text-hold-ink">· {d.closure}</span>}
                           </div>
                       ))
@@ -148,10 +145,7 @@ export function Board({ view, days, lanes, jobs, today, selectedId, dim, onJob, 
                               className="border-line bg-subtle text-muted-foreground flex items-center gap-2 overflow-hidden border-r border-b px-3 text-[11.5px] whitespace-nowrap"
                               style={{ gridColumn: `${w.start + 2} / span ${w.span}`, gridRow: 1 }}
                           >
-                              <b className="text-fg-2 font-mono font-semibold">
-                                  {t('W')}
-                                  {w.from.week}
-                              </b>
+                              <b className="text-fg-2 font-semibold">{t('W:n', { n: w.from.week })}</b>
                               {formatShortDate(w.from.date, locale)} – {formatShortDate(w.to.date, locale)}
                           </div>
                       ))}

@@ -270,6 +270,24 @@
         cursor: pointer;
     }
 
+    /* Keyboard focus is always visible (inputs draw their own ring). */
+    a:focus-visible,
+    button:focus-visible,
+    summary:focus-visible,
+    [tabindex]:focus-visible {
+        outline: 2px solid var(--p);
+        outline-offset: 2px;
+    }
+
+    tr[tabindex]:focus-visible {
+        outline-offset: -2px;
+    }
+
+    aside a:focus-visible,
+    aside button:focus-visible {
+        outline-color: var(--brand);
+    }
+
     [hidden] {
         display: none !important;
     }

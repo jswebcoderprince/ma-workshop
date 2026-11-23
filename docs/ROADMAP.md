@@ -12,8 +12,8 @@ once hosting access is set up, so the client sees real progress.
 | 5 | Calendar | Month / week / day, job bars, lanes, free row, new job, job drawer, find a slot | done 2026-11-23 (98 tests) |
 | 6 | Changes | Move, duration, status, warnings, "could move earlier", "customer to contact", activity log, Jobs list | done 2026-11-23 (inspector in phase 5, Jobs list with filters and search) |
 | 7 | Job card + invoice | Print layouts, job lines, invoice issue/void, numbering | done 2026-11-23 (112 tests): job page with labour and parts lines, A4 job card, VAT invoice, void and re-issue, Invoices list |
-| 8 | PWA + polish | Manifest, icons, service worker, mobile pass, accessibility pass | |
-| 9 | Deploy + handover | Hostinger subdomain, SSL, backups, real data, switch to Lithuanian, short guide for the owner | |
+| 8 | PWA + polish | Manifest, icons, service worker, mobile pass, accessibility pass | done 2026-11-24 (114 tests): installable with the MA icon, offline notice page, visible keyboard focus, skip link, branded login |
+| 9 | Deploy + handover | Hostinger subdomain, SSL, backups, real data, switch to Lithuanian, short guide for the owner | steps written in DEPLOY.md; waiting for SSH access and the client's company details |
 
 ## Working rules
 

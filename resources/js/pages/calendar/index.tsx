@@ -111,7 +111,8 @@ export default function Calendar(props: Props) {
 
     const last = days[days.length - 1]?.date ?? from;
     const range = view === 'day' ? formatDate(from, locale) : `${formatShortDate(from, locale)} – ${formatShortDate(last, locale)}`;
-    const weekLabel = view === 'month' ? `${t('W')}${days[0]?.week}–${days[days.length - 1]?.week}` : `${t('W')}${days[0]?.week}`;
+    const weekLabel =
+        view === 'month' ? `${t('W:n', { n: days[0]?.week ?? '' })}–${days[days.length - 1]?.week}` : t('W:n', { n: days[0]?.week ?? '' });
     const pct = summary.available ? Math.round((summary.booked / summary.available) * 100) : 0;
     const count = (f: Focus) =>
         f === 'all' ? jobs.length : f === 'warning' ? summary.warnings : f === 'call' ? summary.toCall : jobs.filter((j) => j.status === f).length;

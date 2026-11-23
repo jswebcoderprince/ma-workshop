@@ -49,7 +49,7 @@ export function WorkloadChart({ weeks, highlight = 1 }: { weeks: WorkloadWeek[];
         return d;
     };
     const area = (arr: number[]) => `${path(arr)} L${x(N - 1)},${y(0)} L${x(0)},${y(0)} Z`;
-    const label = (w: WorkloadWeek) => `${t('W')} ${w.week}`;
+    const label = (w: WorkloadWeek) => t('W:n', { n: w.week });
 
     const hi = Math.min(highlight, N - 1);
     const tx = x(hi);

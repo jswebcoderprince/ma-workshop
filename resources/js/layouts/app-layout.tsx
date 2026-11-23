@@ -141,6 +141,12 @@ export default function AppLayout({
     return (
         <>
             <Head title={title} />
+            <a
+                href="#main"
+                className="focus:bg-panel focus:text-fg sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[70] focus:rounded-md focus:px-3 focus:py-2 focus:shadow-lg"
+            >
+                {t('Skip to content')}
+            </a>
 
             {/* ---------- sidebar (desktop): graphite, after the black and teal of maenginelab.lt ---------- */}
             <aside
@@ -391,7 +397,7 @@ export default function AppLayout({
                 </header>
 
                 {/* ---------- page ---------- */}
-                <main className="flex min-w-0 flex-col gap-5 px-4 pt-4 pb-24 md:px-6 md:pt-5 md:pb-10">
+                <main id="main" tabIndex={-1} className="flex min-w-0 flex-col gap-5 px-4 pt-4 pb-24 outline-none md:px-6 md:pt-5 md:pb-10">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">

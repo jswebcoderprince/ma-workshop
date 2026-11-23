@@ -64,9 +64,9 @@ export default function InvoicePrint({ invoice }: { invoice: Invoice }) {
                             <th className="w-8 px-2 py-1.5">{t('No.')}</th>
                             <th className="px-2 py-1.5">{t('Description')}</th>
                             <th className="w-16 px-2 py-1.5 text-right">{t('Qty')}</th>
-                            <th className="w-14 px-2 py-1.5">{t('Unit')}</th>
-                            <th className="w-24 px-2 py-1.5 text-right">{invoice.vatPayer ? t('Price without VAT') : t('Price')}</th>
-                            <th className="w-24 px-2 py-1.5 text-right">{invoice.vatPayer ? t('Sum without VAT') : t('Sum')}</th>
+                            <th className="w-20 px-2 py-1.5">{t('Unit')}</th>
+                            <th className="w-28 px-2 py-1.5 text-right">{invoice.vatPayer ? t('Price without VAT') : t('Price')}</th>
+                            <th className="w-28 px-2 py-1.5 text-right">{invoice.vatPayer ? t('Sum without VAT') : t('Sum')}</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -21,9 +21,14 @@ createInertiaApp({
         root.render(<App {...props} />);
     },
     progress: {
-        color: '#4B5563',
+        color: '#1fa5a8',
     },
 });
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Installable app (PWA). Only in a production build: the dev server's hot reload and a service worker do not mix.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => undefined));
+}

@@ -5,6 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="robots" content="noindex, nofollow">
         <meta name="theme-color" content="#141618">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="MA Engine Lab">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <link rel="icon" href="/favicon.ico" sizes="48x48">
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         <title inertia>{{ config('app.name', 'MA Workshop') }}</title>
 

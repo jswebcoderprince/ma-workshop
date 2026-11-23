@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="lt">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>MA Engine Lab</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <style>
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #141618; color: #eceef0;
+               font: 15px/1.5 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+        main { max-width: 360px; padding: 24px; text-align: center; }
+        img { width: 64px; height: 64px; }
+        h1 { font-size: 19px; font-weight: 600; margin: 18px 0 6px; }
+        p { margin: 0 0 4px; color: #9da3aa; }
+        .en { margin-top: 18px; font-size: 14px; }
+        button { margin-top: 22px; height: 40px; padding: 0 18px; border: 0; border-radius: 6px; background: #1fa5a8; color: #fff;
+                 font: inherit; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+<main>
+    <img src="/icon-192.png" alt="">
+    <h1>Nėra interneto ryšio</h1>
+    <p>Planuoklis veikia tik prisijungus. Patikrinkite ryšį.</p>
+    <p class="en">No connection. The planner needs the internet; check the connection.</p>
+    <button type="button" onclick="location.reload()">Bandyti dar kartą · Try again</button>
+</main>
+<script>window.addEventListener('online', function () { location.reload(); });</script>
+</body>
+</html>

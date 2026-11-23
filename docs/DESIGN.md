@@ -68,3 +68,10 @@ KPI `StatCard` (uppercase label, 30px number, tinted icon square, detail area), 
 Job card pattern: white card, 4px left strip by state (primary scheduled/in progress, green completed,
 slate waiting for parts, amber overlap), `#number · vehicle` in semibold with the number in mono, duration chip,
 time range in mono, status text. Free time: dashed indigo card with "+ Book".
+
+## Login, print pages, app icon (2026-11-24)
+
+- Login: graphite brand half (MA mark, name, a week of quarter cells as the picture) next to the form; phones show only the form.
+- Print pages (`components/print-sheet.tsx`): A4 sheet, black on white in both themes, toolbar hidden on paper.
+  Job card has no prices; the invoice follows the usual Lithuanian layout (seller and buyer side by side, `Serija MAE Nr. 0001`).
+- App icon: MA mark on a graphite square (`public/icon-*.png`, maskable variant with a wider margin, `favicon.svg`).
