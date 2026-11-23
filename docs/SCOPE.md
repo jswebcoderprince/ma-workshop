@@ -15,6 +15,7 @@ Mechanics do not log in. They get a printed job card.
 
 | Area | What it does |
 |---|---|
+| Overview | Landing page: booked share this week and next, next free day, jobs waiting for parts, customers to call, workload chart for the next 8 weeks, mechanics' load, upcoming jobs. Added 2026-11-23 with the v3 design. |
 | Calendar | Month view (5 weeks, rolling from the current week) is the main view. Week and day views as well. One row per mechanic. |
 | Quarter-day scheduling | Mon–Fri = 4 quarters of 2.5 h (08:00–18:00). Sat = 2 quarters (09:00–14:00). Sunday closed. Every job starts on a quarter and lasts a whole number of quarters. |
 | Jobs | Customer, vehicle, description of the work, mechanic, start, duration, status. |

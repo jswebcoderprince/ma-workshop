@@ -4,9 +4,10 @@ All pages need login except `/login`. Inertia pages live in `resources/js/pages`
 
 ```mermaid
 flowchart LR
-    login[/login/] --> cal
+    login[/login/] --> ov[Overview /]
+    ov --> cal
     subgraph App
-      cal[Calendar /] --- jobs[Jobs /jobs]
+      cal[Calendar /calendar] --- jobs[Jobs /jobs]
       cal --- cust[Customers /customers]
       cal --- mech[Mechanics /mechanics]
       cal --- inv[Invoices /invoices]
@@ -23,7 +24,8 @@ flowchart LR
 | URL | Page | Main actions |
 |---|---|---|
 | `/login` | Login | email + password, remember me |
-| `/` | Calendar | month / week / day; click empty spot → new job; click job → job drawer; side lists "Customers to contact" and "Could move earlier"; free capacity row |
+| `/` | Overview | KPI cards, workload chart, mechanics' load, upcoming jobs |
+| `/calendar` | Calendar | month / week / day; click empty spot → new job; click job → job drawer; side lists "Customers to contact" and "Could move earlier"; free capacity row |
 | `/jobs` | Jobs list | filter by status and "to contact"; search; opens job drawer |
 | `/jobs/{job}/card` | Job card | A4 print layout |
 | `/customers` | Customers | search name/phone/plate; customer drawer with vehicles and job history; new job for this customer |

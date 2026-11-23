@@ -1,65 +1,75 @@
 # Design
 
-Reference: [`design/frame.html`](../design/frame.html) (v2). Open it in a browser; it runs on sample data.
-`design/frame-v1-dark.html` is the first attempt, rejected on 2026-11-23 as looking generic. Kept only for history.
+Reference: [`design/frame.html`](../design/frame.html) (v3, approved direction 2026-11-23). Open it in a browser; it runs on sample data.
+
+History, kept only for comparison:
+- `design/frame-v1-dark.html`: copied the marketing site (dark, condensed caps). Rejected as looking generic.
+- `design/frame-v2-neutral.html`: neutral product UI (Resource Guru / Float style). Superseded by v3.
 
 ## Direction
 
-The app is a working tool used all day at a desk and on a phone, so it follows the conventions of
-established scheduling and garage software rather than the marketing website:
+The owner picked an admin-dashboard reference (Dribbble-style "Dashboard" shot, 2026-11-23). v3 follows it:
 
-- **Resource Guru / Float** (people × days timeline): avatar + name + load % per row, week numbers in the header,
-  today highlighted, weekends tinted, soft filled booking blocks, capacity shown per day.
-- **Shopmonkey** (garage software): white canvas, one strong accent, vehicle details with plate chips, status pills.
-- **Linear / Cal.com** (modern SaaS): quiet neutral greys, Inter, sentence case, small radius, side sheets, Ctrl K search.
+- Lavender-tinted canvas with white cards, 14 px radius, hairline borders, almost no shadow.
+- Violet primary. Active sidebar item is a filled violet pill with white text.
+- Top bar: logo block with collapse chevron, pill search (Ctrl K), a select (mechanic filter), dark-mode switch,
+  inbox icon with a red count, find-a-slot icon, avatar.
+- A breadcrumb card at the top of every page, with the page's main buttons on the right ("Find a slot", "New job").
+- KPI cards: label + kebab, coloured square icon, big number, small trend or note, grey footnote.
+- Area chart with soft gradient fills and an underline tab switch (8 weeks / 4 weeks).
+- Lists with avatars and right-aligned numbers ("Mechanics" card, like the reference's "Sales performance").
+- Tables: checkbox column, grey header band, coloured dot + text for status, "…" actions.
 
-Brand link: MA Engine Lab's teal from maenginelab.lt is the only accent colour, and the logo mark sits in the sidebar.
-The website's wide display font and all-caps style are **not** used in the app.
+Brand link: the **accent can be switched** to MA Engine Lab teal in Settings → General → Accent colour.
+Violet is the default because it is what the owner chose; the client can pick teal at handover.
 
-Things to avoid (they made v1 look generated): uppercase letter-spaced labels everywhere, condensed display fonts,
-neon accent on near-black, coloured left borders on every card, banner strips.
-
-## Tokens (light is the default; dark is a toggle in Settings)
+## Tokens
 
 | Token | Light | Use |
 |---|---|---|
-| `--bg` | `#f6f7f7` | page |
-| `--panel` | `#ffffff` | cards, sidebar, sheets |
-| `--subtle` | `#f3f4f5` | table headers, inputs at rest |
-| `--line` / `--line-strong` | `#e6e8ea` / `#d3d7da` | borders |
-| `--fg` / `--fg-2` / `--muted` | `#101828` / `#344054` / `#667085` | text |
-| `--accent` | `#0b7d7f` | brand teal: primary buttons, today, selection |
-| `--accent-soft` | `#e7f4f4` | scheduled jobs, selected chips |
-| `--prog` | `#0e8f91` | in-progress jobs (solid) |
-| `--parts-*` | `#fff6e5` / `#8a5300` | waiting for parts (dashed, striped) |
-| `--done-*` | `#f2f4f7` / `#98a2b3` | completed (struck through) |
-| `--over-*` | `#fef1f0` / `#b42318` | overlap or mechanic off |
-| `--notify` | `#6e56cf` | customer to call (outline ring + phone icon) |
+| `--canvas` | `#f3f2fa` | page behind cards |
+| `--panel` | `#ffffff` | cards, sidebar, top bar, sheets |
+| `--subtle` | `#f7f6fc` | table header band, search field |
+| `--line` / `--line-strong` | `#ebeaf3` / `#dddbea` | borders |
+| `--fg` / `--fg-2` / `--muted` | `#1d1b38` / `#46445f` / `#8b8aa3` | text |
+| `--p` | `#6c5dd3` (teal option `#0b8a8c`) | primary, active nav, today, scheduled/in progress |
+| `--ok` | `#22b07d` | in progress dot, "free" hints, good trend |
+| `--parts` | `#e59a1a` | waiting for parts |
+| `--over` | `#e5484d` | overlap, mechanic off, inbox count |
+| `--call` | `#1d9bf0` | customer to call (ring + phone icon) |
+| KPI icons | `#22b07d` `#3b82f6` `#8b5cf6` `#ec4899` | the four stat cards |
 
-Font: **Inter** 400/500/600, 14 px base, tabular numbers for dates and money. Icons: **Lucide** (already in the
-React starter kit as `lucide-react`). Radius 6–12 px. Shadows only on raised surfaces (sheets, popovers).
+Dark theme has matching tokens (switch in the top bar). Mechanic avatar colours: violet, blue, green, pink.
 
-Mechanic colours (avatars only): teal `#0e8f91`, indigo `#4f62d6`, amber `#c2780c`, rose `#c4416f`.
+Font: **Jost** 400/500/600 (covers Lithuanian letters). Icons: **Lucide** (`lucide-react` in the app).
+Numbers use tabular figures.
 
-## Calendar
+## Pages
 
-- Header: week row (`W 48 · 23 Nov – 29 Nov`) above a day row. Today's date is a filled teal pill.
-- Columns are quarters: weekday 4, Saturday 2, Sunday 1 narrow tinted column.
-- Rows: avatar, name, vehicle types, and a load chip (% of free time already booked in the visible range,
-  green < 70 %, amber 70–89 %, red ≥ 90 %). Extra lanes appear when jobs overlap or wait for parts.
-- Blocks: month view shows surname only; week view shows name, vehicle, work and duration.
-- Time off and closed days: grey hatching with a small icon (label in week view, tooltip in month view).
-- Bottom row "Free time": bar per day of free mechanic time, with the number of free days.
-- Above the grid, one summary strip: N to call · N could start earlier · N overlaps → Review (opens the inbox sheet).
+| Page | Layout |
+|---|---|
+| Overview | 4 KPI cards (booked this week + next week, next free day, waiting for parts, customers to call) · workload chart (booked vs available days per week) · mechanics list (load %, next free day) · upcoming jobs table |
+| Calendar | one card: title + Month/Week/Day underline tabs + Today/arrows/range; note chips (to call, could start earlier, overlaps → Review); resource grid; legend |
+| Jobs | card with status filter chips and the jobs table |
+| Customers | card with search and table; customer sheet |
+| Mechanics | cards per mechanic (working days, 4-week load bar, time off) · add time off · workshop closed days |
+| Invoices | 3 KPI cards · invoices table · A4 preview |
+| Settings | card with left tab list: General (language, theme, accent), Company, Invoices, Working hours |
 
-## Other patterns
+## Calendar rules (unchanged from v2)
 
-- Side sheet from the right (bottom sheet on phones) for job details, new job, find a slot, inbox, customer.
-- Lithuanian number plates shown as a small plate chip with the blue EU band.
-- Global search in the top bar (Ctrl K): customers by name, phone or plate.
-- Tables: sentence-case headers on a grey band, 44 px rows, no wrapping except the work description.
-- Under 900 px: bottom tab bar, day view by default, sheets become bottom sheets.
+- Columns are quarters: weekday 4, Saturday 2, Sunday 1 narrow column. Week row (`W 48 · 23 Nov – 29 Nov`) above the day row.
+- Rows: avatar, name, vehicle types, load chip for the visible range (green < 70 %, amber 70–89 %, red ≥ 90 %).
+- Blocks: month view = surname only; week view = name, vehicle, work, duration. Soft violet = scheduled,
+  solid = in progress, dashed amber stripes = waiting for parts, struck grey = completed, blue ring = to call, red = overlap.
+- Time off / closed days: grey hatching with an icon (label in week view, tooltip in month view).
+- "Free time" row at the bottom: bar + number of free mechanic days per day.
+
+## Phones (under 900 px)
+
+Bottom tab bar (Overview, Calendar, Jobs, Customers, Settings), logo + name in the top bar, breadcrumb card shows the
+page title with icon-only buttons, KPI cards two per row, calendar opens in Day view, sheets slide up from the bottom.
 
 ## Print
 
-Job card and invoice: A4, Inter, black on white, thin grey boxes, no app chrome. Printed with the browser.
+Job card and invoice: A4, Jost, black on white, thin grey boxes, no app chrome. Printed with the browser.
