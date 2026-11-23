@@ -20,7 +20,7 @@ class WorkshopSettingsController extends Controller
     public function general(): Response
     {
         return Inertia::render('settings/general', [
-            'values' => ['locale' => Settings::locale(), 'accent' => Settings::get('accent', 'violet')],
+            'values' => ['locale' => Settings::locale(), 'accent' => Settings::accent()],
         ]);
     }
 
@@ -28,7 +28,7 @@ class WorkshopSettingsController extends Controller
     {
         $values = $request->validate([
             'locale' => ['required', Rule::in(['en', 'lt'])],
-            'accent' => ['required', Rule::in(['violet', 'teal'])],
+            'accent' => ['required', Rule::in(['cobalt', 'teal'])],
         ]);
 
         return $this->save('settings.general', $values);

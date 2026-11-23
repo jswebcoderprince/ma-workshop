@@ -18,7 +18,7 @@ export default function SettingsLayout({ title, description, children }: { title
     ];
 
     return (
-        <AppLayout title={title} crumbs={[{ label: t('Settings'), href: route('settings.general') }]}>
+        <AppLayout title={t('Settings')}>
             <Card className="grid md:grid-cols-[220px_minmax(0,1fr)]">
                 <nav className="border-line flex gap-[3px] overflow-x-auto border-b p-3.5 md:flex-col md:border-r md:border-b-0">
                     {tabs.map((tab) => {

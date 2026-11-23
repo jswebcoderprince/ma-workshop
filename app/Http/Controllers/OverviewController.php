@@ -4,14 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Enums\WorkOrderStatus;
 use App\Models\Mechanic;
+use App\Models\Vehicle;
 use App\Models\WorkOrder;
+use App\Scheduling\Availability;
+use App\Scheduling\Position;
+use App\Scheduling\Schedule;
 use App\Scheduling\WorkCalendar;
 use App\Support\JobView;
 use App\Support\Workshop;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/** Landing page: how full the workshop is, who is free next, what needs attention. */
+/**
+ * Landing page (design/stitch overview): today per mechanic, what needs attention, the next weeks.
+ */
 class OverviewController extends Controller
 {
     private const WEEKS = 8;
@@ -20,6 +27,7 @@ class OverviewController extends Controller
     {
         $schedule = $workshop->schedule();
         $cal = $schedule->calendar;
+        $availability = $workshop->availability();
         $now = $workshop->currentQuarter();
         $next = $workshop->nextQuarter();
         $today = $workshop->today();
@@ -27,28 +35,66 @@ class OverviewController extends Controller
 
         $mechanics = Mechanic::query()->where('active', true)->ordered()->get();
         $ids = $mechanics->pluck('id')->all();
+        $jobs = WorkOrder::query()->with(['customer', 'vehicle', 'mechanic'])->get()->keyBy('id');
+
+        // Jobs that have at least one quarter today, with the part of the day they cover.
+        $todayJobs = $jobs->map(function (WorkOrder $w) use ($schedule, $today, $cal) {
+            $qs = collect($schedule->span($w->id))->filter(fn (Position $p) => $p->date === $today)->pluck('quarter');
+            if ($qs->isEmpty()) {
+                return null;
+            }
+
+            return ['job' => $w, 'from' => $cal->quarterStart($today, $qs->min()), 'to' => $cal->quarterEnd($today, $qs->max()), 'quarters' => $qs->count()];
+        })->filter();
 
         $workload = [];
-        for ($w = 0; $w < self::WEEKS; $w++) {
-            $from = WorkCalendar::addDays($monday, 7 * $w);
-            $u = $schedule->utilisation($ids, $from, WorkCalendar::addDays($from, 7), $now);
-            $workload[] = ['week' => (int) date('W', strtotime($from)), 'from' => $from] + $u;
+        for ($i = 0; $i < self::WEEKS; $i++) {
+            $from = WorkCalendar::addDays($monday, 7 * $i);
+            $workload[] = ['week' => (int) date('W', strtotime($from)), 'from' => $from] + $schedule->utilisation($ids, $from, WorkCalendar::addDays($from, 7), $now);
         }
 
-        // Earliest 1-day slot for a car, the most common question on the phone.
         $nextFree = $mechanics->filter(fn (Mechanic $m) => $m->worksOn('car'))
             ->map(fn (Mechanic $m) => ['mechanic' => $m->name, 'at' => $schedule->earliest($m->id, 4, $next)])
             ->filter(fn ($r) => $r['at'] !== null)
             ->sortBy(fn ($r) => $r['at']->key())
             ->first();
 
-        $jobs = WorkOrder::query()->with(['customer', 'vehicle', 'mechanic'])->get();
-        $upcoming = $jobs->where('status', '!=', WorkOrderStatus::Completed)
-            ->sortBy(fn (WorkOrder $w) => $w->startPosition()->key().'#'.str_pad((string) $w->id, 8, '0', STR_PAD_LEFT))
-            ->take(7)->values();
+        $working = $mechanics->filter(fn (Mechanic $m) => $availability->isAvailable($m->id, $today));
+        $warnings = $jobs->filter(fn (WorkOrder $w) => $schedule->warning($w->id) !== null);
+        $toCall = $jobs->whereNotNull('notify_customer');
+        $earlier = $schedule->earlierCandidates($next);
 
         return Inertia::render('overview', [
+            'today' => [
+                'date' => $today,
+                'week' => (int) date('W', strtotime($today)),
+                'open' => $cal->isOpen($today),
+            ],
             'stats' => [
+                'jobsToday' => [
+                    'total' => $todayJobs->count(),
+                    'inProgress' => $todayJobs->filter(fn ($t) => $t['job']->status === WorkOrderStatus::InProgress)->count(),
+                    'scheduled' => $todayJobs->filter(fn ($t) => $t['job']->status === WorkOrderStatus::Scheduled)->count(),
+                    'completed' => $todayJobs->filter(fn ($t) => $t['job']->status === WorkOrderStatus::Completed)->count(),
+                    'waiting' => $todayJobs->filter(fn ($t) => $t['job']->status === WorkOrderStatus::WaitingParts)->count(),
+                    'bookedPercent' => self::percent($schedule->utilisation($ids, $today, WorkCalendar::addDays($today, 1))),
+                ],
+                'mechanics' => [
+                    'working' => $working->count(),
+                    'total' => $mechanics->count(),
+                    'off' => $mechanics->reject(fn (Mechanic $m) => $availability->isAvailable($m->id, $today))
+                        ->map(fn (Mechanic $m) => ['name' => $m->name, 'reason' => $cal->isOpen($today) ? $availability->offReason($m->id, $today) : 'closed'])->values(),
+                    'avatars' => $working->map(fn (Mechanic $m) => JobView::mechanic($m))->values(),
+                ],
+                'warnings' => [
+                    'total' => $warnings->count(),
+                    'first' => ($w = $warnings->first()) ? ['number' => $w->displayNumber(), 'vehicle' => $w->vehicle?->make_model, 'warning' => $schedule->warning($w->id)] : null,
+                ],
+                'toCall' => [
+                    'total' => $toCall->count(),
+                    'earlier' => $toCall->filter(fn (WorkOrder $w) => $w->notify_customer?->value === 'earlier')->count(),
+                    'later' => $toCall->filter(fn (WorkOrder $w) => $w->notify_customer?->value === 'later')->count(),
+                ],
                 'bookedThisWeek' => self::percent($workload[0]),
                 'bookedNextWeek' => self::percent($workload[1]),
                 'nextFree' => $nextFree ? [
@@ -56,20 +102,99 @@ class OverviewController extends Controller
                     'time' => $cal->quarterStart($nextFree['at']->date, $nextFree['at']->quarter),
                     'mechanic' => $nextFree['mechanic'],
                 ] : null,
-                'waitingParts' => $jobs->where('status', WorkOrderStatus::WaitingParts)->count(),
-                'toCall' => $jobs->whereNotNull('notify_customer')->count(),
-                'earlier' => count($schedule->earlierCandidates($next)),
-                'overlaps' => $jobs->filter(fn (WorkOrder $w) => $schedule->warning($w->id) !== null)->count(),
             ],
+            'lanes' => $mechanics->map(fn (Mechanic $m) => $this->lane($m, $today, $next, $todayJobs, $schedule, $availability))->values(),
+            'attention' => $this->attention($warnings, $toCall, $earlier, $jobs, $schedule),
             'workload' => $workload,
-            'mechanics' => $mechanics->map(function (Mechanic $m) use ($schedule, $monday, $now, $next) {
-                $u = $schedule->utilisation([$m->id], $monday, WorkCalendar::addDays($monday, 28), $now);
-                $free = $schedule->earliest($m->id, 4, $next);
-
-                return JobView::mechanic($m) + ['load' => self::percent($u), 'nextFree' => $free?->date];
-            })->values(),
-            'upcoming' => $upcoming->map(fn (WorkOrder $w) => JobView::row($w, $schedule))->values(),
         ]);
+    }
+
+    /** One mechanic's day: jobs today in time order and the free stretches that can still be booked (from the next quarter). */
+    private function lane(Mechanic $m, string $today, Position $from, Collection $todayJobs, Schedule $schedule, Availability $availability): array
+    {
+        $cal = $schedule->calendar;
+        $quarters = $cal->quartersOn($today);
+        $reason = ! $cal->isOpen($today) ? 'closed' : $availability->offReason($m->id, $today);
+        $items = $todayJobs->filter(fn ($t) => $t['job']->mechanic_id === $m->id)
+            ->sortBy(fn ($t) => $t['from'])
+            ->map(fn ($t) => self::card($t['job'], $schedule) + ['from' => $t['from'], 'to' => $t['to'], 'todayQuarters' => $t['quarters']])
+            ->values();
+
+        $free = [];
+        $booked = 0;
+        if ($reason === null) {
+            $run = null;
+            for ($q = 0; $q < $quarters; $q++) {
+                $p = new Position($today, $q);
+                $isFree = $schedule->isFree($m->id, $p);
+                $booked += $isFree ? 0 : 1;
+                if ($isFree && ! $p->isBefore($from)) {
+                    $run = $run ? [$run[0], $q] : [$q, $q];
+                } elseif ($run) {
+                    $free[] = $run;
+                    $run = null;
+                }
+            }
+            if ($run) {
+                $free[] = $run;
+            }
+        }
+
+        return JobView::mechanic($m) + [
+            'off' => $reason === Availability::NOT_WORKING ? 'not_working' : $reason,
+            'booked' => $booked,
+            'available' => $reason === null ? $quarters : 0,
+            'jobs' => $items,
+            'free' => array_map(fn ($r) => [
+                'from' => $cal->quarterStart($today, $r[0]),
+                'to' => $cal->quarterEnd($today, $r[1]),
+                'quarter' => $r[0],
+                'quarters' => $r[1] - $r[0] + 1,
+            ], $free),
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function attention(Collection $warnings, Collection $toCall, array $earlier, Collection $jobs, Schedule $schedule): array
+    {
+        $cal = $schedule->calendar;
+        $items = [];
+        foreach ($warnings as $w) {
+            $items[] = ['kind' => 'warning', 'warning' => $schedule->warning($w->id)] + self::card($w, $schedule);
+        }
+        foreach ($toCall as $w) {
+            $items[] = ['kind' => 'call'] + self::card($w, $schedule);
+        }
+        foreach ($earlier as $c) {
+            $w = $jobs[$c['job']->id];
+            $items[] = ['kind' => 'earlier', 'to' => ['date' => $c['to']->date, 'quarter' => $c['to']->quarter, 'time' => $cal->quarterStart($c['to']->date, $c['to']->quarter)]] + self::card($w, $schedule);
+        }
+
+        return $items;
+    }
+
+    /** @return array<string, mixed> */
+    private static function card(WorkOrder $w, Schedule $schedule): array
+    {
+        $cal = $schedule->calendar;
+        $start = $cal->normalize($w->startPosition());
+        $end = $schedule->end($w->id) ?? $start;
+
+        return [
+            'id' => $w->id,
+            'number' => $w->displayNumber(),
+            'description' => $w->description,
+            'status' => $w->status->value,
+            'notify' => $w->notify_customer?->value,
+            'warning' => $schedule->warning($w->id),
+            'duration' => $w->duration_quarters,
+            'planned' => $w->planned_quarters,
+            'start' => ['date' => $start->date, 'quarter' => $start->quarter, 'time' => $cal->quarterStart($start->date, $start->quarter)],
+            'end' => ['date' => $end->date, 'time' => $cal->quarterEnd($end->date, $end->quarter)],
+            'customer' => ['name' => $w->customer?->name, 'phone' => $w->customer?->phone],
+            'vehicle' => $w->vehicle ? ['make' => $w->vehicle->make_model, 'plate' => Vehicle::formatPlate($w->vehicle->plate), 'type' => $w->vehicle->type->value] : null,
+            'mechanic' => $w->mechanic ? ['id' => $w->mechanic->id, 'name' => $w->mechanic->name] : null,
+        ];
     }
 
     /** @param  array{available: int, booked: int}  $u */

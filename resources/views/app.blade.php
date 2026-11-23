@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-accent="{{ \App\Support\Settings::get('accent', 'violet') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-accent="{{ \App\Support\Settings::accent() }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="robots" content="noindex, nofollow">
-        <meta name="theme-color" content="#6c5dd3">
+        <meta name="theme-color" content="#0f172a">
 
         <title inertia>{{ config('app.name', 'MA Workshop') }}</title>
 
@@ -20,7 +20,7 @@
         </script>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=jost:400,500,600,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700|jetbrains-mono:500,600,700&display=swap" rel="stylesheet" />
 
         @routes
         @viteReactRefresh

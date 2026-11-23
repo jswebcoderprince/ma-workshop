@@ -9,8 +9,8 @@
 /* Design tokens: docs/DESIGN.md (frame v3). Light is the default, `.dark` on <html> switches,
    `data-accent="teal"` swaps the violet primary for MA Engine Lab teal. */
 @theme {
-    --font-sans: 'Jost', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -67,46 +67,82 @@
     --color-over-ink: var(--over-ink);
     --color-call: var(--call);
     --color-call-soft: var(--call-soft);
-    --color-k1: #22b07d;
-    --color-k2: #3b82f6;
-    --color-k3: #8b5cf6;
-    --color-k4: #ec4899;
+    --color-tint: var(--tint);
+    --color-ok-line: var(--ok-line);
+    --color-ok-ink: var(--ok-ink);
+    --color-open: var(--open);
+    --color-open-bg: var(--open-bg);
+    --color-open-line: var(--open-line);
+    --color-open-ink: var(--open-ink);
+    --color-hold: var(--hold);
+    --color-hold-bg: var(--hold-bg);
+    --color-hold-line: var(--hold-line);
+    --color-hold-ink: var(--hold-ink);
+    --color-side: var(--side);
+    --color-side-2: var(--side-2);
+    --color-side-line: var(--side-line);
+    --color-side-fg: var(--side-fg);
+    --color-side-muted: var(--side-muted);
+
 }
 
 :root {
-    --canvas: #f3f2fa;
+    /* Engine Precision Planner (design/stitch/engine_precision_planner/DESIGN.md) */
+    --canvas: #f8fafc;
     --panel: #ffffff;
-    --subtle: #f7f6fc;
-    --hover: #f2f0fb;
-    --line: #ebeaf3;
-    --line-strong: #dddbea;
-    --fg: #1d1b38;
-    --fg-2: #46445f;
-    --muted-fg: #8b8aa3;
-    --faint: #b4b3c6;
-    --p: #6c5dd3;
-    --p-hover: #5a4bc2;
-    --p-soft: #efedfc;
-    --p-line: #d8d3f7;
-    --p-ink: #4b3db3;
-    --prog: #6c5dd3;
-    --ok: #22b07d;
-    --ok-soft: #e7f7f0;
-    --parts: #e59a1a;
-    --parts-bg: #fff5e3;
-    --parts-line: #f5d58f;
-    --parts-ink: #96600a;
-    --done-bg: #f3f3f7;
-    --done-ink: #a3a2b8;
-    --over: #e5484d;
-    --over-bg: #fdeeee;
-    --over-line: #f6b4b6;
-    --over-ink: #c22a30;
-    --call: #1d9bf0;
-    --call-soft: #e8f5fe;
-    --off: #f5f5f9;
-    --off-stripe: #ebebf2;
-    --weekend: #fafafd;
+    --subtle: #f1f5f9;
+    --hover: #f8fafc;
+    --tint: #eff4ff;
+    --line: #e2e8f0;
+    --line-strong: #cbd5e1;
+    --fg: #0f172a;
+    --fg-2: #334155;
+    --muted-fg: #64748b;
+    --faint: #94a3b8;
+    --p: #1e40af;
+    --p-hover: #1d4ed8;
+    --p-soft: #eff6ff;
+    --p-line: #bfdbfe;
+    --p-ink: #1e3a8a;
+    --prog: #1e40af;
+    /* completed / on schedule */
+    --ok: #16a34a;
+    --ok-soft: #dcfce7;
+    --ok-line: #86efac;
+    --ok-ink: #166534;
+    /* delayed / needs attention (amber) */
+    --parts: #d97706;
+    --parts-bg: #fef3c7;
+    --parts-line: #fcd34d;
+    --parts-ink: #92400e;
+    /* urgent: overlaps, customer to call, errors */
+    --over: #dc2626;
+    --over-bg: #fee2e2;
+    --over-line: #fca5a5;
+    --over-ink: #991b1b;
+    --call: #dc2626;
+    --call-soft: #fee2e2;
+    /* opening: free time, could start earlier (indigo) */
+    --open: #6366f1;
+    --open-bg: #eef2ff;
+    --open-line: #c7d2fe;
+    --open-ink: #3730a3;
+    /* leave / closed / on hold (slate) */
+    --hold: #64748b;
+    --hold-bg: #f1f5f9;
+    --hold-line: #cbd5e1;
+    --hold-ink: #475569;
+    --done-bg: #f1f5f9;
+    --done-ink: #94a3b8;
+    --off: #f1f5f9;
+    --off-stripe: rgba(203, 213, 225, 0.45);
+    --weekend: #f8fafc;
+    /* dark sidebar */
+    --side: #0f172a;
+    --side-2: #1e293b;
+    --side-line: rgba(51, 65, 85, 0.7);
+    --side-fg: #cbd5e1;
+    --side-muted: #94a3b8;
 
     --background: var(--canvas);
     --foreground: var(--fg);
@@ -120,60 +156,70 @@
     --secondary-foreground: var(--fg);
     --muted: var(--subtle);
     --muted-foreground: var(--muted-fg);
-    --accent: var(--hover);
+    --accent: var(--subtle);
     --accent-foreground: var(--fg);
     --destructive: var(--over);
     --destructive-foreground: #ffffff;
     --border: var(--line);
     --input: var(--line-strong);
     --ring: var(--p);
-    --radius: 0.625rem;
+    --radius: 0.5rem;
     color-scheme: light;
 }
 
 :root[data-accent='teal'] {
-    --p: #0b8a8c;
-    --p-hover: #087476;
+    --p: #0b7d7f;
+    --p-hover: #086668;
     --p-soft: #e6f4f4;
     --p-line: #b7dcdc;
     --p-ink: #075456;
-    --prog: #0b8a8c;
+    --prog: #0b7d7f;
 }
 
 .dark {
-    --canvas: #111019;
-    --panel: #1a1925;
-    --subtle: #201f2d;
-    --hover: #252433;
-    --line: #2b2a3a;
-    --line-strong: #383749;
-    --fg: #eeedf6;
-    --fg-2: #c8c7d8;
-    --muted-fg: #8e8da6;
-    --faint: #5d5c73;
-    --p: #8a7cf0;
-    --p-hover: #9d91f4;
-    --p-soft: rgba(138, 124, 240, 0.15);
-    --p-line: rgba(138, 124, 240, 0.4);
-    --p-ink: #b9b0fa;
-    --prog: #7465e0;
-    --ok-soft: rgba(34, 176, 125, 0.15);
-    --parts-bg: rgba(229, 154, 26, 0.13);
-    --parts-line: rgba(229, 154, 26, 0.45);
-    --parts-ink: #f2c46b;
-    --done-bg: #22212f;
-    --done-ink: #6e6d85;
-    --over-bg: rgba(229, 72, 77, 0.14);
-    --over-line: rgba(229, 72, 77, 0.5);
-    --over-ink: #ff8d90;
-    --call-soft: rgba(29, 155, 240, 0.15);
-    --off: #1c1b27;
-    --off-stripe: #24232f;
-    --weekend: #181723;
+    --canvas: #0b1120;
+    --panel: #111827;
+    --subtle: #1f2937;
+    --hover: #172033;
+    --tint: #142039;
+    --line: #243042;
+    --line-strong: #334155;
+    --fg: #e2e8f0;
+    --fg-2: #cbd5e1;
+    --muted-fg: #94a3b8;
+    --faint: #64748b;
+    --p: #3b82f6;
+    --p-hover: #60a5fa;
+    --p-soft: rgba(59, 130, 246, 0.15);
+    --p-line: rgba(59, 130, 246, 0.4);
+    --p-ink: #93c5fd;
+    --prog: #2563eb;
+    --ok-soft: rgba(22, 163, 74, 0.16);
+    --ok-line: rgba(22, 163, 74, 0.45);
+    --ok-ink: #86efac;
+    --parts-bg: rgba(217, 119, 6, 0.15);
+    --parts-line: rgba(217, 119, 6, 0.45);
+    --parts-ink: #fcd34d;
+    --over-bg: rgba(220, 38, 38, 0.15);
+    --over-line: rgba(220, 38, 38, 0.45);
+    --over-ink: #fca5a5;
+    --call-soft: rgba(220, 38, 38, 0.15);
+    --open-bg: rgba(99, 102, 241, 0.16);
+    --open-line: rgba(99, 102, 241, 0.45);
+    --open-ink: #c7d2fe;
+    --hold-bg: #1f2937;
+    --hold-line: #334155;
+    --hold-ink: #cbd5e1;
+    --done-bg: #1f2937;
+    --done-ink: #64748b;
+    --off: #141c2b;
+    --off-stripe: rgba(51, 65, 85, 0.5);
+    --weekend: #0f172a;
+    --side: #070b14;
+    --side-2: #111827;
     color-scheme: dark;
 }
 
-:root[data-accent='teal'] .dark,
 :root.dark[data-accent='teal'] {
     --p: #2fb5b7;
     --p-hover: #43c4c6;
@@ -199,8 +245,14 @@
     }
 
     body {
-        font-size: 14.5px;
+        font-size: 14px;
         line-height: 1.45;
+        font-feature-settings: 'cv05' 1;
+    }
+
+    /* Times, plates, job numbers and durations line up (DESIGN.md: tabular numerals everywhere). */
+    .tnum {
+        font-variant-numeric: tabular-nums;
     }
 
     button:not(:disabled),
@@ -223,7 +275,13 @@
     border-radius: 4px;
     background: #fff;
     color: #111;
-    font: 600 12px/1 var(--font-mono);
+    font: 600 11.5px/1 var(--font-mono);
     white-space: nowrap;
     vertical-align: middle;
+}
+
+/* Off-duty mechanic time and closed days (DESIGN.md: 45° micro hatching). */
+@utility hatch {
+    background-image: repeating-linear-gradient(135deg, var(--off-stripe) 0 6px, transparent 6px 12px);
+    background-color: var(--off);
 }

@@ -8,10 +8,25 @@ export interface SharedData {
     auth: { user: User | null };
     locale: 'en' | 'lt';
     translations: Record<string, string>;
-    workshop: { name: string; accent: 'violet' | 'teal'; timezone: string };
-    counts: { openJobs: number; toCall: number } | null;
+    workshop: { name: string; accent: 'cobalt' | 'teal'; timezone: string };
+    shell: {
+        today: string;
+        week: number;
+        hours: { open: string; close: string } | null;
+        roster: RosterEntry[];
+        counts: { openJobs: number; toCall: number; warnings: number };
+    } | null;
     flash: { status: string | null; warning: string | null };
     [key: string]: unknown;
+}
+
+export interface RosterEntry {
+    id: number;
+    name: string;
+    color: string;
+    status: 'working' | 'holiday' | 'day_off' | 'sick' | 'not_working' | 'closed';
+    booked: number;
+    available: number;
 }
 
 export type JobStatus = 'scheduled' | 'in_progress' | 'waiting_parts' | 'completed';

@@ -44,7 +44,7 @@ class SettingsTest extends TestCase
             ->assertSee('data-accent="teal"', false)
             ->assertInertia(fn ($page) => $page->where('locale', 'lt')->where('translations.Calendar', 'Kalendorius'));
 
-        $this->patch('/settings/general', ['locale' => 'en', 'accent' => 'violet']);
+        $this->patch('/settings/general', ['locale' => 'en', 'accent' => 'cobalt']);
         $this->get('/settings/general')->assertInertia(fn ($page) => $page->where('locale', 'en')->where('translations', []));
     }
 

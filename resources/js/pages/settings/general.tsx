@@ -6,7 +6,7 @@ import { useForm } from '@inertiajs/react';
 import { Check, Moon, Sun } from 'lucide-react';
 import type { FormEventHandler } from 'react';
 
-type Values = { locale: 'en' | 'lt'; accent: 'violet' | 'teal' };
+type Values = { locale: 'en' | 'lt'; accent: 'cobalt' | 'teal' };
 
 export default function General({ values }: { values: Values }) {
     const t = useT();
@@ -37,17 +37,17 @@ export default function General({ values }: { values: Values }) {
                 </section>
                 <section>
                     <h4 className="font-semibold">{t('Accent colour')}</h4>
-                    <p className="text-muted-foreground mb-3 text-[13.5px]">{t('Violet, or the teal from the MA Engine Lab brand.')}</p>
+                    <p className="text-muted-foreground mb-3 text-[13.5px]">{t('Cobalt blue, or the teal from the MA Engine Lab brand.')}</p>
                     <Segmented
                         value={form.data.accent}
                         onChange={(v) => form.setData('accent', v)}
                         options={[
                             {
-                                value: 'violet',
+                                value: 'cobalt',
                                 label: (
                                     <>
-                                        <i className="size-3.5 rounded-full bg-[#6c5dd3]" />
-                                        {t('Violet')}
+                                        <i className="size-3.5 rounded-full bg-[#1e40af]" />
+                                        {t('Cobalt blue')}
                                     </>
                                 ),
                             },

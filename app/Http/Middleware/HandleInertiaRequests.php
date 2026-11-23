@@ -2,9 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\WorkOrder;
 use App\Support\Settings;
+use App\Support\ShellData;
 use App\Support\Translations;
+use App\Support\Workshop;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,14 +36,11 @@ class HandleInertiaRequests extends Middleware
             'translations' => fn () => Translations::for(app()->getLocale()),
             'workshop' => fn () => [
                 'name' => Settings::get('company')['name'] ?? 'MA Engine Lab',
-                'accent' => Settings::get('accent', 'violet'),
+                'accent' => Settings::accent(),
                 'timezone' => config('workshop.timezone'),
             ],
-            // Small numbers shown in the shell (sidebar, inbox icon). Only for logged-in pages.
-            'counts' => fn () => $user ? [
-                'openJobs' => WorkOrder::where('status', '!=', 'completed')->count(),
-                'toCall' => WorkOrder::whereNotNull('notify_customer')->count(),
-            ] : null,
+            // The app frame: today's hours, mechanics' status today, counters. Only for logged-in pages.
+            'shell' => fn () => $user ? ShellData::for(app(Workshop::class)) : null,
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
                 'warning' => fn () => $request->session()->get('warning'),

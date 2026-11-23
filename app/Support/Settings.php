@@ -42,6 +42,12 @@ final class Settings
         Cache::forget(self::CACHE_KEY);
     }
 
+    /** cobalt (design default) or teal (MA Engine Lab brand). Older saved values fall back to cobalt. */
+    public static function accent(): string
+    {
+        return self::get('accent') === 'teal' ? 'teal' : 'cobalt';
+    }
+
     public static function locale(): string
     {
         $locale = self::get('locale', 'en');

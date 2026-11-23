@@ -6,6 +6,7 @@ use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\OverviewController;
 use App\Http\Controllers\TimeOffController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\WorkOrderController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,6 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::post('customers/{customer}/vehicles', [VehicleController::class, 'store'])->name('vehicles.store');
     Route::patch('vehicles/{vehicle}', [VehicleController::class, 'update'])->name('vehicles.update');
     Route::delete('vehicles/{vehicle}', [VehicleController::class, 'destroy'])->name('vehicles.destroy');
+
+    Route::post('jobs/{workOrder}/informed', [WorkOrderController::class, 'informed'])->name('jobs.informed');
+    Route::post('jobs/{workOrder}/move', [WorkOrderController::class, 'move'])->name('jobs.move');
 
     // Built in later phases (docs/ROADMAP.md); for now they show a placeholder so navigation works.
     foreach (['calendar', 'jobs', 'invoices'] as $page) {

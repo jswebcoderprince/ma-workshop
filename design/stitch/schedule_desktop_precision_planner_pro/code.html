@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>MA Engine Lab — Workshop Planner &amp; Dispatch</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "canvas-bg": "#F8FAFC",
+            "surface-bg": "#FFFFFF",
+            "border-subtle": "#E2E8F0",
+            "border-strong": "#CBD5E1",
+            "text-primary": "#0F172A",
+            "text-secondary": "#475569",
+            "text-muted": "#64748B",
+            "primary": "#1E40AF",
+            "primary-container": "#EFF6FF",
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04)',
+            'card-hover': '0 6px 12px -2px rgba(15, 23, 42, 0.1), 0 3px 6px -3px rgba(15, 23, 42, 0.06)',
+            'drawer': '-4px 0 24px -4px rgba(15, 23, 42, 0.08)'
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background-color: #F8FAFC;
+        color: #0F172A;
+      }
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    .hatch-pattern {
+      background-image: repeating-linear-gradient(135deg, rgba(203, 213, 225, 0.35), rgba(203, 213, 225, 0.35) 10px, transparent 10px, transparent 20px);
+    }
+  </style>
+</head>
+<body class="bg-canvas-bg text-text-primary antialiased flex h-screen overflow-hidden selection:bg-blue-100 selection:text-blue-900">
+<!-- ================= LEFT APP SIDEBAR ================= -->
+<aside class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between shrink-0 border-r border-slate-800 z-40 select-none">
+<div class="flex flex-col">
+<!-- App Brand Header -->
+<div class="h-16 px-4 flex items-center gap-3 border-b border-slate-800/80 bg-slate-950/50">
+<div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-md shadow-blue-900/40 text-white font-bold text-sm tracking-wider shrink-0">
+          MA
+        </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-sm text-white tracking-tight truncate">MA Engine Lab</span>
+<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">PRO</span>
+</div>
+<span class="text-[11px] font-medium text-slate-400 tracking-wide uppercase">Ops Dispatcher</span>
+</div>
+</div>
+<!-- Workshop Status Mini-Widget -->
+<div class="mx-3 mt-4 p-3 rounded-lg bg-slate-800/60 border border-slate-700/60">
+<div class="flex items-center justify-between text-xs mb-1.5">
+<span class="text-slate-400 font-medium">Bays Active</span>
+<span class="font-mono text-emerald-400 font-semibold">7 of 8 Occupied</span>
+</div>
+<div class="w-full bg-slate-700/80 h-1.5 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 87.5%"></div>
+</div>
+</div>
+<!-- Navigation Links -->
+<div class="px-3 pt-4">
+<div class="px-2 pb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Navigation</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">space_dashboard</span>
+<span>Overview &amp; Metrics</span>
+</a>
+<a aria-current="page" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold text-xs shadow-sm shadow-blue-950/40" href="#">
+<span class="material-symbols-outlined text-[19px]">calendar_today</span>
+<span class="flex-1">Schedule &amp; Timeline</span>
+<span class="w-2 h-2 rounded-full bg-amber-400 ring-2 ring-blue-600" title="Cascade Alert Active"></span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">build</span>
+<span class="flex-1">Active Work Orders</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 font-semibold">14</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">badge</span>
+<span>Mechanic Roster</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">precision_manufacturing</span>
+<span>Dyno &amp; Test Bays</span>
+</a>
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors text-xs font-medium" href="#">
+<span class="material-symbols-outlined text-[19px]">tune</span>
+<span>Station Settings</span>
+</a>
+</nav>
+</div>
+<!-- Quick Mechanic Presence Status -->
+<div class="px-3 pt-5">
+<div class="px-2 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+<span>Roster Today</span>
+<span class="text-slate-400 font-mono text-[11px]">3 / 4 In</span>
+</div>
+<div class="flex flex-col gap-1 px-1">
+<div class="flex items-center justify-between text-xs py-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+<span class="text-slate-300 font-medium">Danial Vance</span>
+</div>
+<span class="text-[10px] font-mono text-slate-400">100% Load</span>
+</div>
+<div class="flex items-center justify-between text-xs py-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+<span class="text-slate-300 font-medium">Sarah Lin</span>
+</div>
+<span class="text-[10px] font-mono text-indigo-300 font-semibold">+2h Free</span>
+</div>
+<div class="flex items-center justify-between text-xs py-1">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+<span class="text-slate-300 font-medium">Marcus Thorne</span>
+</div>
+<span class="text-[10px] font-mono text-amber-300 font-bold">+45m Late</span>
+</div>
+<div class="flex items-center justify-between text-xs py-1 opacity-60">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-500"></span>
+<span class="text-slate-400">James Riley</span>
+</div>
+<span class="text-[10px] text-slate-400 font-mono">On Leave</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sidebar Footer -->
+<div class="p-3 border-t border-slate-800 bg-slate-950/40">
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-800/40 border border-slate-700/50">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+<span class="text-[11px] text-slate-300 font-medium">Cascade Engine v4.2</span>
+</div>
+<span class="text-[10px] font-mono text-emerald-400 font-semibold">SYNCED</span>
+</div>
+</div>
+</aside>
+<!-- ================= MAIN WRAPPER ================= -->
+<div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+<!-- TOP APP HEADER -->
+<header class="h-16 bg-surface-bg border-b border-border-subtle px-6 flex items-center justify-between shrink-0 z-30">
+<div class="flex items-center gap-4">
+<!-- Breadcrumb Hierarchy -->
+<div class="flex items-center gap-2 text-xs">
+<span class="text-text-muted font-medium">MA Engine Lab</span>
+<span class="text-slate-300 font-bold">/</span>
+<span class="font-bold text-text-primary text-sm tracking-tight">Workshop Planner</span>
+</div>
+<span class="h-4 w-px bg-slate-200"></span>
+<!-- Current Shift Status Pill -->
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/90 text-blue-700 text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+<span>Shift 1 Active</span>
+<span class="text-blue-500 font-mono text-[11px] font-normal">· 08:00 – 16:30</span>
+</div>
+</div>
+<!-- Right Header Actions -->
+<div class="flex items-center gap-3">
+<!-- Global Search Bar with Hotkey Badge -->
+<div class="relative flex items-center w-72">
+<span class="material-symbols-outlined absolute left-3 text-[18px] text-slate-400 pointer-events-none">search</span>
+<input class="w-full h-9 pl-9 pr-14 rounded-lg bg-slate-50 border border-border-subtle text-xs text-text-primary placeholder:text-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all font-sans" placeholder="Search job #, VIN, reg, mechanic..." type="text"/>
+<kbd class="absolute right-2 px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-500 bg-white border border-slate-200 shadow-sm font-semibold">⌘K</kbd>
+</div>
+<span class="h-5 w-px bg-slate-200"></span>
+<!-- Notifications Bell -->
+<button class="relative p-2 rounded-lg text-slate-500 hover:text-text-primary hover:bg-slate-100 transition-colors" title="Notifications">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-amber-500 text-white font-mono text-[10px] font-bold">1</span>
+</button>
+<!-- Quick Settings -->
+<button class="p-2 rounded-lg text-slate-500 hover:text-text-primary hover:bg-slate-100 transition-colors" title="Timeline Display Settings">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+<span class="h-5 w-px bg-slate-200"></span>
+<!-- User Profile Pill -->
+<div class="flex items-center gap-2.5 pl-1 cursor-pointer hover:opacity-90">
+<div class="w-8 h-8 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-blue-100">
+            MV
+          </div>
+<div class="flex flex-col text-left leading-tight hidden sm:flex">
+<span class="text-xs font-bold text-text-primary">Marcus Vance</span>
+<span class="text-[11px] text-slate-500">Head Coordinator</span>
+</div>
+</div>
+</div>
+</header>
+<!-- ================= CASCADE OPERATIONAL ALERT BANNER ================= -->
+<div class="bg-amber-50/95 border-b border-amber-200 border-l-4 border-l-amber-500 px-6 py-2.5 flex items-center justify-between shrink-0 shadow-sm">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-7 h-7 rounded-md bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-700 shrink-0">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</div>
+<div class="flex items-center gap-2 flex-wrap text-xs">
+<span class="font-bold uppercase tracking-wider text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded text-[10px] border border-amber-300">
+            Cascade Trigger Active
+          </span>
+<span class="text-amber-950 font-bold">Job #1042 overrun on Station 3 (Marcus Thorne):</span>
+<span class="font-mono font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">+45m late</span>
+<span class="text-amber-900">· 1 downstream job (<span class="font-bold text-amber-950">#1043 S54 Valvetrain</span>) automatically displaced to 14:15.</span>
+<span class="inline-flex items-center gap-1.5 font-bold text-red-700 bg-red-100/90 px-2.5 py-0.5 rounded border border-red-200 text-[11px]">
+<span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span>
+            Customer Not Informed
+          </span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0 ml-4">
+<button class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-sm flex items-center gap-1.5 transition-colors" onclick="document.getElementById('job-inspector').classList.remove('hidden')">
+<span>Review &amp; Rebalance Cascade</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<button class="p-1 text-amber-700 hover:text-amber-950 hover:bg-amber-200/60 rounded-md transition-colors" onclick="this.closest('.border-l-4').remove()" title="Dismiss Banner">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- ================= CONTROLS & TIMELINE TOOLBAR ================= -->
+<div class="bg-surface-bg border-b border-border-subtle px-6 py-2.5 shrink-0 flex flex-col gap-2">
+<!-- Top Row: View Mode + Date Nav + Primary Actions -->
+<div class="flex items-center justify-between gap-4">
+<!-- Left: Segmented View + Date Controls -->
+<div class="flex items-center gap-3">
+<!-- View Segmented Pill -->
+<div class="inline-flex p-1 rounded-lg bg-slate-100 border border-slate-200 text-xs font-medium shrink-0">
+<button class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors">Day View</button>
+<button class="px-3 py-1 rounded-md bg-white text-blue-700 font-bold shadow-sm">Week View</button>
+<button class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors">Month View</button>
+</div>
+<span class="h-5 w-px bg-slate-200 shrink-0"></span>
+<!-- Date Range Navigator -->
+<div class="flex items-center gap-2 shrink-0">
+<div class="inline-flex items-center rounded-lg border border-border-subtle bg-white shadow-sm overflow-hidden">
+<button class="p-1.5 text-slate-500 hover:text-text-primary hover:bg-slate-50 transition-colors" title="Previous Week">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="px-3 py-1 text-xs font-bold text-text-primary hover:bg-slate-50 border-x border-border-subtle transition-colors">Today</button>
+<button class="p-1.5 text-slate-500 hover:text-text-primary hover:bg-slate-50 transition-colors" title="Next Week">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+<span class="text-xs font-bold text-text-primary tracking-tight ml-1 whitespace-nowrap">
+              Monday, Oct 20 – Friday, Oct 24, 2025
+            </span>
+<span class="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200 whitespace-nowrap">
+              W43 · Shift 1 (08:00–16:30)
+            </span>
+</div>
+</div>
+<!-- Right: Primary Actions -->
+<div class="flex items-center gap-2 shrink-0">
+<button class="p-1.5 rounded-lg border border-border-subtle bg-white text-slate-600 hover:text-text-primary hover:bg-slate-50 transition-colors shadow-sm" title="Undo Schedule Shift">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg border border-border-subtle bg-white text-slate-700 hover:bg-slate-50 transition-colors text-xs font-semibold shadow-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[17px] text-slate-500">auto_fix_high</span>
+<span>Cascade Rules</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm flex items-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Schedule Job</span>
+<kbd class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-blue-700 text-blue-100 border border-blue-500/50">N</kbd>
+</button>
+</div>
+</div>
+<!-- Bottom Row: Filter & Real-Time Status Filter Pills -->
+<div class="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+<!-- Filter Controls -->
+<div class="flex items-center gap-2.5 flex-nowrap overflow-x-auto">
+<!-- Mechanic Select -->
+<div class="relative shrink-0">
+<select class="h-8 pl-3 pr-8 rounded-lg border border-border-subtle bg-slate-50 text-xs font-semibold text-text-primary appearance-none cursor-pointer focus:outline-none focus:border-blue-600 focus:bg-white transition-colors">
+<option>All Mechanics (4 Active)</option>
+<option>Danial Vance (100% Load)</option>
+<option>Sarah Lin (Early Slot Open)</option>
+<option>Marcus Thorne (Delayed +45m)</option>
+<option>James Riley (Approved Leave)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-[16px] text-slate-400 pointer-events-none">expand_more</span>
+</div>
+<!-- Quick Status Pills Filter -->
+<div class="flex items-center gap-1.5 shrink-0">
+<button class="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-900 text-white">All (4)</button>
+<button class="px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-600"></span>
+<span>On Track</span>
+</button>
+<button class="px-2.5 py-1 rounded-md text-xs font-bold text-amber-800 bg-amber-100/90 border border-amber-300 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+<span>Delayed / Shifted (1)</span>
+</button>
+<button class="px-2.5 py-1 rounded-md text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+<span>Slot Opened (+2h)</span>
+</button>
+<button class="px-2.5 py-1 rounded-md text-xs font-bold text-red-700 bg-red-50 border border-red-200 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-red-600">priority_high</span>
+<span>Needs Customer Contact (1)</span>
+</button>
+</div>
+</div>
+<!-- Legend Summary -->
+<div class="hidden xl:flex items-center gap-3.5 text-[11px] text-slate-500 shrink-0">
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-blue-600"></span> On Schedule</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-amber-500"></span> Overrun / Shift</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> Finished Early</span>
+<span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-slate-300"></span> Break / Leave</span>
+</div>
+</div>
+</div>
+<!-- ================= MAIN WORKSHOP TIMELINE BOARD & RIGHT INSPECTOR ================= -->
+<div class="flex-1 flex overflow-hidden p-4 gap-4 items-stretch min-h-0">
+<!-- TIMELINE BOARD WRAPPER (WITH HORIZONTAL SCROLL FOR PERFECT HOUR SPACING) -->
+<div class="flex-1 bg-surface-bg rounded-xl border border-border-subtle shadow-sm flex flex-col h-full overflow-hidden min-w-0">
+<!-- SCROLLABLE TIMELINE CONTAINER (Keeps Mechanic Lane and Time Columns synchronized) -->
+<div class="flex-1 overflow-x-auto overflow-y-auto">
+<div class="min-w-[1360px] flex flex-col h-full">
+<!-- TIMELINE TIME AXIS HEADER -->
+<div class="flex border-b border-border-subtle bg-slate-50 sticky top-0 z-30 select-none">
+<!-- Mechanic Column Header -->
+<div class="w-72 shrink-0 px-4 py-3 border-r border-border-subtle flex items-center justify-between bg-slate-100/90 sticky left-0 z-40">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-700">Mechanic Lane / Station</span>
+<span class="text-[11px] font-mono text-slate-500 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">4 Techs</span>
+</div>
+<!-- Time Increments Grid (10 Dedicated Columns from 08:00 to 18:00) -->
+<div class="flex-1 grid grid-cols-10 divide-x divide-border-subtle text-xs font-semibold text-slate-700">
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">08:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">09:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">10:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">11:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">12:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<!-- Distinct Lunch Break Column (12:30 - 13:30) -->
+<div class="px-3 py-2.5 bg-amber-50/70 border-b-2 border-amber-400 flex items-center justify-between">
+<span class="font-mono font-bold text-amber-900 text-xs">13:00</span>
+<span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-200 text-amber-900 border border-amber-300">Lunch</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">14:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">15:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">16:00</span>
+<span class="text-[10px] font-mono text-slate-400">:30</span>
+</div>
+<div class="px-3 py-2.5 flex items-center justify-between">
+<span class="font-mono font-bold text-slate-800 text-xs">17:00</span>
+<span class="font-mono text-slate-500 text-[10px]">18:00</span>
+</div>
+</div>
+</div>
+<!-- TIMELINE BODY LANES -->
+<div class="divide-y divide-border-subtle flex-1 flex flex-col">
+<!-- ================= LANE 1: DANIAL VANCE ================= -->
+<div class="flex min-h-[148px] hover:bg-slate-50/50 transition-colors">
+<!-- Mechanic Profile Cell -->
+<div class="w-72 shrink-0 p-4 bg-surface-bg border-r border-border-subtle flex flex-col justify-between sticky left-0 z-20 shadow-xs">
+<div class="flex items-start gap-3">
+<div class="relative shrink-0">
+<div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-800 font-bold text-sm flex items-center justify-center border border-blue-200 shadow-sm">
+                        DV
+                      </div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="text-xs font-bold text-text-primary truncate">Danial Vance</span>
+<span class="text-[11px] text-text-muted truncate">Master Engine Specialist</span>
+<span class="text-[10px] font-mono text-slate-500 font-medium mt-0.5">Bay #1 (Dyno Prep)</span>
+</div>
+</div>
+<!-- Mechanic Load Metric Pill -->
+<div class="flex items-center justify-between pt-2.5 border-t border-slate-100">
+<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">2 Jobs Scheduled</span>
+<span class="text-[11px] font-mono font-bold text-slate-800">8.0h / 8.0h (100%)</span>
+</div>
+</div>
+<!-- Timeline Lane Grid -->
+<div class="flex-1 relative p-3 grid grid-cols-10 gap-3 items-stretch bg-white/70">
+<!-- Visual Vertical Guide Lines -->
+<div class="absolute inset-0 grid grid-cols-10 pointer-events-none divide-x divide-slate-100">
+<div></div><div></div><div></div><div></div><div></div>
+<div class="bg-amber-50/30"></div>
+<div></div><div></div><div></div><div></div>
+</div>
+<!-- Job 1: Porsche 911 GT3 (08:00 - 12:30 -> 5 cols allocated cleanly) -->
+<div class="col-span-5 z-10 bg-white rounded-xl border border-blue-200/90 shadow-card-subtle p-3 flex flex-col justify-between hover:shadow-card-hover hover:border-blue-400 transition-all cursor-pointer relative group/card">
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-blue-600 rounded-l-xl"></div>
+<div>
+<div class="pl-2 flex items-start justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-blue-700">#1038</span>
+<span class="font-mono text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">EN68 MAE</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                          0.5d · 4.5h
+                        </span>
+</div>
+<div class="pl-2">
+<h4 class="text-xs font-bold text-text-primary truncate">2021 Porsche 911 GT3 · David K.</h4>
+<p class="text-[11px] text-text-secondary truncate mt-0.5">Crankshaft &amp; Bearing Overhaul</p>
+</div>
+</div>
+<div class="pl-2 mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+<span class="text-emerald-700 font-semibold flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        In Progress · Bore check passed
+                      </span>
+<div class="flex items-center gap-2">
+<span class="font-mono text-slate-600 text-[10px] font-semibold">08:00 – 12:30</span>
+<span class="material-symbols-outlined text-[16px] text-emerald-600" title="Customer Informed">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Job 2: BMW M5 Competition (13:30 - 17:00 -> 4 cols) -->
+<div class="col-span-4 z-10 bg-white rounded-xl border border-blue-200/90 shadow-card-subtle p-3 flex flex-col justify-between hover:shadow-card-hover hover:border-blue-400 transition-all cursor-pointer relative group/card">
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-blue-600 rounded-l-xl"></div>
+<div>
+<div class="pl-2 flex items-start justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-blue-700">#1039</span>
+<span class="font-mono text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">GX21 KLL</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                          0.5d · 3.5h
+                        </span>
+</div>
+<div class="pl-2">
+<h4 class="text-xs font-bold text-text-primary truncate">BMW M5 Competition · Harrison R.</h4>
+<p class="text-[11px] text-text-secondary truncate mt-0.5">High-Pressure Fuel Rail Sync</p>
+</div>
+</div>
+<div class="pl-2 mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+<span class="text-slate-600 font-semibold flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Scheduled · Bay Pre-rinsed
+                      </span>
+<div class="flex items-center gap-2">
+<span class="font-mono text-slate-600 text-[10px] font-semibold">13:30 – 17:00</span>
+<span class="material-symbols-outlined text-[16px] text-emerald-600" title="Customer Informed">check_circle</span>
+</div>
+</div>
+</div>
+<!-- Buffer Slot (1 col: 17:00 - 18:00) -->
+<div class="col-span-1 z-10 rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-2 flex flex-col items-center justify-center text-center">
+<span class="text-[10px] font-bold text-slate-600 uppercase tracking-tight">Clean &amp; Prep</span>
+<span class="font-mono text-[10px] text-slate-400 font-semibold mt-0.5">1.0h Buffer</span>
+</div>
+</div>
+</div>
+<!-- ================= LANE 2: SARAH LIN (SLOT OPENED EARLY) ================= -->
+<div class="flex min-h-[148px] hover:bg-slate-50/50 transition-colors">
+<!-- Mechanic Profile Cell -->
+<div class="w-72 shrink-0 p-4 bg-surface-bg border-r border-border-subtle flex flex-col justify-between sticky left-0 z-20 shadow-xs">
+<div class="flex items-start gap-3">
+<div class="relative shrink-0">
+<div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-800 font-bold text-sm flex items-center justify-center border border-indigo-200 shadow-sm">
+                        SL
+                      </div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="text-xs font-bold text-text-primary truncate">Sarah Lin</span>
+<span class="text-[11px] text-text-muted truncate">Diagnostics &amp; Cylinder Heads</span>
+<span class="text-[10px] font-mono text-slate-500 font-medium mt-0.5">Bay #2 (Bench 1)</span>
+</div>
+</div>
+<!-- Status Capacity Indicator -->
+<div class="flex items-center justify-between pt-2.5 border-t border-slate-100">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+                      +2.0h Buffer Opened
+                    </span>
+<span class="text-[11px] font-mono font-bold text-slate-700">6.0h / 8.0h</span>
+</div>
+</div>
+<!-- Timeline Lane Grid -->
+<div class="flex-1 relative p-3 grid grid-cols-10 gap-3 items-stretch bg-white/70">
+<!-- Visual Vertical Guide Lines -->
+<div class="absolute inset-0 grid grid-cols-10 pointer-events-none divide-x divide-slate-100">
+<div></div><div></div><div></div><div></div><div></div>
+<div class="bg-amber-50/30"></div>
+<div></div><div></div><div></div><div></div>
+</div>
+<!-- Finished Early Card (08:00 - 10:30 -> 3 cols) -->
+<div class="col-span-3 z-10 bg-white rounded-xl border border-emerald-300 shadow-card-subtle p-3 flex flex-col justify-between hover:shadow-card-hover transition-all cursor-pointer relative group/card">
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-emerald-600 rounded-l-xl"></div>
+<div>
+<div class="pl-2 flex items-start justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-emerald-800">#1040</span>
+<span class="font-mono text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">RV20 VVA</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                          Finished Early (+2h saved)
+                        </span>
+</div>
+<div class="pl-2">
+<h4 class="text-xs font-bold text-text-primary truncate">AMG C63 · Claire D.</h4>
+<p class="text-[11px] text-text-secondary truncate mt-0.5">Head Gasket Pressure Test</p>
+</div>
+</div>
+<div class="pl-2 mt-2 pt-2 border-t border-emerald-100 flex items-center justify-between text-[11px]">
+<span class="text-emerald-700 font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+                        Done at 10:30 (Saved 2.0h)
+                      </span>
+<span class="font-mono text-slate-600 text-[10px] font-semibold">08:00 – 10:30</span>
+</div>
+</div>
+<!-- LIBERATED SLOT: Available for emergency walk-in (10:30 - 12:30 -> 2 cols) -->
+<div class="col-span-2 z-10 rounded-xl border-2 border-dashed border-indigo-400 bg-indigo-50/80 p-3 flex flex-col justify-between hover:bg-indigo-100/80 transition-all cursor-pointer group/slot shadow-xs">
+<div class="flex items-center justify-between">
+<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-indigo-600 text-white shadow-xs">
+                        ⚡ +2.0h Slot Open
+                      </span>
+<span class="font-mono text-[11px] font-bold text-indigo-900">10:30 – 12:30</span>
+</div>
+<div class="my-auto py-1">
+<span class="text-xs font-bold text-indigo-950 flex items-center gap-1 group-hover/slot:text-indigo-700 transition-colors">
+<span class="material-symbols-outlined text-[17px]">add_circle</span>
+                        Intake Urgent Job
+                      </span>
+<p class="text-[10px] text-indigo-700 font-medium mt-0.5">Open for Emergency or Overrun Transfer</p>
+</div>
+<div class="flex items-center justify-between text-[10px] font-mono text-indigo-800 border-t border-indigo-200/80 pt-1.5">
+<span>Available Now</span>
+<span class="font-sans font-bold underline text-indigo-900 group-hover/slot:text-indigo-700">+ Assign Job</span>
+</div>
+</div>
+<!-- Afternoon Job (13:30 - 18:00 -> 5 cols) -->
+<div class="col-span-5 z-10 bg-white rounded-xl border border-blue-200/90 shadow-card-subtle p-3 flex flex-col justify-between hover:shadow-card-hover hover:border-blue-400 transition-all cursor-pointer relative group/card">
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-blue-600 rounded-l-xl"></div>
+<div>
+<div class="pl-2 flex items-start justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-blue-700">#1041</span>
+<span class="font-mono text-[10px] font-semibold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">N874 JKK</span>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                          0.5d · 4.5h
+                        </span>
+</div>
+<div class="pl-2">
+<h4 class="text-xs font-bold text-text-primary truncate">Toyota Supra MK4 2JZ · Kenji Sato</h4>
+<p class="text-[11px] text-text-secondary truncate mt-0.5">Bucket Valve Clearance &amp; Shim Tuning</p>
+</div>
+</div>
+<div class="pl-2 mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+<span class="text-slate-600 font-semibold flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Stage 1 Teardown Confirmed
+                      </span>
+<div class="flex items-center gap-2">
+<span class="font-mono text-slate-600 text-[10px] font-semibold">13:30 – 18:00</span>
+<span class="material-symbols-outlined text-[16px] text-emerald-600" title="Customer Informed">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= LANE 3: MARCUS THORNE (CASCADE DELAY ACTIVE) ================= -->
+<div class="flex min-h-[154px] bg-amber-50/20 transition-colors relative border-l-4 border-l-amber-500">
+<!-- Mechanic Profile Cell -->
+<div class="w-72 shrink-0 p-4 bg-surface-bg border-r border-border-subtle flex flex-col justify-between sticky left-0 z-20 shadow-xs">
+<div class="flex items-start gap-3">
+<div class="relative shrink-0">
+<div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-900 font-bold text-sm flex items-center justify-center border border-amber-300 shadow-sm">
+                        MT
+                      </div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 ring-2 ring-white animate-ping"></span>
+<span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-red-500 ring-2 ring-white"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-bold text-text-primary truncate">Marcus Thorne</span>
+<span class="material-symbols-outlined text-[16px] text-red-500" title="Overrun Alert">error</span>
+</div>
+<span class="text-[11px] text-text-muted truncate">Assembly &amp; Timing Systems</span>
+<span class="text-[10px] font-mono text-amber-700 font-bold mt-0.5">Bay #3 (Assembly Bench)</span>
+</div>
+</div>
+<!-- Status Alert Metrics -->
+<div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                      Overrun: +45m Delay
+                    </span>
+<span class="font-mono text-[11px] font-bold text-red-700">9.5h / 8.0h</span>
+</div>
+</div>
+<!-- Timeline Lane Grid -->
+<div class="flex-1 relative p-3 grid grid-cols-10 gap-3 items-stretch bg-white/70">
+<!-- Visual Vertical Guide Lines -->
+<div class="absolute inset-0 grid grid-cols-10 pointer-events-none divide-x divide-slate-100">
+<div></div><div></div><div></div><div></div><div></div>
+<div class="bg-amber-50/30"></div>
+<div></div><div></div><div></div><div></div>
+</div>
+<!-- Overrunning Job #1042 (Selected State in Inspector) (08:30 - 13:15 -> 6 cols) -->
+<div class="col-span-6 z-10 bg-amber-50/60 rounded-xl border-2 border-amber-400 ring-2 ring-amber-200/80 shadow-md p-3 flex flex-col justify-between hover:shadow-lg transition-all cursor-pointer relative group/card" onclick="document.getElementById('job-inspector').classList.remove('hidden')">
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-amber-500 rounded-l-xl"></div>
+<div>
+<div class="pl-2 flex items-start justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-2">
+<span class="font-mono text-xs font-bold text-amber-950">#1042</span>
+<span class="font-mono text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">LD19 XPL</span>
+<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-200 text-amber-900 border border-amber-300">
+                            +45m Late
+                          </span>
+</div>
+<div class="flex items-center gap-1.5 shrink-0">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white text-amber-900 border border-amber-300 shadow-xs">
+                            Est 13:15 (Orig 12:30)
+                          </span>
+<span class="px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold border border-red-200 flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-red-600">call</span>
+                            Uninformed
+                          </span>
+</div>
+</div>
+<div class="pl-2">
+<h4 class="text-xs font-bold text-text-primary truncate">2019 Audi RS6 Avant 4.0 TFSI · Liam H.</h4>
+<p class="text-[11px] text-text-secondary truncate mt-0.5">Cylinder Bore Honing &amp; Piston Fitment</p>
+</div>
+</div>
+<!-- Root Cause Note -->
+<div class="pl-2 mt-2 pt-2 border-t border-amber-200/70 flex items-center justify-between text-[11px] bg-amber-100/60 -mx-1 px-2.5 py-1 rounded-lg">
+<div class="flex items-center gap-1.5 text-amber-950 font-medium">
+<span class="material-symbols-outlined text-[16px] text-amber-600 shrink-0">report_problem</span>
+<span class="truncate">Stuck wrist pin on Cyl 4 (Heated extraction underway)</span>
+</div>
+<span class="font-mono text-[10px] text-amber-900 font-bold shrink-0 ml-2">
+                        Running +45m past window
+                      </span>
+</div>
+</div>
+<!-- Downstream Displaced Job #1043 (14:15 - 18:00 -> 4 cols) -->
+<div class="col-span-4 z-10 bg-red-50/90 rounded-xl border-2 border-dashed border-red-300 shadow-sm p-3 flex flex-col justify-between hover:bg-red-100/70 transition-all cursor-pointer relative group/card">
+<div class="absolute top-0 left-0 bottom-0 w-1.5 bg-red-500 rounded-l-xl"></div>
+<div>
+<div class="pl-2 flex items-start justify-between gap-2 mb-1.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-red-600 animate-pulse">east</span>
+<span class="font-mono text-xs font-bold text-red-950">#1043</span>
+<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-red-200 text-red-900 uppercase">
+                            Cascade Pushed
+                          </span>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white text-red-800 border border-red-200">
+                          +45m Shift
+                        </span>
+</div>
+<div class="pl-2">
+<h4 class="text-xs font-bold text-text-primary truncate">BMW M3 S54 (LJ54 BWM) · Marcus R.</h4>
+<p class="text-[11px] text-text-secondary truncate mt-0.5">Valvetrain Timing &amp; Cam Follower Swap</p>
+</div>
+</div>
+<div class="pl-2 mt-2 pt-2 border-t border-red-200/80 flex items-center justify-between text-[11px]">
+<span class="text-red-700 font-bold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+                        New Start: 14:15 (Was 13:30)
+                      </span>
+<span class="text-[10px] font-bold text-red-800 bg-white px-2 py-0.5 rounded border border-red-300 shadow-xs">
+                        Customer Uninformed!
+                      </span>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= LANE 4: JAMES RILEY (ON APPROVED LEAVE) ================= -->
+<div class="flex min-h-[128px] bg-slate-50/70 transition-colors">
+<!-- Mechanic Profile Cell -->
+<div class="w-72 shrink-0 p-4 bg-surface-bg border-r border-border-subtle flex flex-col justify-between sticky left-0 z-20 opacity-85 shadow-xs">
+<div class="flex items-start gap-3">
+<div class="relative shrink-0">
+<div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 font-bold text-sm flex items-center justify-center border border-slate-200 shadow-xs">
+                        JR
+                      </div>
+<span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-slate-400 ring-2 ring-white"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="text-xs font-bold text-slate-700 truncate">James Riley</span>
+<span class="text-[11px] text-slate-500 truncate">Tuning &amp; ECU / Dyno Bay</span>
+<span class="text-[10px] font-mono text-slate-400 font-medium mt-0.5">Dyno Cell A (Locked)</span>
+</div>
+</div>
+<!-- Status Metric Pill -->
+<div class="flex items-center justify-between pt-2.5 border-t border-slate-100">
+<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500">Out of Station</span>
+<span class="text-[11px] font-mono font-medium text-slate-400">0.0h Assigned</span>
+</div>
+</div>
+<!-- Timeline Lane Grid (Diagonal Hatch Pattern Indicating Leave) -->
+<div class="flex-1 relative p-3 flex items-center justify-center hatch-pattern bg-slate-100/60">
+<div class="bg-white/95 px-6 py-3 rounded-xl border border-slate-300 shadow-sm flex items-center gap-3.5 z-10">
+<div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200">
+<span class="material-symbols-outlined text-[20px]">event_busy</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-text-primary">On Approved Annual Leave</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-300">BAY OFFLINE</span>
+</div>
+<span class="text-[11px] text-slate-500 font-medium mt-0.5">Mon, Oct 20 – Wed, Oct 22 · Returning Thursday for ECU Dyno Calibrations</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- TIMELINE FOOTER METRICS BAR -->
+<div class="px-6 py-2.5 bg-slate-100/90 border-t border-border-subtle flex items-center justify-between text-xs text-slate-600 shrink-0 select-none">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-1.5">
+<span class="text-slate-500 font-medium">Floor Utilization:</span>
+<span class="font-mono font-bold text-text-primary">73.5% (23.5 / 32.0 Available Hours)</span>
+</div>
+<span class="h-3.5 w-px bg-slate-300"></span>
+<div class="flex items-center gap-1.5">
+<span class="text-slate-500 font-medium">Open Buffer Capacity:</span>
+<span class="font-mono font-bold text-emerald-700">+2.0h Early Completion on Bay #2</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-[11px] text-slate-500 font-medium">Auto-cascade displacement recalculating live</span>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT SLIDE-OVER INSPECTION PANEL (FOR OVERRUNNING JOB #1042) ================= -->
+<aside class="w-[370px] bg-surface-bg rounded-xl border border-border-subtle shadow-drawer flex flex-col h-full shrink-0 overflow-hidden transition-all duration-300" id="job-inspector">
+<!-- Inspector Header -->
+<div class="p-3.5 border-b border-border-subtle bg-slate-50/80 flex items-start justify-between shrink-0">
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300">
+                CASCADE CRITICAL
+              </span>
+<span class="font-mono text-xs font-bold text-slate-500">LANE 3 · BENCH 1</span>
+</div>
+<h3 class="text-sm font-bold text-text-primary mt-1 truncate">Job #1042 — Cylinder Bore Honing</h3>
+<span class="text-xs text-text-muted">High-precision tolerance fitment</span>
+</div>
+<button class="p-1.5 rounded-lg text-slate-400 hover:text-text-primary hover:bg-slate-200/60 transition-colors" onclick="document.getElementById('job-inspector').classList.add('hidden')" title="Close Panel">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Inspector Content (Scrollable) -->
+<div class="flex-1 overflow-y-auto p-3.5 flex flex-col gap-3.5 text-xs">
+<!-- Vehicle & Customer Quick Details Card -->
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Vehicle &amp; Client</span>
+<span class="px-2 py-0.5 rounded bg-white text-text-primary font-mono text-[11px] font-bold border border-slate-200 shadow-xs">LD19 XPL</span>
+</div>
+<div class="text-xs font-bold text-text-primary">2019 Audi RS6 Avant 4.0 TFSI Quattro</div>
+<div class="flex items-center justify-between text-text-secondary pt-1.5 border-t border-slate-200/80">
+<span class="flex items-center gap-1.5 font-semibold text-text-primary">
+<span class="material-symbols-outlined text-[16px] text-slate-400">person</span>
+                Liam Hemsworth
+              </span>
+<div class="flex items-center gap-1.5">
+<a class="p-1.5 rounded-md bg-white hover:bg-blue-50 hover:text-blue-700 border border-slate-200 text-slate-600 transition-colors shadow-xs" href="tel:07700900412" title="Direct Phone Call">
+<span class="material-symbols-outlined text-[15px]">call</span>
+</a>
+<button class="p-1.5 rounded-md bg-white hover:bg-blue-50 hover:text-blue-700 border border-slate-200 text-slate-600 transition-colors shadow-xs" title="Send SMS Update">
+<span class="material-symbols-outlined text-[15px]">chat</span>
+</button>
+</div>
+</div>
+<div class="text-[11px] font-mono text-slate-500 flex items-center justify-between pt-0.5">
+<span>VIN: WAUZZZF24KN091823</span>
+<span class="text-text-primary font-bold">Today 18:30 Pick-up</span>
+</div>
+</div>
+<!-- Technician & Station Reassignment -->
+<div class="flex flex-col gap-1">
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Assigned Technician</span>
+<div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white shadow-xs">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-xs border border-amber-200">MT</div>
+<div>
+<div class="text-xs font-bold text-text-primary">Marcus Thorne</div>
+<div class="text-[11px] text-slate-500">Assembly &amp; Timing Lead</div>
+</div>
+</div>
+<button class="text-xs font-bold text-blue-700 hover:text-blue-800 hover:underline">Reassign</button>
+</div>
+</div>
+<!-- Overrun & Shift Timing Breakdown -->
+<div class="flex flex-col gap-1.5">
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Overrun Timeline Breakdown</span>
+<div class="grid grid-cols-2 gap-2">
+<div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+<span class="text-[10px] text-slate-500 block font-medium">Original Window</span>
+<span class="text-xs font-bold text-text-primary font-mono block mt-1">08:30 – 12:30</span>
+<span class="text-[10px] text-slate-500 block font-medium mt-0.5">4.0h Planned</span>
+</div>
+<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-300">
+<span class="text-[10px] text-amber-800 block font-bold">Revised Est. Finish</span>
+<span class="text-xs font-bold text-amber-950 font-mono block mt-1">13:15 (+45m)</span>
+<span class="text-[10px] text-amber-800 font-bold block mt-0.5">+45 min Overrun</span>
+</div>
+</div>
+</div>
+<!-- Downstream Impact Card -->
+<div class="p-3 rounded-xl bg-red-50/90 border border-red-200 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold uppercase tracking-wider text-red-900 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-red-600">sync_problem</span>
+                Downstream Impact
+              </span>
+<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-200 text-red-900">1 Job Pushed</span>
+</div>
+<p class="text-xs text-red-950 leading-relaxed">
+              Delay cascades into <strong class="font-bold text-text-primary">Job #1043 (BMW M3 S54 Valvetrain)</strong>, bumping start time from 13:30 to <span class="font-mono font-bold text-red-900">14:15</span>.
+            </p>
+<!-- Customer Contact Status Switch -->
+<div class="p-2.5 rounded-lg bg-white border border-red-200 flex items-center justify-between gap-2 shadow-xs">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[18px] text-red-600 shrink-0">notification_important</span>
+<div class="flex flex-col min-w-0">
+<span class="text-[11px] font-bold text-red-900">Customer Contact</span>
+<span class="text-[10px] text-red-700 truncate" id="contact-status-label">Not informed of 45m shift</span>
+</div>
+</div>
+<button class="px-2.5 py-1.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs transition-colors shrink-0" id="notify-btn" onclick="this.innerText='Informed (Logged)'; this.classList.remove('bg-red-600', 'hover:bg-red-700'); this.classList.add('bg-emerald-600', 'hover:bg-emerald-700'); document.getElementById('contact-status-label').innerText='Logged via SMS at 11:24';">
+                Notify Now
+              </button>
+</div>
+</div>
+<!-- Schedule Audit Log -->
+<div class="flex flex-col gap-1.5">
+<span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Chronological Event Log</span>
+<div class="border-l-2 border-slate-200 ml-2 pl-3 flex flex-col gap-2.5 py-1">
+<div class="relative">
+<span class="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="text-[11px] font-mono text-slate-500 font-semibold block">08:30</span>
+<span class="text-xs font-bold text-text-primary">Job Started on Schedule</span>
+<span class="text-[10px] text-slate-500 block">Audi mounted on Bay 3 engine crane.</span>
+</div>
+<div class="relative">
+<span class="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-amber-500"></span>
+<span class="text-[11px] font-mono text-amber-700 font-bold block">11:15</span>
+<span class="text-xs font-bold text-amber-950">Overrun Logged by Marcus</span>
+<span class="text-[10px] text-amber-800 block">Cylinder 4 wrist pin seized in rod bushing. Heat soak cycle needed (+45m).</span>
+</div>
+<div class="relative">
+<span class="absolute -left-[17px] top-1 w-2 h-2 rounded-full bg-blue-600"></span>
+<span class="text-[11px] font-mono text-slate-500 font-semibold block">11:18</span>
+<span class="text-xs font-bold text-text-primary">Cascade Shift Dispatched</span>
+<span class="text-[10px] text-slate-500 block">Downstream Job #1043 auto-displaced to 14:15.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Inspector Action Dock -->
+<div class="p-3.5 border-t border-border-subtle bg-slate-50/80 flex flex-col gap-2 shrink-0">
+<button class="w-full py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[17px]">sync</span>
+<span>Apply &amp; Recalculate Cascade</span>
+</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-1.5 px-2 rounded-lg border border-border-subtle bg-white text-text-primary hover:bg-slate-50 text-xs font-semibold transition-colors shadow-xs">
+              Transfer to Sarah (+2h free)
+            </button>
+<button class="py-1.5 px-2 rounded-lg border border-border-subtle bg-white text-slate-600 hover:bg-slate-100 text-xs font-semibold transition-colors" onclick="document.getElementById('job-inspector').classList.add('hidden')">
+              Close Inspector
+            </button>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</body></html>

@@ -5,38 +5,62 @@ import { Link } from '@inertiajs/react';
 import { EllipsisVertical, type LucideIcon } from 'lucide-react';
 import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
 
-/* Small building blocks matching design/frame.html (v3). */
+/* Building blocks for the Engine Precision Planner design (design/stitch/engine_precision_planner/DESIGN.md). */
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-    return (
-        <div className={cn('border-line bg-panel min-w-0 rounded-[14px] border shadow-[0_1px_2px_rgba(29,27,56,.04)]', className)}>{children}</div>
-    );
+    return <div className={cn('border-line bg-panel min-w-0 rounded-lg border shadow-[0_1px_2px_0_rgba(15,23,42,.05)]', className)}>{children}</div>;
 }
 
-export function CardHeader({ title, sub, children, className }: { title: ReactNode; sub?: ReactNode; children?: ReactNode; className?: string }) {
+export function CardHeader({
+    title,
+    icon: Icon,
+    sub,
+    children,
+    className,
+}: {
+    title: ReactNode;
+    icon?: LucideIcon;
+    sub?: ReactNode;
+    children?: ReactNode;
+    className?: string;
+}) {
     return (
-        <div className={cn('flex flex-wrap items-center gap-3 px-5 py-4', className)}>
-            <h3 className="text-[17px] font-semibold tracking-[-0.01em]">{title}</h3>
-            {sub && <span className="text-muted-foreground text-[13px]">{sub}</span>}
+        <div className={cn('flex flex-wrap items-center gap-2.5 px-4 py-3.5', className)}>
+            {Icon && <Icon className="text-p size-5" strokeWidth={1.8} />}
+            <h3 className="text-[17px] leading-6 font-semibold tracking-[-0.01em]">{title}</h3>
+            {typeof sub === 'number' || (typeof sub === 'string' && sub.length <= 16) ? (
+                <span className="bg-subtle text-fg-2 rounded-full px-2 py-0.5 text-[11px] font-semibold">{sub}</span>
+            ) : (
+                sub && <span className="text-muted-foreground text-[12.5px]">{sub}</span>
+            )}
             <span className="flex-1" />
             {children}
         </div>
     );
 }
 
+/** Small uppercase label used above numbers and sections. */
+export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
+    return (
+        <span className={cn('text-muted-foreground text-[11px] leading-[14px] font-semibold tracking-[0.06em] uppercase', className)}>
+            {children}
+        </span>
+    );
+}
+
 type BtnVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'danger';
 const btnVariants: Record<BtnVariant, string> = {
-    default: 'border-line-strong bg-panel text-fg-2 hover:bg-hover',
-    primary: 'border-p bg-p text-white shadow-[0_6px_14px_-8px_var(--p)] hover:bg-p-hover',
+    default: 'border-line bg-panel text-fg hover:bg-hover shadow-[0_1px_2px_0_rgba(15,23,42,.05)]',
+    primary: 'border-p bg-p text-white hover:bg-p-hover shadow-[0_1px_2px_0_rgba(15,23,42,.1)]',
     soft: 'border-transparent bg-p-soft text-p-ink hover:brightness-95',
-    ghost: 'border-transparent bg-transparent text-fg-2 hover:bg-hover',
+    ghost: 'border-transparent bg-transparent text-fg-2 hover:bg-subtle',
     danger: 'border-over bg-over text-white hover:brightness-95',
 };
 
 export function buttonClasses(variant: BtnVariant = 'default', size: 'md' | 'sm' = 'md', className?: string) {
     return cn(
-        'inline-flex items-center justify-center gap-[7px] border font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-        size === 'md' ? 'h-10 rounded-[9px] px-[18px]' : 'h-8 rounded-lg px-3 text-[13.5px]',
+        'inline-flex items-center justify-center gap-1.5 rounded-md border font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60',
+        size === 'md' ? 'h-[38px] px-3.5 text-[13px]' : 'h-8 px-2.5 text-[12.5px]',
         btnVariants[variant],
         className,
     );
@@ -48,7 +72,7 @@ export const Button = forwardRef<
 >(function Button({ variant = 'default', size = 'md', icon: Icon, className, children, type = 'button', ...rest }, ref) {
     return (
         <button ref={ref} type={type} className={buttonClasses(variant, size, className)} {...rest}>
-            {Icon && <Icon className="size-[17px]" strokeWidth={1.7} />}
+            {Icon && <Icon className="size-[17px]" strokeWidth={1.8} />}
             {children}
         </button>
     );
@@ -74,10 +98,19 @@ export function ButtonLink({
 }) {
     return (
         <Link href={href} className={buttonClasses(variant, size, className)} aria-label={label} title={label}>
-            {Icon && <Icon className="size-[17px]" strokeWidth={1.7} />}
+            {Icon && <Icon className="size-[17px]" strokeWidth={1.8} />}
             {children}
         </Link>
     );
+}
+
+const iconBtn = 'relative grid size-9 place-items-center rounded-lg text-fg-2 hover:bg-subtle hover:text-fg';
+function Badge({ n }: { n?: number }) {
+    return n ? (
+        <span className="bg-over border-panel absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full border-2 px-1 font-mono text-[10px] font-bold text-white">
+            {n}
+        </span>
+    ) : null;
 }
 
 export function IconButton({
@@ -88,19 +121,9 @@ export function IconButton({
     ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement> & { icon: LucideIcon; label: string; badge?: number }) {
     return (
-        <button
-            type="button"
-            aria-label={label}
-            title={label}
-            className={cn('text-fg-2 hover:bg-hover relative grid size-[38px] place-items-center rounded-[10px]', className)}
-            {...rest}
-        >
-            <Icon className="size-[18px]" strokeWidth={1.7} />
-            {!!badge && (
-                <span className="border-panel bg-over absolute top-1.5 right-1.5 grid h-4 min-w-4 place-items-center rounded-full border-2 px-1 text-[10.5px] font-semibold text-white">
-                    {badge}
-                </span>
-            )}
+        <button type="button" aria-label={label} title={label} className={cn(iconBtn, className)} {...rest}>
+            <Icon className="size-[19px]" strokeWidth={1.8} />
+            <Badge n={badge} />
         </button>
     );
 }
@@ -121,20 +144,9 @@ export function IconLink({
     method?: 'post';
 }) {
     return (
-        <Link
-            href={href}
-            method={method}
-            as={method ? 'button' : 'a'}
-            aria-label={label}
-            title={label}
-            className={cn('text-fg-2 hover:bg-hover relative grid size-[38px] place-items-center rounded-[10px]', className)}
-        >
-            <Icon className="size-[18px]" strokeWidth={1.7} />
-            {!!badge && (
-                <span className="border-panel bg-over absolute top-1.5 right-1.5 grid h-4 min-w-4 place-items-center rounded-full border-2 px-1 text-[10.5px] font-semibold text-white">
-                    {badge}
-                </span>
-            )}
+        <Link href={href} method={method} as={method ? 'button' : 'a'} aria-label={label} title={label} className={cn(iconBtn, className)}>
+            <Icon className="size-[19px]" strokeWidth={1.8} />
+            <Badge n={badge} />
         </Link>
     );
 }
@@ -144,10 +156,10 @@ export function Kebab({ label = 'More', ...rest }: ButtonHTMLAttributes<HTMLButt
         <button
             type="button"
             aria-label={label}
-            className="text-muted-foreground hover:bg-hover hover:text-fg grid size-[30px] place-items-center rounded-lg"
+            className="text-muted-foreground hover:bg-subtle hover:text-fg grid size-[30px] place-items-center rounded-md"
             {...rest}
         >
-            <EllipsisVertical className="size-[17px]" strokeWidth={1.7} />
+            <EllipsisVertical className="size-[17px]" strokeWidth={1.8} />
         </button>
     );
 }
@@ -167,16 +179,16 @@ export function Field({
 }) {
     return (
         <label className={cn('flex min-w-0 flex-col gap-1.5', className)}>
-            <span className="text-fg-2 text-[13.5px] font-medium">{label}</span>
+            <span className="text-fg text-[12.5px] font-semibold">{label}</span>
             {children}
-            {hint && !error && <span className="text-muted-foreground text-[12.5px]">{hint}</span>}
-            {error && <span className="text-over-ink text-[12.5px]">{error}</span>}
+            {hint && !error && <span className="text-muted-foreground text-[12px]">{hint}</span>}
+            {error && <span className="text-over-ink text-[12px] font-medium">{error}</span>}
         </label>
     );
 }
 
 const inputCls =
-    'h-[42px] w-full rounded-[10px] border border-line-strong bg-panel px-3 outline-none transition-shadow focus:border-p focus:shadow-[0_0_0_3px_var(--p-soft)] aria-invalid:border-over';
+    'h-[38px] w-full rounded-md border border-line-strong bg-panel px-3 text-[14px] outline-none transition-shadow focus:border-p focus:shadow-[0_0_0_3px_var(--p-soft)] aria-invalid:border-over disabled:bg-subtle disabled:text-muted-foreground';
 
 export const TextInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function TextInput({ className, ...rest }, ref) {
     return <input ref={ref} className={cn(inputCls, className)} {...rest} />;
@@ -187,7 +199,7 @@ export function SelectInput({ className, children, ...rest }: SelectHTMLAttribut
         <select
             className={cn(
                 inputCls,
-                'appearance-none bg-[url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2716%27%20height=%2716%27%20fill=%27none%27%20stroke=%27%238b8aa3%27%20stroke-width=%272%27%20viewBox=%270%200%2024%2024%27%3E%3Cpath%20d=%27m6%209%206%206%206-6%27/%3E%3C/svg%3E")] bg-[position:right_12px_center] bg-no-repeat pr-9',
+                'appearance-none bg-[url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2716%27%20height=%2716%27%20fill=%27none%27%20stroke=%27%2364748b%27%20stroke-width=%272%27%20viewBox=%270%200%2024%2024%27%3E%3Cpath%20d=%27m6%209%206%206%206-6%27/%3E%3C/svg%3E")] bg-[position:right_10px_center] bg-no-repeat pr-9',
                 className,
             )}
             {...rest}
@@ -225,26 +237,29 @@ export function Switch({
     );
 }
 
-export function Segmented<T extends string>({
+/** Segmented control: slate track, white active pill with primary text (Stitch view switch). */
+export function Segmented<T extends string | number>({
     value,
     onChange,
     options,
+    className,
 }: {
     value: T;
     onChange: (v: T) => void;
     options: { value: T; label: ReactNode }[];
+    className?: string;
 }) {
     return (
-        <div className="bg-subtle inline-flex gap-0.5 rounded-[10px] p-[3px]">
+        <div className={cn('border-line bg-subtle inline-flex gap-0.5 rounded-lg border p-[3px]', className)}>
             {options.map((o) => (
                 <button
-                    key={o.value}
+                    key={String(o.value)}
                     type="button"
                     aria-pressed={value === o.value}
                     onClick={() => onChange(o.value)}
                     className={cn(
-                        'text-muted-foreground inline-flex h-8 items-center gap-1.5 rounded-lg px-3.5 font-medium',
-                        value === o.value && 'bg-panel text-fg shadow-[0_1px_3px_rgba(29,27,56,.1)]',
+                        'text-fg-2 hover:text-fg inline-flex h-[30px] items-center gap-1.5 rounded-md px-3 text-[12.5px] font-medium',
+                        value === o.value && 'bg-panel text-p font-bold shadow-[0_1px_2px_rgba(15,23,42,.1)]',
                     )}
                 >
                     {o.label}
@@ -254,12 +269,21 @@ export function Segmented<T extends string>({
     );
 }
 
-export function MechanicAvatar({ mechanic, size = 'md' }: { mechanic: Pick<MechanicView, 'name' | 'color'>; size?: 'md' | 'sm' }) {
+export function MechanicAvatar({
+    mechanic,
+    size = 'md',
+    muted,
+}: {
+    mechanic: Pick<MechanicView, 'name' | 'color'>;
+    size?: 'lg' | 'md' | 'sm';
+    muted?: boolean;
+}) {
     return (
         <span
             className={cn(
-                'inline-grid shrink-0 place-items-center rounded-full font-semibold text-white',
-                size === 'md' ? 'size-[34px] text-[12.5px]' : 'size-7 text-[11px]',
+                'inline-grid shrink-0 place-items-center rounded-lg font-bold text-white',
+                size === 'lg' ? 'size-10 text-[13px]' : size === 'md' ? 'size-9 text-[12.5px]' : 'size-7 text-[10.5px]',
+                muted && 'bg-subtle! text-muted-foreground!',
             )}
             style={{ background: mechanic.color }}
         >
@@ -273,7 +297,7 @@ export function CustomerAvatar({ name, size = 'md' }: { name: string; size?: 'md
         <span
             className={cn(
                 'border-line bg-subtle text-fg-2 inline-grid shrink-0 place-items-center rounded-full border font-semibold',
-                size === 'md' ? 'size-[34px] text-[12.5px]' : 'size-7 text-[11px]',
+                size === 'md' ? 'size-9 text-[12px]' : 'size-7 text-[10.5px]',
             )}
         >
             {initials(name)}
@@ -290,31 +314,64 @@ const statusColor: Record<JobStatus, string> = {
 
 export function StatusDot({ status, label }: { status: JobStatus; label: string }) {
     return (
-        <span className={cn('inline-flex items-center gap-[7px] text-[13.5px] font-medium whitespace-nowrap', statusColor[status])}>
+        <span className={cn('inline-flex items-center gap-1.5 text-[13px] font-semibold whitespace-nowrap', statusColor[status])}>
             <span className="size-2 rounded-full bg-current" />
             {label}
         </span>
     );
 }
 
-type TagTone = 'default' | 'p' | 'call' | 'over' | 'parts' | 'ok';
+type TagTone = 'default' | 'p' | 'call' | 'over' | 'parts' | 'ok' | 'open' | 'hold';
 const tagTone: Record<TagTone, string> = {
-    default: 'bg-subtle text-fg-2',
-    p: 'bg-p-soft text-p-ink',
-    call: 'bg-call-soft text-call',
-    over: 'bg-over-bg text-over-ink',
-    parts: 'bg-parts-bg text-parts-ink',
-    ok: 'bg-ok-soft text-ok',
+    default: 'bg-subtle text-fg-2 border-line',
+    p: 'bg-p-soft text-p-ink border-p-line',
+    call: 'bg-call-soft text-over-ink border-over-line',
+    over: 'bg-over-bg text-over-ink border-over-line',
+    parts: 'bg-parts-bg text-parts-ink border-parts-line',
+    ok: 'bg-ok-soft text-ok-ink border-ok-line',
+    open: 'bg-open-bg text-open-ink border-open-line',
+    hold: 'bg-hold-bg text-hold-ink border-hold-line',
 };
 
-export function Tag({ tone = 'default', icon: Icon, children, title }: { tone?: TagTone; icon?: LucideIcon; children?: ReactNode; title?: string }) {
+/** Status chips (Stitch: light fill, crisp border, dark label). */
+export function Tag({
+    tone = 'default',
+    icon: Icon,
+    children,
+    title,
+    className,
+}: {
+    tone?: TagTone;
+    icon?: LucideIcon;
+    children?: ReactNode;
+    title?: string;
+    className?: string;
+}) {
     return (
         <span
             title={title}
-            className={cn('inline-flex h-6 items-center gap-[5px] rounded-[7px] px-[9px] text-[12.5px] font-medium whitespace-nowrap', tagTone[tone])}
+            className={cn(
+                'inline-flex h-[22px] items-center gap-1 rounded border px-1.5 text-[11px] font-semibold whitespace-nowrap',
+                tagTone[tone],
+                className,
+            )}
         >
-            {Icon && <Icon className="size-[13px]" strokeWidth={1.8} />}
+            {Icon && <Icon className="size-[13px]" strokeWidth={2} />}
             {children}
+        </span>
+    );
+}
+
+/** Quarter-day duration chip in mono, e.g. "0.5d". */
+export function DurationChip({ quarters, className }: { quarters: number; className?: string }) {
+    return (
+        <span
+            className={cn(
+                'bg-subtle text-fg-2 border-line rounded border px-1.5 py-px font-mono text-[10.5px] font-semibold whitespace-nowrap',
+                className,
+            )}
+        >
+            {(quarters / 4).toFixed(2).replace(/0$/, '')}d
         </span>
     );
 }
@@ -334,35 +391,54 @@ export function Plate({ value }: { value: string | null | undefined }) {
     );
 }
 
+type Tone = 'p' | 'ok' | 'parts' | 'over' | 'open';
+const toneIcon: Record<Tone, string> = {
+    p: 'bg-p-soft text-p',
+    ok: 'bg-ok-soft text-ok',
+    parts: 'bg-parts-bg text-parts',
+    over: 'bg-over-bg text-over',
+    open: 'bg-open-bg text-open',
+};
+const toneLabel: Record<Tone, string> = {
+    p: 'text-muted-foreground',
+    ok: 'text-muted-foreground',
+    parts: 'text-parts-ink',
+    over: 'text-over-ink',
+    open: 'text-open-ink',
+};
+const toneValue: Record<Tone, string> = { p: 'text-fg', ok: 'text-fg', parts: 'text-parts-ink', over: 'text-over-ink', open: 'text-open-ink' };
+
+/** KPI card (Stitch overview): uppercase label, big number, tinted icon square, detail area below. */
 export function StatCard({
     label,
     icon: Icon,
-    color,
+    tone = 'p',
     value,
-    aside,
-    foot,
+    note,
+    children,
 }: {
     label: ReactNode;
     icon: LucideIcon;
-    color: string;
+    tone?: Tone;
     value: ReactNode;
-    aside?: ReactNode;
-    foot?: ReactNode;
+    note?: ReactNode;
+    children?: ReactNode;
 }) {
     return (
-        <Card className="px-[18px] pt-4 pb-[18px]">
-            <div className="text-fg-2 mb-3 flex items-center justify-between font-medium">
-                <span>{label}</span>
-                <Kebab />
-            </div>
-            <div className="flex items-center gap-3">
-                <span className="grid size-[34px] shrink-0 place-items-center rounded-[9px] text-white" style={{ background: color }}>
-                    <Icon className="size-[17px]" strokeWidth={1.7} />
+        <Card className="flex flex-col justify-between p-4 transition-shadow hover:shadow-[0_4px_6px_-1px_rgba(15,23,42,.08)]">
+            <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                    <Eyebrow className={toneLabel[tone]}>{label}</Eyebrow>
+                    <div className="flex flex-wrap items-baseline gap-2">
+                        <span className={cn('text-[30px] leading-[38px] font-bold tracking-[-0.02em] tabular-nums', toneValue[tone])}>{value}</span>
+                        {note && <span className="text-fg-2 text-[13px]">{note}</span>}
+                    </div>
+                </div>
+                <span className={cn('grid size-10 shrink-0 place-items-center rounded-lg', toneIcon[tone])}>
+                    <Icon className="size-[22px]" strokeWidth={1.8} />
                 </span>
-                <span className="text-[23px] leading-none font-semibold tracking-[-0.02em] tabular-nums">{value}</span>
-                {aside && <span className="ml-auto">{aside}</span>}
             </div>
-            {foot && <div className="text-muted-foreground mt-2 text-right text-[12.5px]">{foot}</div>}
+            {children && <div className="mt-3">{children}</div>}
         </Card>
     );
 }
@@ -370,11 +446,11 @@ export function StatCard({
 export function EmptyState({ icon: Icon, title, children }: { icon: LucideIcon; title: ReactNode; children?: ReactNode }) {
     return (
         <div className="flex flex-col items-center gap-2 px-6 py-14 text-center">
-            <span className="bg-p-soft text-p grid size-12 place-items-center rounded-2xl">
-                <Icon className="size-6" strokeWidth={1.7} />
+            <span className="bg-p-soft text-p grid size-12 place-items-center rounded-lg">
+                <Icon className="size-6" strokeWidth={1.8} />
             </span>
-            <h3 className="mt-1 text-[17px] font-semibold">{title}</h3>
-            {children && <div className="text-muted-foreground max-w-md">{children}</div>}
+            <h3 className="mt-1 text-[16px] font-semibold">{title}</h3>
+            {children && <div className="text-muted-foreground max-w-md text-[13.5px]">{children}</div>}
         </div>
     );
 }
