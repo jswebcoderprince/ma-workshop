@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b0e0f">
+<title>Workshop Schedule — MA Engine Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Dispatch board. Wide: resource rows x day columns. Narrow: one day at a time, stacked by resource. */
+  :root {
+    --bg: #0b0e0f;
+    --surface: #141a1c;
+    --surface-2: #1b2325;
+    --line: #263033;
+    --fg: #e8eff0;
+    --muted: #8ca0a3;
+    --accent: #00b3b5;
+    --accent-ink: #042021;
+    --parts: #d9a21b;
+    --over: #e0623d;
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --body: "IBM Plex Sans", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f2f5f5;
+      --surface: #ffffff;
+      --surface-2: #e9eff0;
+      --line: #d2dcdd;
+      --fg: #11181a;
+      --muted: #5c6c6e;
+      --accent: #00797b;
+      --accent-ink: #ffffff;
+      --parts: #96690a;
+      --over: #b8431f;
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f2f5f5;
+    --surface: #ffffff;
+    --surface-2: #e9eff0;
+    --line: #d2dcdd;
+    --fg: #11181a;
+    --muted: #5c6c6e;
+    --accent: #00797b;
+    --accent-ink: #ffffff;
+    --parts: #96690a;
+    --over: #b8431f;
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 20px 56px;
+  }
+  h1, h2, h3 { font-family: var(--display); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600;
+  }
+
+  .only-wide { display: block; }
+  .only-narrow { display: none; }
+
+  /* --- header --- */
+  .top { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+  .brand h1 { font-size: 30px; font-weight: 700; line-height: 1.05; }
+  .brand .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .proto-tag {
+    display: inline-block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    font-weight: 600; color: var(--accent); border: 1px solid var(--accent);
+    border-radius: 3px; padding: 2px 7px; margin-left: 8px; vertical-align: 3px;
+  }
+  .weeknav { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 17px; }
+  .weeknav button {
+    font: inherit; font-size: 15px; background: var(--surface); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 4px; width: 32px; height: 32px; cursor: pointer;
+  }
+  .weeknav button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* --- availability finder --- */
+  .finder {
+    background: var(--surface); border: 1px solid var(--line); border-top: 2px solid var(--accent);
+    border-radius: 6px; padding: 16px 18px; margin-bottom: 24px;
+  }
+  .finder h2 { font-size: 21px; font-weight: 600; margin-bottom: 2px; }
+  .finder p.hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; flex: 1 1 150px; }
+  .field label { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .field select {
+    font-family: var(--body); font-size: 15px; background: var(--surface-2); color: var(--fg);
+    border: 1px solid var(--line); border-radius: 4px; padding: 10px; width: 100%;
+  }
+  .btn {
+    font-family: var(--display); font-size: 16px; font-weight: 600; letter-spacing: .04em;
+    text-transform: uppercase; background: var(--accent); color: var(--accent-ink);
+    border: 0; border-radius: 4px; padding: 11px 20px; cursor: pointer; min-height: 44px;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .answer {
+    margin-top: 16px; padding: 14px 16px; border-radius: 5px;
+    background: var(--surface-2); border-left: 3px solid var(--accent);
+  }
+  .answer .slot { font-family: var(--display); font-size: 25px; font-weight: 700; line-height: 1.15; }
+  .answer .who { color: var(--muted); font-size: 13.5px; margin-top: 4px; }
+  .answer.none { border-left-color: var(--over); }
+
+  /* --- wide board --- */
+  .board { margin-bottom: 30px; }
+  .board h3 { font-size: 19px; font-weight: 600; margin-bottom: 2px; }
+  .board .note { color: var(--muted); font-size: 12.5px; margin: 0 0 10px; }
+  .scroller { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+  table.grid { border-collapse: collapse; width: 100%; min-width: 880px; }
+  table.grid th, table.grid td { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); vertical-align: top; }
+  table.grid th:last-child, table.grid td:last-child { border-right: 0; }
+  table.grid tr:last-child td { border-bottom: 0; }
+  table.grid thead th {
+    background: var(--surface-2); padding: 8px 10px; text-align: left;
+    font-family: var(--display); font-size: 14px; font-weight: 600; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--muted); white-space: nowrap;
+  }
+  table.grid thead th .dn { color: var(--fg); }
+  .res {
+    width: 158px; min-width: 158px; padding: 10px; background: var(--surface-2);
+    font-family: var(--display); font-size: 16px; font-weight: 600; white-space: nowrap;
+  }
+  .res .kind { display: block; font-family: var(--body); font-size: 11px; font-weight: 400; color: var(--muted); letter-spacing: .04em; text-transform: none; }
+  td.day { padding: 6px; min-width: 120px; }
+
+  /* --- job card, shared --- */
+  .job {
+    display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
+    background: var(--surface-2); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 3px; padding: 6px 7px; margin-bottom: 5px;
+  }
+  .job:hover { border-color: var(--accent); }
+  .job:last-child { margin-bottom: 0; }
+  .job .t { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .job .c { font-size: 13px; font-weight: 600; line-height: 1.25; margin-top: 1px; }
+  .job .v { font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+  .job .tag {
+    display: inline-block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    font-weight: 600; border-radius: 2px; padding: 1px 5px; margin-top: 4px;
+  }
+  .job.parts { border-left-color: var(--parts); }
+  .job.parts .tag { background: var(--parts); color: #1a1403; }
+  .job.over { border-left-color: var(--over); }
+  .job.over .tag { background: var(--over); color: #1f0a05; }
+
+  /* --- narrow day view --- */
+  .daynav {
+    display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .daynav button {
+    flex: 1 0 auto; min-width: 52px; min-height: 52px; cursor: pointer;
+    background: var(--surface); color: var(--fg); border: 1px solid var(--line);
+    border-radius: 5px; padding: 6px 4px; font-family: var(--display); line-height: 1.1;
+  }
+  .daynav button .dw { display: block; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .daynav button .dd { display: block; font-size: 19px; font-weight: 700; }
+  .daynav button .dot { display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin: 3px auto 0; }
+  .daynav button[aria-pressed="true"] { border-color: var(--accent); background: var(--surface-2); }
+  .daynav button[aria-pressed="true"] .dw { color: var(--accent); }
+
+  .mgroup { margin-bottom: 22px; }
+  .mgroup h3 { font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+  .mgroup .note { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+  .rescard {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+    padding: 12px; margin-bottom: 10px;
+  }
+  .rescard .rname { font-family: var(--display); font-size: 17px; font-weight: 600; }
+  .rescard .rkind { font-size: 11.5px; color: var(--muted); margin-bottom: 9px; }
+  .rescard .empty { font-size: 13px; color: var(--muted); font-style: italic; }
+  .rescard .job { background: var(--bg); }
+
+  /* --- detail panel --- */
+  .panel {
+    position: fixed; right: 0; top: 0; bottom: 0; width: min(360px, 100%);
+    background: var(--surface); border-left: 1px solid var(--line);
+    padding: 22px max(20px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));
+    overflow-y: auto; z-index: 20; box-shadow: -14px 0 40px rgba(0,0,0,.35);
+  }
+  .panel h3 { font-size: 22px; font-weight: 700; }
+  .panel .veh { color: var(--muted); font-size: 13.5px; margin: 2px 0 16px; }
+  .panel dl { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; margin: 0 0 18px; font-size: 13.5px; }
+  .panel dt { color: var(--muted); }
+  .panel dd { margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .panel .acts { display: flex; flex-direction: column; gap: 8px; }
+  .panel .close { position: absolute; top: 14px; right: 16px; background: none; border: 0; color: var(--muted); font-size: 28px; line-height: 1; cursor: pointer; width: 44px; height: 44px; }
+  .panel .close:hover { color: var(--fg); }
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 19; border: 0; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 11px; height: 11px; border-radius: 2px; flex: none; }
+
+  footer.foot { border-top: 1px solid var(--line); margin-top: 34px; padding-top: 16px; color: var(--muted); font-size: 12.5px; }
+  footer.foot strong { color: var(--fg); font-weight: 600; }
+
+  @media (max-width: 760px) {
+    .only-wide { display: none; }
+    .only-narrow { display: block; }
+    .brand h1 { font-size: 26px; }
+    .top { align-items: flex-start; }
+    .finder { padding: 14px 15px; }
+    .finder h2 { font-size: 20px; }
+    #find { flex: 1 0 100%; }
+    .answer .slot { font-size: 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="eyebrow">MA Engine Lab · Prienai</div>
+      <h1>Workshop Schedule<span class="proto-tag">Prototype</span></h1>
+      <div class="sub">Mechanics, lifts and the next free slot in one place</div>
+    </div>
+    <div class="weeknav">
+      <button type="button" id="prev" aria-label="Previous week">‹</button>
+      <span id="weeklabel">9–14 November</span>
+      <button type="button" id="next" aria-label="Next week">›</button>
+    </div>
+  </div>
+
+  <section class="finder">
+    <h2>When can we fit them in?</h2>
+    <p class="hint">A customer is on the phone. Enter the vehicle and how long the job should take.</p>
+    <div class="controls">
+      <div class="field">
+        <label for="vtype">Vehicle</label>
+        <select id="vtype">
+          <option value="car">Car</option>
+          <option value="moto">Motorcycle</option>
+          <option value="marine">Watercraft</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="dur">Estimated time</label>
+        <select id="dur">
+          <option value="60">1 hour</option>
+          <option value="120" selected>2 hours</option>
+          <option value="180">3 hours</option>
+          <option value="240">4 hours</option>
+          <option value="480">Full day</option>
+        </select>
+      </div>
+      <button type="button" class="btn" id="find">Find a slot</button>
+    </div>
+    <div class="answer" id="answer" hidden></div>
+  </section>
+
+  <!-- wide: week grid -->
+  <div class="only-wide">
+    <section class="board">
+      <h3>Mechanics</h3>
+      <p class="note">Who is busy and when. Click any job to change how long it takes.</p>
+      <div class="scroller"><table class="grid"><thead id="mh"></thead><tbody id="mb"></tbody></table></div>
+    </section>
+
+    <section class="board">
+      <h3>Lifts and bays</h3>
+      <p class="note">A car waiting for parts holds a lift long after the mechanic has moved on, so lifts are tracked separately.</p>
+      <div class="scroller"><table class="grid"><thead id="lh"></thead><tbody id="lb"></tbody></table></div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--accent)"></i> Work in progress</span>
+        <span><i class="swatch" style="background:var(--parts)"></i> Waiting for parts</span>
+        <span><i class="swatch" style="background:var(--over)"></i> Running over</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- narrow: one day at a time -->
+  <div class="only-narrow">
+    <div class="daynav" id="daynav" role="group" aria-label="Pick a day"></div>
+
+    <section class="mgroup">
+      <h3>Mechanics</h3>
+      <p class="note">Tap a job to change how long it takes.</p>
+      <div id="dmech"></div>
+    </section>
+
+    <section class="mgroup">
+      <h3>Lifts and bays</h3>
+      <p class="note">A car waiting for parts holds a lift after the mechanic has moved on, so lifts are tracked separately.</p>
+      <div id="dlift"></div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--accent)"></i> In progress</span>
+        <span><i class="swatch" style="background:var(--parts)"></i> Waiting for parts</span>
+        <span><i class="swatch" style="background:var(--over)"></i> Running over</span>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <strong>Opening hours:</strong> Mon–Fri 08:00–18:00 · Sat 09:00–14:00 · Closed Sunday.
+    All jobs shown here are sample data.
+  </footer>
+</div>
+
+<div id="overlay"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  var SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var DATES = [9, 10, 11, 12, 13, 14];
+
+  // Working window per weekday, in minutes from midnight.
+  var HOURS = [[480, 1080], [480, 1080], [480, 1080], [480, 1080], [480, 1080], [540, 840]];
+
+  var MECHANICS = [
+    { id: "tomas", name: "Tomas", kind: "Engines, diagnostics" },
+    { id: "rolandas", name: "Rolandas", kind: "Engines, gearboxes" },
+    { id: "darius", name: "Darius", kind: "Motorcycles, marine" }
+  ];
+
+  var LIFTS = [
+    { id: "k1", name: "Lift 1", kind: "Cars", fits: ["car"] },
+    { id: "k2", name: "Lift 2", kind: "Cars", fits: ["car"] },
+    { id: "moto", name: "Motorcycle stand", kind: "Motorcycles", fits: ["moto"] },
+    { id: "marine", name: "Marine bay", kind: "Boats, jet skis", fits: ["marine"] }
+  ];
+
+  // day 0 = Monday. start/dur in minutes. liftUntil: the lift stays occupied past the work itself.
+  var JOBS = [
+    { id: 1, day: 0, start: 480, dur: 150, mech: "tomas", lift: "k1", customer: "Mindaugas P.", vehicle: "VW Passat 2014", work: "Engine diagnostics", status: "ok" },
+    { id: 2, day: 0, start: 660, dur: 180, mech: "rolandas", lift: "k2", customer: "Jūratė K.", vehicle: "Toyota Avensis 2011", work: "Timing belt replacement", status: "ok" },
+    { id: 3, day: 0, start: 600, dur: 120, mech: "darius", lift: "moto", customer: "Rokas A.", vehicle: "Yamaha MT-07", work: "Oil and filter change", status: "ok" },
+    { id: 4, day: 1, start: 480, dur: 240, mech: "tomas", lift: "k1", customer: "Egidijus R.", vehicle: "Audi A6 2009", work: "Turbocharger inspection", status: "parts", liftUntil: 1080 },
+    { id: 5, day: 1, start: 540, dur: 120, mech: "rolandas", lift: "k2", customer: "Simona V.", vehicle: "Opel Astra 2016", work: "Brake system", status: "ok" },
+    { id: 6, day: 1, start: 780, dur: 150, mech: "darius", lift: "marine", customer: "Tadas B.", vehicle: "Yamaha WaveRunner", work: "Engine service", status: "ok" },
+    { id: 7, day: 2, start: 480, dur: 180, mech: "rolandas", lift: "k2", customer: "Gintaras M.", vehicle: "Škoda Octavia 2013", work: "Clutch replacement", status: "ok" },
+    { id: 8, day: 2, start: 600, dur: 90, mech: "darius", lift: "moto", customer: "Ieva S.", vehicle: "Honda CB500", work: "Chain and spark plugs", status: "ok" },
+    { id: 9, day: 3, start: 480, dur: 300, mech: "tomas", lift: "k1", customer: "Darius Ž.", vehicle: "BMW 320d 2015", work: "Engine rebuild", status: "over" },
+    { id: 10, day: 3, start: 540, dur: 120, mech: "rolandas", lift: "k2", customer: "Lina D.", vehicle: "Ford Focus 2017", work: "Fault diagnostics", status: "ok" },
+    { id: 11, day: 4, start: 480, dur: 120, mech: "darius", lift: "moto", customer: "Paulius N.", vehicle: "KTM Duke 390", work: "Pre-season service", status: "ok" },
+    { id: 12, day: 5, start: 540, dur: 180, mech: "tomas", lift: "k1", customer: "Rasa G.", vehicle: "Nissan Qashqai 2018", work: "Oil change and check", status: "ok" }
+  ];
+
+  var activeDay = 0;
+
+  function hhmm(m) {
+    var h = Math.floor(m / 60), mm = m % 60;
+    return (h < 10 ? "0" : "") + h + ":" + (mm < 10 ? "0" : "") + mm;
+  }
+  function mechEnd(j) { return j.start + j.dur; }
+  function liftEnd(j) { return j.status === "parts" && j.liftUntil ? j.liftUntil : j.start + j.dur; }
+  function overlaps(a1, a2, b1, b2) { return a1 < b2 && b1 < a2; }
+  function hours(min) { return (min / 60).toFixed(1).replace(".0", ""); }
+
+  /* ---------- availability search ---------- */
+  function findSlot(vtype, minutes) {
+    var fits = LIFTS.filter(function (l) { return l.fits.indexOf(vtype) !== -1; });
+    for (var d = 0; d < 6; d++) {
+      var open = HOURS[d][0], close = HOURS[d][1];
+      for (var s = open; s + minutes <= close; s += 30) {
+        var e = s + minutes;
+        var mech = MECHANICS.filter(function (m) {
+          return !JOBS.some(function (j) {
+            return j.day === d && j.mech === m.id && overlaps(s, e, j.start, mechEnd(j));
+          });
+        })[0];
+        if (!mech) continue;
+        var lift = fits.filter(function (l) {
+          return !JOBS.some(function (j) {
+            return j.day === d && j.lift === l.id && overlaps(s, e, j.start, liftEnd(j));
+          });
+        })[0];
+        if (!lift) continue;
+        return { day: d, start: s, end: e, mech: mech, lift: lift };
+      }
+    }
+    return null;
+  }
+
+  function showAnswer() {
+    var vtype = document.getElementById("vtype").value;
+    var minutes = parseInt(document.getElementById("dur").value, 10);
+    var box = document.getElementById("answer");
+    var r = findSlot(vtype, minutes);
+    box.hidden = false;
+    if (!r) {
+      box.className = "answer none";
+      box.innerHTML = '<div class="slot">Nothing free this week</div>' +
+        '<div class="who">Offer the following week, or split the job into a shorter first visit.</div>';
+      return;
+    }
+    box.className = "answer";
+    box.innerHTML =
+      '<div class="eyebrow">Next free slot</div>' +
+      '<div class="slot">' + DAYS[r.day] + " " + DATES[r.day] + ", " + hhmm(r.start) + "–" + hhmm(r.end) + "</div>" +
+      '<div class="who">Mechanic: <strong>' + r.mech.name + "</strong> · " + r.lift.name + "</div>";
+  }
+
+  /* ---------- shared card ---------- */
+  function jobCard(j, mode) {
+    var cls = "job";
+    if (j.status === "parts") cls += " parts";
+    if (j.status === "over") cls += " over";
+    var end = mode === "lift" ? liftEnd(j) : mechEnd(j);
+    var tag = "";
+    if (j.status === "parts") tag = '<span class="tag">Waiting for parts</span>';
+    if (j.status === "over") tag = '<span class="tag">Running over</span>';
+    return '<button type="button" class="' + cls + '" data-job="' + j.id + '">' +
+      '<span class="t">' + hhmm(j.start) + "–" + hhmm(end) + "</span>" +
+      '<span class="c">' + j.customer + "</span>" +
+      '<span class="v">' + j.vehicle + " · " + j.work + "</span>" + tag +
+      "</button>";
+  }
+
+  function jobsFor(day, key, resId) {
+    return JOBS.filter(function (j) { return j.day === day && j[key] === resId; })
+      .sort(function (a, b) { return a.start - b.start; });
+  }
+
+  /* ---------- wide board ---------- */
+  function head(id) {
+    var h = id === "lh" ? '<tr><th>Bay</th>' : '<tr><th>Mechanic</th>';
+    for (var i = 0; i < 6; i++) {
+      h += '<th><span class="dn">' + SHORT[i] + "</span> " + DATES[i] + "</th>";
+    }
+    return h + "</tr>";
+  }
+
+  function renderGrid(headId, bodyId, rows, key, mode) {
+    document.getElementById(headId).innerHTML = head(headId);
+    var html = "";
+    rows.forEach(function (r) {
+      html += '<tr><td class="res">' + r.name + '<span class="kind">' + r.kind + "</span></td>";
+      for (var d = 0; d < 6; d++) {
+        html += '<td class="day">';
+        jobsFor(d, key, r.id).forEach(function (j) { html += jobCard(j, mode); });
+        html += "</td>";
+      }
+      html += "</tr>";
+    });
+    document.getElementById(bodyId).innerHTML = html;
+  }
+
+  /* ---------- narrow day view ---------- */
+  function renderDayNav() {
+    var html = "";
+    for (var i = 0; i < 6; i++) {
+      var busy = JOBS.some(function (j) { return j.day === i; });
+      html += '<button type="button" data-day="' + i + '" aria-pressed="' + (i === activeDay) + '">' +
+        '<span class="dw">' + SHORT[i] + "</span>" +
+        '<span class="dd">' + DATES[i] + "</span>" +
+        (busy ? '<span class="dot"></span>' : "") +
+        "</button>";
+    }
+    var nav = document.getElementById("daynav");
+    nav.innerHTML = html;
+    nav.querySelectorAll("[data-day]").forEach(function (b) {
+      b.onclick = function () {
+        activeDay = parseInt(b.getAttribute("data-day"), 10);
+        renderAll();
+      };
+    });
+  }
+
+  function renderDayList(targetId, rows, key, mode) {
+    var html = "";
+    rows.forEach(function (r) {
+      var list = jobsFor(activeDay, key, r.id);
+      html += '<div class="rescard">' +
+        '<div class="rname">' + r.name + "</div>" +
+        '<div class="rkind">' + r.kind + "</div>";
+      if (list.length) {
+        list.forEach(function (j) { html += jobCard(j, mode); });
+      } else {
+        html += '<div class="empty">Free all day</div>';
+      }
+      html += "</div>";
+    });
+    document.getElementById(targetId).innerHTML = html;
+  }
+
+  function renderAll() {
+    renderGrid("mh", "mb", MECHANICS, "mech", "mech");
+    renderGrid("lh", "lb", LIFTS, "lift", "lift");
+    renderDayNav();
+    renderDayList("dmech", MECHANICS, "mech", "mech");
+    renderDayList("dlift", LIFTS, "lift", "lift");
+  }
+
+  /* ---------- detail panel ---------- */
+  function openJob(id) {
+    var j = JOBS.filter(function (x) { return x.id === id; })[0];
+    if (!j) return;
+    var m = MECHANICS.filter(function (x) { return x.id === j.mech; })[0];
+    var l = LIFTS.filter(function (x) { return x.id === j.lift; })[0];
+    var o = document.getElementById("overlay");
+    o.innerHTML =
+      '<button type="button" class="scrim" id="scrim" aria-label="Close"></button>' +
+      '<aside class="panel" role="dialog" aria-label="Job details">' +
+      '<button type="button" class="close" id="pclose" aria-label="Close">×</button>' +
+      '<div class="eyebrow">' + DAYS[j.day] + " " + DATES[j.day] + " November</div>" +
+      "<h3>" + j.customer + "</h3>" +
+      '<p class="veh">' + j.vehicle + "</p>" +
+      "<dl>" +
+      "<dt>Job</dt><dd>" + j.work + "</dd>" +
+      "<dt>Scheduled</dt><dd>" + hhmm(j.start) + "–" + hhmm(mechEnd(j)) + "</dd>" +
+      "<dt>Duration</dt><dd>" + hours(j.dur) + " h</dd>" +
+      "<dt>Mechanic</dt><dd>" + (m ? m.name : "—") + "</dd>" +
+      "<dt>Bay</dt><dd>" + (l ? l.name : "—") + "</dd>" +
+      "<dt>Bay held until</dt><dd>" + hhmm(liftEnd(j)) + "</dd>" +
+      "</dl>" +
+      '<div class="acts">' +
+      '<button type="button" class="btn" data-act="extend">Extend by 1 hour</button>' +
+      '<button type="button" class="btn ghost" data-act="parts">' +
+      (j.status === "parts" ? "Parts have arrived" : "Waiting for parts") + "</button>" +
+      "</div></aside>";
+
+    document.getElementById("scrim").onclick = closePanel;
+    document.getElementById("pclose").onclick = closePanel;
+    o.querySelectorAll("[data-act]").forEach(function (b) {
+      b.onclick = function () {
+        var act = b.getAttribute("data-act");
+        if (act === "extend") {
+          j.dur += 60;
+          j.status = "over";
+          if (j.liftUntil && j.liftUntil < mechEnd(j)) j.liftUntil = mechEnd(j);
+        } else if (act === "parts") {
+          if (j.status === "parts") {
+            j.status = "ok";
+            delete j.liftUntil;
+          } else {
+            j.status = "parts";
+            j.liftUntil = Math.min(HOURS[j.day][1], mechEnd(j) + 240);
+          }
+        }
+        closePanel();
+        renderAll();
+        if (!document.getElementById("answer").hidden) showAnswer();
+      };
+    });
+  }
+  function closePanel() { document.getElementById("overlay").innerHTML = ""; }
+
+  /* ---------- wiring ---------- */
+  document.getElementById("find").onclick = showAnswer;
+  document.getElementById("vtype").onchange = function () { if (!document.getElementById("answer").hidden) showAnswer(); };
+  document.getElementById("dur").onchange = function () { if (!document.getElementById("answer").hidden) showAnswer(); };
+
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest(".job") : null;
+    if (b && b.getAttribute("data-job")) openJob(parseInt(b.getAttribute("data-job"), 10));
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePanel(); });
+
+  var wk = 0;
+  function setWeek(n) {
+    wk = n;
+    document.getElementById("weeklabel").textContent = (9 + 7 * wk) + "–" + (14 + 7 * wk) + " November";
+  }
+  document.getElementById("prev").onclick = function () { setWeek(wk - 1); };
+  document.getElementById("next").onclick = function () { setWeek(wk + 1); };
+
+  renderAll();
+  showAnswer();
+})();
+</script>
+</body>
+</html>
