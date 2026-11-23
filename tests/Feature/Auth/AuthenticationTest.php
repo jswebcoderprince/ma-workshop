@@ -10,45 +10,45 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_login_screen_can_be_rendered()
+    public function test_login_screen_can_be_rendered(): void
     {
-        $response = $this->get('/login');
-
-        $response->assertStatus(200);
+        $this->get('/login')->assertOk()->assertInertia(fn ($page) => $page->component('auth/login'));
     }
 
-    public function test_users_can_authenticate_using_the_login_screen()
+    public function test_users_can_log_in_and_land_on_the_overview(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
-
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->post('/login', ['email' => $user->email, 'password' => 'password'])
+            ->assertRedirect(route('overview', absolute: false));
+        $this->assertAuthenticatedAs($user);
     }
 
-    public function test_users_can_not_authenticate_with_invalid_password()
+    public function test_wrong_password_is_rejected(): void
     {
         $user = User::factory()->create();
 
-        $this->post('/login', [
-            'email' => $user->email,
-            'password' => 'wrong-password',
-        ]);
-
+        $this->post('/login', ['email' => $user->email, 'password' => 'wrong-password'])->assertSessionHasErrors('email');
         $this->assertGuest();
     }
 
-    public function test_users_can_logout()
+    public function test_users_can_log_out(): void
     {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post('/logout');
-
+        $this->actingAs(User::factory()->create())->post('/logout')->assertRedirect(route('login'));
         $this->assertGuest();
-        $response->assertRedirect('/');
+    }
+
+    public function test_guests_are_sent_to_login(): void
+    {
+        foreach (['/', '/calendar', '/jobs', '/settings/general'] as $url) {
+            $this->get($url)->assertRedirect(route('login'));
+        }
+    }
+
+    public function test_there_is_no_self_registration_or_email_reset(): void
+    {
+        foreach (['/register', '/forgot-password', '/reset-password/x', '/verify-email'] as $url) {
+            $this->get($url)->assertNotFound();
+        }
     }
 }

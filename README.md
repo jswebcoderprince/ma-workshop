@@ -25,7 +25,7 @@ Needs XAMPP MySQL running, PHP 8.3 at `C:\php83`, Node 20+.
 
 ```bash
 C:/php83/php.exe artisan migrate --seed
-C:/php83/php.exe artisan serve     # http://127.0.0.1:8000
+C:/php83/php.exe artisan serve --port=8010   # http://127.0.0.1:8010 (8000 is often taken by other projects)
 npm run dev
 ```
 

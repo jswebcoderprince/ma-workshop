@@ -6,153 +6,224 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Design tokens: docs/DESIGN.md (frame v3). Light is the default, `.dark` on <html> switches,
+   `data-accent="teal"` swaps the violet primary for MA Engine Lab teal. */
 @theme {
-    --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Jost', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);
 
+    /* shadcn/ui names, mapped onto our palette */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
-
     --color-popover: var(--popover);
     --color-popover-foreground: var(--popover-foreground);
-
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
-
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
-
     --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
-
     --color-accent: var(--accent);
     --color-accent-foreground: var(--accent-foreground);
-
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
-
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
 
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
-
-    --color-sidebar: var(--sidebar-background);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
+    /* our own names */
+    --color-canvas: var(--canvas);
+    --color-panel: var(--panel);
+    --color-subtle: var(--subtle);
+    --color-hover: var(--hover);
+    --color-line: var(--line);
+    --color-line-strong: var(--line-strong);
+    --color-fg: var(--fg);
+    --color-fg-2: var(--fg-2);
+    --color-faint: var(--faint);
+    --color-p: var(--p);
+    --color-p-hover: var(--p-hover);
+    --color-p-soft: var(--p-soft);
+    --color-p-line: var(--p-line);
+    --color-p-ink: var(--p-ink);
+    --color-prog: var(--prog);
+    --color-ok: var(--ok);
+    --color-ok-soft: var(--ok-soft);
+    --color-parts: var(--parts);
+    --color-parts-bg: var(--parts-bg);
+    --color-parts-line: var(--parts-line);
+    --color-parts-ink: var(--parts-ink);
+    --color-done-bg: var(--done-bg);
+    --color-done-ink: var(--done-ink);
+    --color-over: var(--over);
+    --color-over-bg: var(--over-bg);
+    --color-over-line: var(--over-line);
+    --color-over-ink: var(--over-ink);
+    --color-call: var(--call);
+    --color-call-soft: var(--call-soft);
+    --color-k1: #22b07d;
+    --color-k2: #3b82f6;
+    --color-k3: #8b5cf6;
+    --color-k4: #ec4899;
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
+:root {
+    --canvas: #f3f2fa;
+    --panel: #ffffff;
+    --subtle: #f7f6fc;
+    --hover: #f2f0fb;
+    --line: #ebeaf3;
+    --line-strong: #dddbea;
+    --fg: #1d1b38;
+    --fg-2: #46445f;
+    --muted-fg: #8b8aa3;
+    --faint: #b4b3c6;
+    --p: #6c5dd3;
+    --p-hover: #5a4bc2;
+    --p-soft: #efedfc;
+    --p-line: #d8d3f7;
+    --p-ink: #4b3db3;
+    --prog: #6c5dd3;
+    --ok: #22b07d;
+    --ok-soft: #e7f7f0;
+    --parts: #e59a1a;
+    --parts-bg: #fff5e3;
+    --parts-line: #f5d58f;
+    --parts-ink: #96600a;
+    --done-bg: #f3f3f7;
+    --done-ink: #a3a2b8;
+    --over: #e5484d;
+    --over-bg: #fdeeee;
+    --over-line: #f6b4b6;
+    --over-ink: #c22a30;
+    --call: #1d9bf0;
+    --call-soft: #e8f5fe;
+    --off: #f5f5f9;
+    --off-stripe: #ebebf2;
+    --weekend: #fafafd;
 
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
+    --background: var(--canvas);
+    --foreground: var(--fg);
+    --card: var(--panel);
+    --card-foreground: var(--fg);
+    --popover: var(--panel);
+    --popover-foreground: var(--fg);
+    --primary: var(--p);
+    --primary-foreground: #ffffff;
+    --secondary: var(--subtle);
+    --secondary-foreground: var(--fg);
+    --muted: var(--subtle);
+    --muted-foreground: var(--muted-fg);
+    --accent: var(--hover);
+    --accent-foreground: var(--fg);
+    --destructive: var(--over);
+    --destructive-foreground: #ffffff;
+    --border: var(--line);
+    --input: var(--line-strong);
+    --ring: var(--p);
+    --radius: 0.625rem;
+    color-scheme: light;
+}
+
+:root[data-accent='teal'] {
+    --p: #0b8a8c;
+    --p-hover: #087476;
+    --p-soft: #e6f4f4;
+    --p-line: #b7dcdc;
+    --p-ink: #075456;
+    --prog: #0b8a8c;
+}
+
+.dark {
+    --canvas: #111019;
+    --panel: #1a1925;
+    --subtle: #201f2d;
+    --hover: #252433;
+    --line: #2b2a3a;
+    --line-strong: #383749;
+    --fg: #eeedf6;
+    --fg-2: #c8c7d8;
+    --muted-fg: #8e8da6;
+    --faint: #5d5c73;
+    --p: #8a7cf0;
+    --p-hover: #9d91f4;
+    --p-soft: rgba(138, 124, 240, 0.15);
+    --p-line: rgba(138, 124, 240, 0.4);
+    --p-ink: #b9b0fa;
+    --prog: #7465e0;
+    --ok-soft: rgba(34, 176, 125, 0.15);
+    --parts-bg: rgba(229, 154, 26, 0.13);
+    --parts-line: rgba(229, 154, 26, 0.45);
+    --parts-ink: #f2c46b;
+    --done-bg: #22212f;
+    --done-ink: #6e6d85;
+    --over-bg: rgba(229, 72, 77, 0.14);
+    --over-line: rgba(229, 72, 77, 0.5);
+    --over-ink: #ff8d90;
+    --call-soft: rgba(29, 155, 240, 0.15);
+    --off: #1c1b27;
+    --off-stripe: #24232f;
+    --weekend: #181723;
+    color-scheme: dark;
+}
+
+:root[data-accent='teal'] .dark,
+:root.dark[data-accent='teal'] {
+    --p: #2fb5b7;
+    --p-hover: #43c4c6;
+    --p-soft: rgba(47, 181, 183, 0.14);
+    --p-line: rgba(47, 181, 183, 0.4);
+    --p-ink: #84d9da;
+    --prog: #168f91;
+}
+
 @layer base {
     *,
     ::after,
     ::before,
     ::backdrop,
     ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
+        border-color: var(--line);
     }
-}
 
-:root {
-    --background: hsl(0, 0%, 100%);
-    --foreground: hsl(0, 0%, 3.9%);
-    --card: hsl(0, 0%, 100%);
-    --card-foreground: hsl(0, 0%, 3.9%);
-    --popover: hsl(0, 0%, 100%);
-    --popover-foreground: hsl(0, 0%, 3.9%);
-    --primary: hsl(0, 0%, 9%);
-    --primary-foreground: hsl(0, 0%, 98%);
-    --secondary: hsl(0, 0%, 96.1%);
-    --secondary-foreground: hsl(0, 0%, 9%);
-    --muted: hsl(0, 0%, 96.1%);
-    --muted-foreground: hsl(0, 0%, 45.1%);
-    --accent: hsl(0, 0%, 96.1%);
-    --accent-foreground: hsl(0, 0%, 9%);
-    --destructive: hsl(0, 84.2%, 60.2%);
-    --destructive-foreground: hsl(0, 0%, 98%);
-    --border: hsl(0, 0%, 92.8%);
-    --input: hsl(0, 0%, 89.8%);
-    --ring: hsl(0, 0%, 3.9%);
-    --chart-1: hsl(12, 76%, 61%);
-    --chart-2: hsl(173, 58%, 39%);
-    --chart-3: hsl(197, 37%, 24%);
-    --chart-4: hsl(43, 74%, 66%);
-    --chart-5: hsl(27, 87%, 67%);
-    --radius: 0.5rem;
-    --sidebar-background: hsl(0, 0%, 98%);
-    --sidebar-foreground: hsl(240, 5.3%, 30%);
-    --sidebar-primary: hsl(0, 0%, 10%);
-    --sidebar-primary-foreground: hsl(0, 0%, 98%);
-    --sidebar-accent: hsl(0, 0%, 94%);
-    --sidebar-accent-foreground: hsl(0, 0%, 30%);
-    --sidebar-border: hsl(0, 0%, 91%);
-    --sidebar-ring: hsl(217.2, 91.2%, 59.8%);
-}
-
-.dark {
-    --background: hsl(0, 0%, 3.9%);
-    --foreground: hsl(0, 0%, 98%);
-    --card: hsl(0, 0%, 3.9%);
-    --card-foreground: hsl(0, 0%, 98%);
-    --popover: hsl(0, 0%, 3.9%);
-    --popover-foreground: hsl(0, 0%, 98%);
-    --primary: hsl(0, 0%, 98%);
-    --primary-foreground: hsl(0, 0%, 9%);
-    --secondary: hsl(0, 0%, 14.9%);
-    --secondary-foreground: hsl(0, 0%, 98%);
-    --muted: hsl(0, 0%, 6.9%);
-    --muted-foreground: hsl(0, 0%, 63.9%);
-    --accent: hsl(0, 0%, 14.9%);
-    --accent-foreground: hsl(0, 0%, 98%);
-    --destructive: hsl(0, 84%, 60%);
-    --destructive-foreground: hsl(0, 0%, 98%);
-    --border: hsl(0, 0%, 14.9%);
-    --input: hsl(0, 0%, 14.9%);
-    --ring: hsl(0, 0%, 83.1%);
-    --chart-1: hsl(220, 70%, 50%);
-    --chart-2: hsl(160, 60%, 45%);
-    --chart-3: hsl(30, 80%, 55%);
-    --chart-4: hsl(280, 65%, 60%);
-    --chart-5: hsl(340, 75%, 55%);
-    --sidebar-background: hsl(0, 0%, 7%);
-    --sidebar-foreground: hsl(0, 0%, 80%);
-    --sidebar-primary: hsl(360, 100%, 100%);
-    --sidebar-primary-foreground: hsl(0, 0%, 100%);
-    --sidebar-accent: hsl(0, 0%, 15.9%);
-    --sidebar-accent-foreground: hsl(240, 4.8%, 95.9%);
-    --sidebar-border: hsl(0, 0%, 15.9%);
-    --sidebar-ring: hsl(217.2, 91.2%, 59.8%);
-}
-
-@layer base {
-    * {
-        @apply border-border;
+    html,
+    body {
+        background: var(--canvas);
+        color: var(--fg);
     }
 
     body {
-        @apply bg-background text-foreground;
+        font-size: 14.5px;
+        line-height: 1.45;
     }
+
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
+    }
+
+    [hidden] {
+        display: none !important;
+    }
+}
+
+/* Lithuanian number plate chip with the blue EU band. */
+@utility plate {
+    display: inline-flex;
+    align-items: stretch;
+    height: 22px;
+    overflow: hidden;
+    border: 1px solid #1f2937;
+    border-radius: 4px;
+    background: #fff;
+    color: #111;
+    font: 600 12px/1 var(--font-mono);
+    white-space: nowrap;
+    vertical-align: middle;
 }

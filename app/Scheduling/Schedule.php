@@ -149,6 +149,34 @@ final class Schedule
         return $out;
     }
 
+    /**
+     * Mechanic quarters available and booked between two dates ($to excluded), counting only positions from $since on.
+     *
+     * @param  list<int>  $mechanicIds
+     * @return array{available: int, booked: int}
+     */
+    public function utilisation(array $mechanicIds, string $from, string $to, ?Position $since = null): array
+    {
+        $available = 0;
+        $booked = 0;
+        for ($date = $from; $date < $to; $date = WorkCalendar::addDays($date, 1)) {
+            for ($q = 0; $q < $this->calendar->quartersOn($date); $q++) {
+                $p = new Position($date, $q);
+                if ($since !== null && $p->isBefore($since)) {
+                    continue;
+                }
+                foreach ($mechanicIds as $m) {
+                    if ($this->availability->isAvailable($m, $date)) {
+                        $available++;
+                        $booked += $this->isFree($m, $p) ? 0 : 1;
+                    }
+                }
+            }
+        }
+
+        return ['available' => $available, 'booked' => $booked];
+    }
+
     /** Free quarters across the given mechanics on $date, counting only positions from $from on. */
     public function freeQuarters(array $mechanicIds, string $date, ?Position $from = null): int
     {

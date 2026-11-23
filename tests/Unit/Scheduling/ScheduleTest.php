@@ -164,6 +164,18 @@ class ScheduleTest extends TestCase
         $this->assertSame([], $s->earlierCandidates(new Position('2026-11-23', 0)));
     }
 
+    public function test_utilisation_counts_available_and_booked_quarters(): void
+    {
+        $s = $this->schedule(
+            [$this->job(1, 1, '2026-11-23', 0, 6), $this->job(2, 2, '2026-11-24', 0, 4, ScheduledJob::WAITING_PARTS)],
+            [['mechanic' => 2, 'from' => '2026-11-25', 'to' => '2026-11-25', 'type' => 'holiday']],
+        );
+        // Week 23–29 Nov: mechanic 1 = 5×4 + 2 (Sat) = 22, mechanic 2 = 5×4 − 4 (holiday) = 16 → 38 available; booked 6
+        $this->assertSame(['available' => 38, 'booked' => 6], $s->utilisation([1, 2], '2026-11-23', '2026-11-30'));
+        // From Monday 13:00: 2 quarters of Monday gone for both mechanics, 2 of the 6 booked ones gone
+        $this->assertSame(['available' => 34, 'booked' => 4], $s->utilisation([1, 2], '2026-11-23', '2026-11-30', new Position('2026-11-23', 2)));
+    }
+
     public function test_free_quarters_per_day(): void
     {
         $s = $this->schedule([$this->job(1, 1, '2026-11-23', 0, 3)]);

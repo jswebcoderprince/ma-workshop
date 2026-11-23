@@ -7,7 +7,7 @@ once hosting access is set up, so the client sees real progress.
 |---|---|---|---|
 | 1 | Foundation | Scope, rules, data model, sitemap, design frame, Laravel + React project | done 2026-11-23 |
 | 2 | Data + scheduling engine | Migrations, models, seed data, `app/Scheduling` with unit tests | done 2026-11-23 (59 tests) |
-| 3 | App shell | Login (single user), layout, navigation, LT/EN, settings page, theme | |
+| 3 | App shell | Login (single user), layout, navigation, LT/EN, settings page, theme, Overview page | done 2026-11-23 (56 tests) |
 | 4 | Mechanics + customers | Mechanics, time off, closures; customers and vehicles with search | |
 | 5 | Calendar | Month / week / day, job bars, lanes, free row, new job, job drawer, find a slot | |
 | 6 | Changes | Move, duration, status, warnings, "could move earlier", "customer to contact", activity log | |

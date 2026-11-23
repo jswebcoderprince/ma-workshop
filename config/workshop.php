@@ -18,6 +18,7 @@ return [
     // Settings the owner can change in the app. Stored values in the `settings` table win.
     'defaults' => [
         'locale' => 'en',
+        'accent' => 'violet',
         'company' => [
             'name' => 'MA Engine Lab',
             'code' => '',

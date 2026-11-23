@@ -1,28 +1,15 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { LogoMark } from '@/components/logo';
+import { Button, Card, Field, TextInput } from '@/components/ui-kit';
+import { useT } from '@/lib/i18n';
+import type { SharedData } from '@/types';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { LoaderCircle, LogIn } from 'lucide-react';
+import type { FormEventHandler } from 'react';
 
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-
-interface LoginForm {
-    email: string;
-    password: string;
-    remember: boolean;
-}
-
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-}
-
-export default function Login({ status, canResetPassword }: LoginProps) {
-    const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
+export default function Login({ status }: { status?: string }) {
+    const t = useT();
+    const { workshop } = usePage<SharedData>().props;
+    const { data, setData, post, processing, errors, reset } = useForm<{ email: string; password: string; remember: boolean }>({
         email: '',
         password: '',
         remember: false,
@@ -30,75 +17,70 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('login'), {
-            onFinish: () => reset('password'),
-        });
+        post(route('login'), { onFinish: () => reset('password') });
     };
 
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <Head title="Log in" />
-
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
+        <div className="bg-canvas grid min-h-screen place-items-center px-4 py-10">
+            <Head title={t('Log in')} />
+            <div className="w-full max-w-[400px]">
+                <div className="mb-6 flex items-center justify-center gap-3">
+                    <LogoMark size={40} />
+                    <div className="leading-tight">
+                        <div className="text-lg font-semibold">{workshop.name}</div>
+                        <div className="text-muted-foreground text-[13px]">{t('Workshop planner')}</div>
                     </div>
-
-                    <div className="grid gap-2">
-                        <div className="flex items-center">
-                            <Label htmlFor="password">Password</Label>
-                            {canResetPassword && (
-                                <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
-                                </TextLink>
-                            )}
-                        </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
-
-                    <div className="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" tabIndex={3} />
-                        <Label htmlFor="remember">Remember me</Label>
-                    </div>
-
-                    <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Log in
-                    </Button>
                 </div>
-
-                <div className="text-muted-foreground text-center text-sm">
-                    Don't have an account?{' '}
-                    <TextLink href={route('register')} tabIndex={5}>
-                        Sign up
-                    </TextLink>
-                </div>
-            </form>
-
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
-        </AuthLayout>
+                <Card className="p-7">
+                    <h1 className="text-[21px] font-semibold tracking-[-0.01em]">{t('Log in')}</h1>
+                    <p className="text-muted-foreground mt-1 mb-6">{t('Enter your email and password.')}</p>
+                    {status && <div className="bg-ok-soft text-ok mb-4 rounded-xl px-3.5 py-2.5">{status}</div>}
+                    <form onSubmit={submit} className="flex flex-col gap-4">
+                        <Field label={t('Email')} error={errors.email}>
+                            <TextInput
+                                type="email"
+                                name="email"
+                                required
+                                autoFocus
+                                autoComplete="email"
+                                value={data.email}
+                                aria-invalid={!!errors.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                            />
+                        </Field>
+                        <Field label={t('Password')} error={errors.password}>
+                            <TextInput
+                                type="password"
+                                name="password"
+                                required
+                                autoComplete="current-password"
+                                value={data.password}
+                                aria-invalid={!!errors.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                            />
+                        </Field>
+                        <label className="text-fg-2 flex items-center gap-2.5">
+                            <input
+                                type="checkbox"
+                                name="remember"
+                                checked={data.remember}
+                                onChange={(e) => setData('remember', e.target.checked)}
+                                className="size-[18px] rounded-[5px] accent-[var(--p)]"
+                            />
+                            {t('Remember me on this device')}
+                        </label>
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            className="mt-2 w-full"
+                            disabled={processing}
+                            icon={processing ? LoaderCircle : LogIn}
+                        >
+                            {t('Log in')}
+                        </Button>
+                    </form>
+                </Card>
+            </div>
+        </div>
     );
 }

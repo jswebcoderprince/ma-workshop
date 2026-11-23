@@ -1,21 +1,25 @@
 <?php
 
-use App\Http\Controllers\Settings\PasswordController;
-use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\AccountController;
+use App\Http\Controllers\Settings\WorkshopSettingsController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::middleware('auth')->group(function () {
-    Route::redirect('settings', 'settings/profile');
+Route::middleware('auth')->prefix('settings')->name('settings.')->group(function () {
+    Route::redirect('/', '/settings/general')->name('index');
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('general', [WorkshopSettingsController::class, 'general'])->name('general');
+    Route::patch('general', [WorkshopSettingsController::class, 'updateGeneral']);
 
-    Route::get('settings/password', [PasswordController::class, 'edit'])->name('password.edit');
-    Route::put('settings/password', [PasswordController::class, 'update'])->name('password.update');
+    Route::get('company', [WorkshopSettingsController::class, 'company'])->name('company');
+    Route::patch('company', [WorkshopSettingsController::class, 'updateCompany']);
 
-    Route::get('settings/appearance', function () {
-        return Inertia::render('settings/appearance');
-    })->name('appearance');
+    Route::get('invoices', [WorkshopSettingsController::class, 'invoices'])->name('invoices');
+    Route::patch('invoices', [WorkshopSettingsController::class, 'updateInvoices']);
+
+    Route::get('hours', [WorkshopSettingsController::class, 'hours'])->name('hours');
+    Route::patch('hours', [WorkshopSettingsController::class, 'updateHours']);
+
+    Route::get('account', [AccountController::class, 'edit'])->name('account');
+    Route::patch('account', [AccountController::class, 'updateProfile']);
+    Route::put('password', [AccountController::class, 'updatePassword'])->name('password');
 });
