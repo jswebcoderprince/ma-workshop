@@ -115,7 +115,10 @@ export default function Mechanics({ mechanics, closures, palette, today }: Props
                                 </div>
                                 <div className="bg-subtle h-[7px] overflow-hidden rounded-full">
                                     <i
-                                        className={cn('grow-x block h-full rounded-full', m.load >= 90 ? 'bg-over' : m.load >= 70 ? 'bg-parts' : 'bg-p')}
+                                        className={cn(
+                                            'grow-x block h-full rounded-full',
+                                            m.load >= 90 ? 'bg-over' : m.load >= 70 ? 'bg-parts' : 'bg-p',
+                                        )}
                                         style={{ width: `${m.load}%` }}
                                     />
                                 </div>

@@ -19,7 +19,12 @@ import {
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
     return (
-        <div className={cn('border-line bg-panel min-w-0 rounded-xl border shadow-[0_1px_2px_0_rgba(15,23,42,.04),0_1px_3px_0_rgba(15,23,42,.03)]', className)}>
+        <div
+            className={cn(
+                'border-line bg-panel min-w-0 rounded-xl border shadow-[0_1px_2px_0_rgba(15,23,42,.04),0_1px_3px_0_rgba(15,23,42,.03)]',
+                className,
+            )}
+        >
             {children}
         </div>
     );

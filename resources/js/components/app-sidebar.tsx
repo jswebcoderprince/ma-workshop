@@ -327,7 +327,11 @@ export function AppSidebar({ mini, onToggle }: { mini: boolean; onToggle: () => 
                                 onMouseLeave={() => leave()}
                                 onFocus={(e: FocusEvent<HTMLLIElement>) => {
                                     // Keyboard users get the menu too; a mouse click just opens the page.
-                                    if (e.target === e.currentTarget.firstElementChild && (e.target as HTMLElement).matches(':focus-visible') && hasMenu(item)) {
+                                    if (
+                                        e.target === e.currentTarget.firstElementChild &&
+                                        (e.target as HTMLElement).matches(':focus-visible') &&
+                                        hasMenu(item)
+                                    ) {
                                         window.clearTimeout(timer.current);
                                         place(item, e.currentTarget);
                                     }
@@ -373,7 +377,10 @@ export function AppSidebar({ mini, onToggle }: { mini: boolean; onToggle: () => 
                                     )}
                                     {!!item.alert && (
                                         <span
-                                            className={cn('bg-over ring-panel pop-in relative size-2 shrink-0 rounded-full ring-2', mini && 'absolute! top-2 right-2')}
+                                            className={cn(
+                                                'bg-over ring-panel pop-in relative size-2 shrink-0 rounded-full ring-2',
+                                                mini && 'absolute! top-2 right-2',
+                                            )}
                                             title={t('Overlaps: :n', { n: item.alert })}
                                         />
                                     )}
@@ -390,9 +397,7 @@ export function AppSidebar({ mini, onToggle }: { mini: boolean; onToggle: () => 
                                 </Link>
 
                                 <AnimatePresence>
-                                    {isOpen && open && (
-                                        <Flyout item={item} mini={mini} top={open.top} left={open.left} onPick={close} />
-                                    )}
+                                    {isOpen && open && <Flyout item={item} mini={mini} top={open.top} left={open.left} onPick={close} />}
                                 </AnimatePresence>
                             </li>
                         );
@@ -514,7 +519,11 @@ function Flyout({ item, mini, top, left, onPick }: { item: NavItem; mini: boolea
                                     <s.icon
                                         className={cn(
                                             'size-4 shrink-0 transition-colors',
-                                            s.active ? 'text-white' : s.alarm && s.count ? 'text-over' : 'text-muted-foreground group-hover/sub:text-fg-2',
+                                            s.active
+                                                ? 'text-white'
+                                                : s.alarm && s.count
+                                                  ? 'text-over'
+                                                  : 'text-muted-foreground group-hover/sub:text-fg-2',
                                         )}
                                         strokeWidth={1.8}
                                     />
@@ -539,7 +548,9 @@ function Flyout({ item, mini, top, left, onPick }: { item: NavItem; mini: boolea
                                         ))}
                                     </span>
                                 ) : (
-                                    <span className={cn('text-[12px]', s.active ? 'text-white/80' : 'text-faint')}>{offLabel(s.mechanic.status)}</span>
+                                    <span className={cn('text-[12px]', s.active ? 'text-white/80' : 'text-faint')}>
+                                        {offLabel(s.mechanic.status)}
+                                    </span>
                                 )
                             ) : (
                                 <>
