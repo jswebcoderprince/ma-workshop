@@ -1,3 +1,4 @@
+import { AppSidebar, useNav } from '@/components/app-sidebar';
 import { LogoMark } from '@/components/logo';
 import {
     DropdownMenu,
@@ -11,68 +12,13 @@ import { useAppearance } from '@/hooks/use-appearance';
 import { formatDate, initials } from '@/lib/format';
 import { useLocale, useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
-import type { RosterEntry, SharedData } from '@/types';
+import type { SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import {
-    Bell,
-    CalendarRange,
-    CircleCheck,
-    HardHat,
-    LayoutGrid,
-    LogOut,
-    Moon,
-    PanelLeftClose,
-    PanelLeftOpen,
-    ReceiptText,
-    Search,
-    Settings,
-    Sun,
-    TriangleAlert,
-    UserRound,
-    Users,
-    Wrench,
-    X,
-    type LucideIcon,
-} from 'lucide-react';
+import { Bell, ChevronRight, CircleCheck, House, LogOut, Moon, Search, Settings, TriangleAlert, UserRound, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-type NavItem = { name: string; label: string; icon: LucideIcon; match: string };
-
-function useNav(): NavItem[] {
-    const t = useT();
-    return [
-        { name: 'overview', label: t('Overview'), icon: LayoutGrid, match: '/' },
-        { name: 'calendar', label: t('Calendar'), icon: CalendarRange, match: '/calendar' },
-        { name: 'jobs', label: t('Jobs'), icon: Wrench, match: '/jobs' },
-        { name: 'customers', label: t('Customers'), icon: Users, match: '/customers' },
-        { name: 'mechanics', label: t('Mechanics'), icon: HardHat, match: '/mechanics' },
-        { name: 'invoices', label: t('Invoices'), icon: ReceiptText, match: '/invoices' },
-        { name: 'settings.index', label: t('Settings'), icon: Settings, match: '/settings' },
-    ];
-}
-
-function isActive(url: string, match: string) {
-    const path = url.split('?')[0];
-    return match === '/' ? path === '/' : path === match || path.startsWith(match + '/');
-}
-
 export type Crumb = { label: string; href?: string };
-
-/** Why a mechanic is not working today, for the sidebar list. */
-function useOffLabel() {
-    const t = useT();
-    return (status: RosterEntry['status']) =>
-        status === 'holiday'
-            ? t('Holiday')
-            : status === 'day_off'
-              ? t('Day off')
-              : status === 'sick'
-                ? t('Sick leave')
-                : status === 'closed'
-                  ? t('Closed')
-                  : t('Not working');
-}
 
 export default function AppLayout({
     title,
@@ -94,7 +40,6 @@ export default function AppLayout({
     const page = usePage<SharedData>();
     const { auth, shell, workshop, flash } = page.props;
     const nav = useNav();
-    const offLabel = useOffLabel();
     const { appearance, updateAppearance } = useAppearance();
     const [mini, setMini] = useState(() => typeof window !== 'undefined' && localStorage.getItem('sidebar-mini') === '1');
     const [toast, setToast] = useState<{ text: string; warn: boolean; undo: number | null } | null>(null);
@@ -134,10 +79,6 @@ export default function AppLayout({
 
     const user = auth.user!;
     const dark = appearance === 'dark';
-    const roster = shell?.roster ?? [];
-    const working = roster.filter((r) => r.status === 'working');
-    const booked = working.reduce((a, r) => a + r.booked, 0);
-    const available = working.reduce((a, r) => a + r.available, 0);
     const counts = shell?.counts;
 
     return (
@@ -150,161 +91,33 @@ export default function AppLayout({
                 {t('Skip to content')}
             </a>
 
-            {/* ---------- sidebar (desktop): graphite, after the black and teal of maenginelab.lt ---------- */}
-            <aside
+            <AppSidebar mini={mini} onToggle={toggleMini} />
+
+            <div
                 className={cn(
-                    'bg-side text-side-fg fixed inset-y-0 left-0 z-40 hidden flex-col overflow-y-auto md:flex',
-                    mini ? 'w-[60px]' : 'w-[248px]',
+                    'min-h-screen transition-[padding] duration-300 ease-[cubic-bezier(.22,1,.36,1)]',
+                    mini ? 'md:pl-[70px]' : 'md:pl-[248px]',
                 )}
             >
-                <div className={cn('flex h-16 shrink-0 items-center gap-3', mini ? 'justify-center' : 'pr-3 pl-5')}>
-                    <Link href={route('overview')} className="flex min-w-0 items-center gap-3" title={workshop.name}>
-                        <LogoMark size={mini ? 30 : 34} className="text-white" />
-                        {!mini && (
-                            <span className="min-w-0 leading-[1.15]">
-                                <span className="block truncate text-[15px] font-semibold tracking-[-0.01em] text-white">{workshop.name}</span>
-                                <span className="text-side-muted block text-[12px]">{t('Workshop planner')}</span>
-                            </span>
-                        )}
-                    </Link>
-                </div>
-
-                <nav className={cn('flex flex-col gap-px pt-2', mini ? 'px-2.5' : 'px-3')} aria-label={t('Navigation')}>
-                    {nav.map((item) => {
-                        const active = isActive(page.url, item.match);
-                        return (
-                            <Link
-                                key={item.name}
-                                href={route(item.name)}
-                                title={mini ? item.label : undefined}
-                                aria-current={active ? 'page' : undefined}
-                                className={cn(
-                                    'group relative flex h-9 items-center gap-3 rounded-md text-[14px] transition-[background-color,color,transform] duration-150 active:scale-[.98]',
-                                    mini ? 'justify-center' : 'px-2.5',
-                                    active ? 'font-medium text-white' : 'text-side-muted hover:bg-side-2 hover:text-side-fg',
-                                )}
-                            >
-                                {active && (
-                                    <motion.span
-                                        layoutId="nav-active"
-                                        className="bg-side-3 absolute inset-0 rounded-md"
-                                        transition={{ type: 'spring', stiffness: 520, damping: 40 }}
-                                    />
-                                )}
-                                <item.icon
-                                    className={cn(
-                                        'relative size-[18px] shrink-0 transition-[color,transform] duration-200 group-hover:translate-x-px',
-                                        active ? 'text-brand' : 'text-side-dim group-hover:text-side-muted',
-                                    )}
-                                    strokeWidth={1.75}
-                                />
-                                {!mini && <span className="relative flex-1 truncate">{item.label}</span>}
-                                {!mini && item.name === 'jobs' && !!counts?.openJobs && (
-                                    <span className={cn('relative text-[12.5px] tabular-nums', active ? 'text-side-muted' : 'text-side-dim')}>
-                                        {counts.openJobs}
-                                    </span>
-                                )}
-                                {item.name === 'calendar' && !!counts?.warnings && (
-                                    <span
-                                        className={cn('bg-over relative size-1.5 rounded-full', mini && 'absolute top-2 right-2')}
-                                        title={t('Overlaps: :n', { n: counts.warnings })}
-                                    />
-                                )}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                {!mini && shell && (
-                    <section className="border-side-line mx-3 mt-6 border-t pt-4" aria-label={t('Mechanics today')}>
-                        <div className="flex items-baseline justify-between px-2.5 pb-2">
-                            <span className="text-side-fg text-[13px] font-medium">{t('Today')}</span>
-                            <span className="text-side-dim text-[12px] tabular-nums">
-                                {shell.hours ? `${shell.hours.open}–${shell.hours.close}` : t('Closed')}
-                            </span>
-                        </div>
-                        <ul className="flex flex-col">
-                            {roster.map((r) => (
-                                <li key={r.id} className="flex h-8 items-center gap-2.5 px-2.5 text-[13px]">
-                                    <span
-                                        className={cn(
-                                            'grid size-5 shrink-0 place-items-center rounded-[5px] text-[10px] font-semibold text-white',
-                                            r.status !== 'working' && 'opacity-40',
-                                        )}
-                                        style={{ background: r.color }}
-                                        aria-hidden="true"
-                                    >
-                                        {initials(r.name).slice(0, 1)}
-                                    </span>
-                                    <span className={cn('min-w-0 flex-1 truncate', r.status === 'working' ? 'text-side-fg' : 'text-side-dim')}>
-                                        {r.name}
-                                    </span>
-                                    {r.status === 'working' ? (
-                                        <span
-                                            className="flex gap-[3px]"
-                                            role="img"
-                                            aria-label={t(':booked of :total quarters', { booked: r.booked, total: r.available })}
-                                            title={t(':booked of :total quarters', { booked: r.booked, total: r.available })}
-                                        >
-                                            {r.slots.map((busy, i) => (
-                                                <span key={i} className={cn('h-2.5 w-3 rounded-[2px]', busy ? 'bg-brand' : 'bg-white/10')} />
-                                            ))}
-                                        </span>
-                                    ) : (
-                                        <span className="text-side-dim text-[12px]">{offLabel(r.status)}</span>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                        {shell.hours && available > 0 && (
-                            <p className="text-side-dim mt-1.5 px-2.5 text-[12px]">
-                                {t(':booked of :total quarters booked', { booked, total: available })}
-                            </p>
-                        )}
-                    </section>
-                )}
-
-                <div className={cn('border-side-line mt-auto flex items-center gap-1 border-t py-3', mini ? 'flex-col px-2' : 'px-3')}>
-                    <button
-                        type="button"
-                        onClick={() => updateAppearance(dark ? 'light' : 'dark')}
-                        title={dark ? t('Light mode') : t('Dark mode')}
-                        className={cn(
-                            'text-side-muted hover:bg-side-2 hover:text-side-fg flex h-8 items-center gap-2.5 rounded-md text-[13px]',
-                            mini ? 'w-9 justify-center' : 'flex-1 px-2.5',
-                        )}
-                    >
-                        {dark ? <Sun className="size-4" strokeWidth={1.75} /> : <Moon className="size-4" strokeWidth={1.75} />}
-                        {!mini && (dark ? t('Light mode') : t('Dark mode'))}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={toggleMini}
-                        aria-label={mini ? t('Expand menu') : t('Collapse menu')}
-                        title={mini ? t('Expand menu') : t('Collapse menu')}
-                        className="text-side-dim hover:bg-side-2 hover:text-side-fg grid size-8 place-items-center rounded-md"
-                    >
-                        {mini ? <PanelLeftOpen className="size-4" strokeWidth={1.75} /> : <PanelLeftClose className="size-4" strokeWidth={1.75} />}
-                    </button>
-                </div>
-            </aside>
-
-            <div className={cn('min-h-screen', mini ? 'md:pl-[60px]' : 'md:pl-[248px]')}>
                 {/* ---------- header ---------- */}
                 <header className="border-line bg-panel/95 sticky top-0 z-30 flex h-14 items-center gap-3 border-b px-4 shadow-[0_1px_8px_rgba(0,0,0,.04)] backdrop-blur md:h-16 md:px-6">
                     <span className="flex min-w-0 items-center gap-2 md:hidden">
                         <LogoMark size={30} className="text-fg" />
                         <span className="truncate text-[15px] font-semibold">{workshop.name}</span>
                     </span>
-                    <nav className="hidden min-w-0 items-center gap-2 text-[12.5px] md:flex" aria-label="Breadcrumb">
-                        <Link href={route('overview')} className="text-muted-foreground hover:text-fg font-medium whitespace-nowrap">
+                    <nav className="hidden min-w-0 items-center gap-1.5 text-[12.5px] md:flex" aria-label="Breadcrumb">
+                        <Link
+                            href={route('overview')}
+                            className="text-muted-foreground hover:text-p flex items-center gap-1.5 font-medium whitespace-nowrap transition-colors"
+                        >
+                            <House className="size-[15px]" strokeWidth={1.8} />
                             {workshop.name}
                         </Link>
                         {crumbs.map((c) => (
-                            <span key={c.label} className="flex items-center gap-2 whitespace-nowrap">
-                                <span className="text-line-strong font-bold">/</span>
+                            <span key={c.label} className="flex items-center gap-1.5 whitespace-nowrap">
+                                <ChevronRight className="text-faint size-3.5" strokeWidth={2} />
                                 {c.href ? (
-                                    <Link href={c.href} className="text-muted-foreground hover:text-fg font-medium">
+                                    <Link href={c.href} className="text-muted-foreground hover:text-p font-medium transition-colors">
                                         {c.label}
                                     </Link>
                                 ) : (
@@ -312,8 +125,8 @@ export default function AppLayout({
                                 )}
                             </span>
                         ))}
-                        <span className="text-line-strong font-bold">/</span>
-                        <span className="text-fg truncate text-[13.5px] font-bold tracking-tight">{title}</span>
+                        <ChevronRight className="text-faint size-3.5 shrink-0" strokeWidth={2} />
+                        <span className="text-fg truncate text-[13.5px] font-semibold tracking-tight">{title}</span>
                     </nav>
                     {shell && (
                         <span
@@ -334,22 +147,22 @@ export default function AppLayout({
 
                     <div className="ml-auto flex items-center gap-2 md:gap-3">
                         <form
-                            className="relative hidden w-72 items-center xl:flex"
+                            className="relative hidden w-[310px] items-center xl:flex"
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 const q = new FormData(e.currentTarget).get('q');
                                 router.get(route('customers'), { q: String(q ?? '') });
                             }}
                         >
-                            <Search className="text-faint pointer-events-none absolute left-3 size-[17px]" strokeWidth={1.8} />
+                            <Search className="text-muted-foreground pointer-events-none absolute left-3 size-[17px]" strokeWidth={1.8} />
                             <input
                                 ref={searchRef}
                                 name="q"
                                 aria-label={t('Search customers, phones, plates')}
                                 placeholder={t('Search customers, phones, plates')}
-                                className="border-line bg-hover focus:border-p focus:bg-panel h-9 w-full rounded-lg border pr-14 pl-9 text-[12.5px] outline-none focus:shadow-[0_0_0_3px_var(--p-soft)]"
+                                className="bg-subtle focus:border-p focus:bg-panel h-10 w-full rounded-lg border border-transparent pr-14 pl-9 text-[13px] transition-[background-color,border-color,box-shadow] duration-200 outline-none focus:shadow-[0_0_0_3px_var(--p-soft)]"
                             />
-                            <kbd className="border-line bg-panel text-muted-foreground absolute right-2 rounded border px-1.5 py-0.5 font-mono text-[10px] font-semibold">
+                            <kbd className="border-line bg-panel text-muted-foreground absolute right-2.5 rounded border px-1.5 py-0.5 font-mono text-[10px] font-semibold">
                                 Ctrl K
                             </kbd>
                         </form>
@@ -360,9 +173,9 @@ export default function AppLayout({
                             title={t('Customers to call')}
                             className="text-fg-2 hover:bg-subtle hover:text-fg relative grid size-9 place-items-center rounded-lg"
                         >
-                            <Bell className="size-[20px]" strokeWidth={1.8} />
+                            <Bell className={cn('size-[20px]', !!counts?.toCall && 'bell-ring')} strokeWidth={1.8} />
                             {!!counts?.toCall && (
-                                <span className="bg-over border-panel absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full border-2 px-1 font-mono text-[10px] font-bold text-white">
+                                <span className="bg-over border-panel pop-in absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full border-2 px-1 font-mono text-[10px] font-bold text-white">
                                     {counts.toCall}
                                 </span>
                             )}
@@ -442,11 +255,11 @@ export default function AppLayout({
             <nav className="bg-panel/95 fixed inset-x-0 bottom-0 z-40 flex shadow-[0_-2px_12px_rgba(0,0,0,.04)] backdrop-blur md:hidden">
                 <div className="flex h-16 w-full items-center justify-around px-1 pb-[env(safe-area-inset-bottom,0px)]">
                     {nav.slice(0, 5).map((item) => {
-                        const active = isActive(page.url, item.match);
+                        const active = item.active;
                         return (
                             <Link
                                 key={item.name}
-                                href={route(item.name)}
+                                href={item.href}
                                 className={cn(
                                     'relative flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition-[color,transform] duration-150 active:scale-[.94]',
                                     active ? 'text-p' : 'text-muted-foreground',

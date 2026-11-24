@@ -18,7 +18,11 @@ import {
 /* Building blocks for the Engine Precision Planner design (design/stitch/engine_precision_planner/DESIGN.md). */
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-    return <div className={cn('border-line bg-panel min-w-0 rounded-lg border shadow-[0_1px_2px_0_rgba(15,23,42,.05)]', className)}>{children}</div>;
+    return (
+        <div className={cn('border-line bg-panel min-w-0 rounded-xl border shadow-[0_1px_2px_0_rgba(15,23,42,.04),0_1px_3px_0_rgba(15,23,42,.03)]', className)}>
+            {children}
+        </div>
+    );
 }
 
 export function CardHeader({
@@ -56,8 +60,9 @@ export function Eyebrow({ children, className }: { children: ReactNode; classNam
 
 type BtnVariant = 'default' | 'primary' | 'soft' | 'ghost' | 'danger';
 const btnVariants: Record<BtnVariant, string> = {
-    default: 'border-line bg-panel text-fg hover:bg-hover shadow-[0_1px_2px_0_rgba(15,23,42,.05)]',
-    primary: 'border-p bg-p text-white hover:bg-p-hover shadow-[0_1px_2px_0_rgba(15,23,42,.1)]',
+    default: 'border-line bg-panel text-fg hover:bg-hover hover:border-line-strong shadow-[0_1px_2px_0_rgba(15,23,42,.05)]',
+    primary:
+        'border-p bg-p text-white hover:bg-p-hover shadow-[0_1px_2px_0_rgba(15,23,42,.1)] hover:-translate-y-px hover:shadow-[0_8px_18px_-8px_var(--p)] active:translate-y-0',
     soft: 'border-transparent bg-p-soft text-p-ink hover:brightness-95',
     ghost: 'border-transparent bg-transparent text-fg-2 hover:bg-subtle',
     danger: 'border-over bg-over text-white hover:brightness-95',
@@ -65,7 +70,7 @@ const btnVariants: Record<BtnVariant, string> = {
 
 export function buttonClasses(variant: BtnVariant = 'default', size: 'md' | 'sm' = 'md', className?: string) {
     return cn(
-        'inline-flex items-center justify-center gap-1.5 rounded-md border font-semibold whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100',
+        'inline-flex items-center justify-center gap-1.5 rounded-md border font-semibold whitespace-nowrap transition-[background-color,border-color,color,box-shadow,translate,scale] duration-150 ease-out active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:active:scale-100',
         size === 'md' ? 'h-[38px] px-3.5 text-[13px]' : 'h-8 px-2.5 text-[12.5px]',
         btnVariants[variant],
         className,
@@ -111,7 +116,7 @@ export function ButtonLink({
 }
 
 const iconBtn =
-    'relative grid size-9 place-items-center rounded-lg text-fg-2 transition-[background-color,color,transform] duration-150 hover:bg-subtle hover:text-fg active:scale-[.92]';
+    'relative grid size-9 place-items-center rounded-lg text-fg-2 transition-[background-color,color,scale] duration-150 hover:bg-subtle hover:text-fg active:scale-[.92]';
 function Badge({ n }: { n?: number }) {
     return n ? (
         <span className="bg-over border-panel absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full border-2 px-1 font-mono text-[10px] font-bold text-white">

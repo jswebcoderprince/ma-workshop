@@ -43,7 +43,7 @@ export function JobTable({ jobs, showWork = true }: { jobs: JobRow[]; showWork?:
                         <th className={th + ' text-right'}>{t('Actions')}</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="rows-in">
                     {jobs.map((j) => (
                         <tr key={j.id} className="hover:bg-hover [&:last-child>td]:border-b-0">
                             <td className={td}>

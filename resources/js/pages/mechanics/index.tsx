@@ -67,7 +67,7 @@ export default function Mechanics({ mechanics, closures, palette, today }: Props
                     </EmptyState>
                 </Card>
             ) : (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5 md:gap-5">
+                <div className="stagger grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-3.5 md:gap-5">
                     {mechanics.map((m) => (
                         <Card key={m.id} className={cn(!m.active && 'opacity-70')}>
                             <CardHeader
@@ -115,7 +115,7 @@ export default function Mechanics({ mechanics, closures, palette, today }: Props
                                 </div>
                                 <div className="bg-subtle h-[7px] overflow-hidden rounded-full">
                                     <i
-                                        className={cn('block h-full rounded-full', m.load >= 90 ? 'bg-over' : m.load >= 70 ? 'bg-parts' : 'bg-p')}
+                                        className={cn('grow-x block h-full rounded-full', m.load >= 90 ? 'bg-over' : m.load >= 70 ? 'bg-parts' : 'bg-p')}
                                         style={{ width: `${m.load}%` }}
                                     />
                                 </div>

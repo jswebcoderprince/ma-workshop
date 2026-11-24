@@ -543,7 +543,7 @@ export function Board({ view, days, lanes, jobs, today, selectedId, dim, onJob, 
                                         <span className="bg-subtle h-1.5 flex-1 overflow-hidden rounded-full">
                                             <span
                                                 className={cn(
-                                                    'block h-full origin-left rounded-full transition-[width] duration-500 ease-out',
+                                                    'grow-x block h-full origin-left rounded-full transition-[width] duration-500 ease-out',
                                                     pct >= 100 ? 'bg-over' : pct >= 80 ? 'bg-parts' : 'bg-p',
                                                 )}
                                                 style={{ width: `${Math.min(100, pct)}%` }}

@@ -6,8 +6,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Design tokens: docs/DESIGN.md (frame v3). Light is the default, `.dark` on <html> switches,
-   `data-accent="teal"` swaps the violet primary for MA Engine Lab teal. */
+/* Design tokens: docs/DESIGN.md. Light is the default, `.dark` on <html> switches,
+   `data-accent="teal"` swaps the cobalt primary for MA Engine Lab teal. */
 @theme {
     /* IBM Plex: engineering heritage, full Lithuanian set, tabular figures.  */
     --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -94,9 +94,9 @@
 
 :root {
     /* Engine Precision Planner (design/stitch/engine_precision_planner/DESIGN.md) */
-    --canvas: #f6f7f8;
+    --canvas: #f3f5f8;
     --panel: #ffffff;
-    --subtle: #eff1f3;
+    --subtle: #eef1f5;
     --hover: #f7f8f9;
     --tint: #eff4ff;
     --line: #e2e5e9;
@@ -283,11 +283,6 @@
         outline-offset: -2px;
     }
 
-    aside a:focus-visible,
-    aside button:focus-visible {
-        outline-color: var(--brand);
-    }
-
     [hidden] {
         display: none !important;
     }
@@ -433,6 +428,113 @@ body.board-dragging * {
     transform: scale(0.97);
 }
 
+/* Sidebar rows slide in once when the app opens (components/app-sidebar.tsx). */
+@keyframes nav-in {
+    from {
+        opacity: 0;
+        translate: -10px 0;
+    }
+}
+.nav-in {
+    animation: nav-in 0.42s var(--ease-out) backwards;
+}
+
+/* Counters and dots pop in. */
+@keyframes pop-in {
+    0% {
+        opacity: 0;
+        scale: 0.4;
+    }
+    60% {
+        opacity: 1;
+        scale: 1.15;
+    }
+}
+.pop-in {
+    animation: pop-in 0.38s var(--ease-out) 0.25s backwards;
+}
+
+/* The bell rings once when customers are waiting for a call. */
+@keyframes bell-ring {
+    0%,
+    100% {
+        rotate: 0deg;
+    }
+    15% {
+        rotate: 14deg;
+    }
+    30% {
+        rotate: -12deg;
+    }
+    45% {
+        rotate: 8deg;
+    }
+    60% {
+        rotate: -5deg;
+    }
+    75% {
+        rotate: 2deg;
+    }
+}
+.bell-ring {
+    transform-origin: 50% 2px;
+    animation: bell-ring 0.9s var(--ease-in-out) 0.7s;
+}
+
+/* Cards in a grid and rows in a table come in one after another (only the first dozen wait). */
+.stagger > *,
+.rows-in > tr {
+    animation: rise-in 0.34s var(--ease-out) backwards;
+}
+.stagger > *:nth-child(2),
+.rows-in > tr:nth-child(2) {
+    animation-delay: 30ms;
+}
+.stagger > *:nth-child(3),
+.rows-in > tr:nth-child(3) {
+    animation-delay: 60ms;
+}
+.stagger > *:nth-child(4),
+.rows-in > tr:nth-child(4) {
+    animation-delay: 90ms;
+}
+.stagger > *:nth-child(5),
+.rows-in > tr:nth-child(5) {
+    animation-delay: 120ms;
+}
+.stagger > *:nth-child(6),
+.rows-in > tr:nth-child(6) {
+    animation-delay: 150ms;
+}
+.stagger > *:nth-child(7),
+.rows-in > tr:nth-child(7) {
+    animation-delay: 180ms;
+}
+.stagger > *:nth-child(8),
+.rows-in > tr:nth-child(8) {
+    animation-delay: 210ms;
+}
+.stagger > *:nth-child(n + 9),
+.rows-in > tr:nth-child(n + 9) {
+    animation-delay: 240ms;
+}
+
+/* Load and progress bars fill from the left. */
+@keyframes grow-x {
+    from {
+        scale: 0 1;
+    }
+}
+.grow-x {
+    transform-origin: left center;
+    animation: grow-x 0.8s var(--ease-out) 0.15s backwards;
+}
+
+/* Table rows that open something: a soft highlight that follows the mouse. */
+.row-hover {
+    transition: background-color 0.15s var(--ease-out);
+}
+
 /* Waiting for parts: amber stripes (bar body, and stronger in the month cells). */
 @utility stripes-parts {
     background-color: var(--parts-bg);
@@ -454,5 +556,11 @@ body.board-dragging * {
     .lift:hover,
     .press:active {
         transform: none;
+    }
+    .grow-x,
+    .bell-ring,
+    .pop-in,
+    .nav-in {
+        animation: none !important;
     }
 }

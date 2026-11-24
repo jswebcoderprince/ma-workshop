@@ -154,7 +154,7 @@ export default function Jobs({ filters, jobs, counts, mechanics }: Props) {
                                         <th className="border-line border-y py-2.5 pr-5 pl-3 font-medium">{t('Invoice')}</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="rows-in">
                                     {jobs.data.map((j) => (
                                         <tr
                                             key={j.id}

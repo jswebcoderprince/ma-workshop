@@ -100,7 +100,7 @@ export default function Customers({ filters, customers, selected }: Props) {
                                     <th className="border-line border-y py-3 pr-5 pl-3.5 font-medium">{t('Next visit')}</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="rows-in">
                                 {customers.data.map((c) => {
                                     const v = c.vehicles[0];
                                     const Icon = v ? VEHICLE_ICON[v.type] : null;

@@ -116,7 +116,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
             }
         >
             {/* KPI cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="stagger grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard label={t('Jobs today')} icon={ClipboardList} value={j.total} note={t('on the calendar')}>
                     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-[11.5px] font-semibold">
                         <span className="text-muted-foreground">
@@ -124,11 +124,13 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                         </span>
                         <span className="text-p whitespace-nowrap">{t(':n% booked', { n: j.bookedPercent })}</span>
                     </div>
-                    <div className="bg-subtle mt-2 flex h-2 overflow-hidden rounded-full">
-                        <div className="bg-ok h-full" style={{ width: pct(j.completed) }} />
-                        <div className="bg-p h-full" style={{ width: pct(j.inProgress) }} />
-                        <div className="bg-p-line h-full" style={{ width: pct(j.scheduled) }} />
-                        <div className="bg-hold-line h-full" style={{ width: pct(j.waiting) }} />
+                    <div className="bg-subtle mt-2 h-2 overflow-hidden rounded-full">
+                        <div className="grow-x flex h-full">
+                            <div className="bg-ok h-full" style={{ width: pct(j.completed) }} />
+                            <div className="bg-p h-full" style={{ width: pct(j.inProgress) }} />
+                            <div className="bg-p-line h-full" style={{ width: pct(j.scheduled) }} />
+                            <div className="bg-hold-line h-full" style={{ width: pct(j.waiting) }} />
+                        </div>
                     </div>
                 </StatCard>
 
@@ -208,7 +210,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                             </Link>
                         </CardHeader>
-                        <div className="space-y-4 px-4 pb-4">
+                        <div className="stagger space-y-4 px-4 pb-4">
                             {lanes.length === 0 && <EmptyState icon={HardHat} title={t('No mechanics yet')} />}
                             {lanes.map((lane) => (
                                 <LaneCard key={lane.id} lane={lane} todayOpen={today.open} />
@@ -263,7 +265,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                                 {t(':n items', { n: attention.length })}
                             </span>
                         </CardHeader>
-                        <div className="space-y-2.5 px-4 pb-4">
+                        <div className="stagger space-y-2.5 px-4 pb-4">
                             {attention.length === 0 && (
                                 <div className="bg-ok-soft text-ok-ink flex items-center gap-2 rounded-lg p-3 text-[13px] font-medium">
                                     <CircleCheck className="size-5" />
@@ -328,7 +330,7 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                         </div>
                         <div className="bg-panel h-2 w-16 overflow-hidden rounded-full">
                             <div
-                                className={cn('h-full rounded-full', tone === 'over' ? 'bg-over' : tone === 'parts' ? 'bg-parts' : 'bg-ok')}
+                                className={cn('grow-x h-full rounded-full', tone === 'over' ? 'bg-over' : tone === 'parts' ? 'bg-parts' : 'bg-ok')}
                                 style={{ width: `${Math.min(100, loadPct)}%` }}
                             />
                         </div>

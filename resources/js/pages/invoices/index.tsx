@@ -96,7 +96,7 @@ export default function Invoices({ filters, invoices, summary }: Props) {
                                     <th className="border-line border-y py-2.5 pr-5 pl-3 font-medium">{t('Status')}</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="rows-in">
                                 {invoices.data.map((i) => (
                                     <tr
                                         key={i.id}

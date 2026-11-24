@@ -39,9 +39,9 @@ The look, layout and components follow Stitch. Some Stitch content contradicts t
 | over / call (urgent) | `#DC2626` · `#FEE2E2` · `#991B1B` | customer to call, errors, fully booked |
 | open (opening) | `#6366F1` · `#EEF2FF` · `#3730A3` | free slots, could start earlier |
 | hold (leave / closed) | `#64748B` · `#F1F5F9` · `#475569` + 45° hatch | holiday, day off, closed, on hold |
-| side / side-2 / side-3 | `#141618` / `#1C1F22` / `#262A2E` | graphite sidebar (the black of maenginelab.lt), hover, active item |
+| side / side-2 / side-3 | `#141618` / `#1C1F22` / `#262A2E` | graphite brand half of the login page (the black of maenginelab.lt) |
 | brand | `#1FA5A8` | MA Engine Lab teal: logo "A", active nav icon, booked quarters in the sidebar |
-| neutrals | canvas `#F6F7F8`, line `#E2E5E9`, fg `#15181C`, muted `#69707A` | neutral grey instead of Tailwind's blue slate |
+| neutrals | canvas `#F3F5F8`, line `#E2E5E9`, fg `#15181C`, muted `#69707A` | neutral grey instead of Tailwind's blue slate |
 
 Teal (`#0B7D7F`) replaces cobalt when Settings → General → Accent is "Brand teal". Dark mode has matching tokens.
 
@@ -51,11 +51,17 @@ letter-spaced labels and the slate/cobalt sidebar looked AI-made. Labels are now
 
 ## Frame (`resources/js/layouts/app-layout.tsx`)
 
-- Graphite sidebar (248px, collapsible to 60px): MA mark + name, navigation (active = slightly lighter row,
-  white text, teal icon; no filled pill), open jobs count as plain number, amber dot on Calendar when there are
-  overlaps. "Today" list: each mechanic with four small cells for today's quarters (teal = booked) or the reason
-  they are off, then "14 of 16 quarters booked". Bottom: dark/light mode and collapse.
-- Header: breadcrumb, "Open today · 08:00 – 18:00" pill, search (Ctrl K), bell with customers-to-call count, user menu.
+- Sidebar (`components/app-sidebar.tsx`, 2026-11-24, after the owner's reference picture of a modern admin
+  dashboard): white panel, 248px, collapsible to 70px with the round "‹" button on its edge. Every row is icon + name +
+  "›"; the open page is a filled primary pill. Open jobs count as a small pill, red dot on Calendar when there are
+  overlaps. Hovering a row slides out a small menu to its right (keyboard focus opens it too, Esc closes):
+  Calendar → Day / Week / Month (keeps the shown date and mechanic); Jobs → the six status tabs + Customers to call +
+  Overlaps with counts; Mechanics → each mechanic with today's four quarters (or why they are off), opens the calendar
+  for that mechanic; Invoices → All / Valid / Voided; Settings → its five pages. Collapsed, every row opens its menu
+  with the row's own name on top. Bottom: three round buttons (dark/light, account, log out).
+  The graphite sidebar with the "Today" list (2026-11-23) is replaced; that list now lives in the Mechanics menu.
+- Header: breadcrumb (house icon, "›" between parts), "Open today · 08:00 – 18:00" pill, filled search (Ctrl K),
+  bell with customers-to-call count, user menu.
 - Page heading: 30px bold title, optional pills, subtitle "Today · date · Week N", actions on the right.
 - Phones: compact header, 2×2 KPI cards, bottom tab bar (Overview, Calendar, Jobs, Customers, Mechanics), sheets slide up.
 
@@ -114,6 +120,11 @@ Library: `motion` (Framer Motion). `MotionConfig reducedMotion="user"`, and CSS 
 | Calendar bars and month cells | fade / rise in when a new range is shown |
 | Inspector, sheets, toasts | spring in from the side or bottom, quicker ease out |
 | KPI numbers | count up from 0 (`CountUp`) |
+| Sidebar | rows slide in once when the app opens (`.nav-in`); the active pill glides between rows; side menus spring out with their rows one after another; the dark/light icon turns |
+| Primary buttons | rise 1px with a soft shadow in the accent colour on hover |
+| Card grids, table rows | come in one after another (`.stagger`, `.rows-in`; only the first eight wait) |
+| Load and progress bars | fill from the left (`.grow-x`) |
+| Counters, bell | counters pop in (`.pop-in`); the bell rings once when customers are waiting for a call |
 
 Only transform and opacity animate. Entrance animations use `animation-fill-mode: backwards`: a transform left on a
 block would become the frame for fixed popups (the hover card was misplaced because of that).
