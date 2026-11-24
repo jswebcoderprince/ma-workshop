@@ -1,7 +1,6 @@
 import { ACCENT, toneOf } from '@/components/calendar/status-style';
 import { useStatusLabel } from '@/components/job-table';
 import { Button, ButtonLink, Card, CardHeader, DurationChip, EmptyState, MechanicAvatar, StatCard, Tag } from '@/components/ui-kit';
-import { WorkloadChart, type WorkloadWeek } from '@/components/workload-chart';
 import AppLayout from '@/layouts/app-layout';
 import { formatDate, formatShortDate } from '@/lib/format';
 import { useLocale, useT } from '@/lib/i18n';
@@ -26,7 +25,6 @@ import {
     Sparkles,
     TriangleAlert,
 } from 'lucide-react';
-import { useState } from 'react';
 
 type Card = {
     id: number;
@@ -63,13 +61,10 @@ interface Props {
         mechanics: { working: number; total: number; off: { name: string; reason: string | null }[]; avatars: MechanicView[] };
         warnings: { total: number; first: { number: string; vehicle: string | null; warning: string } | null };
         toCall: { total: number; earlier: number; later: number };
-        bookedThisWeek: number;
-        bookedNextWeek: number;
         nextFree: { date: string; time: string; mechanic: string } | null;
     };
     lanes: Lane[];
     attention: Attention[];
-    workload: WorkloadWeek[];
 }
 
 function useOffLabel() {
@@ -84,11 +79,10 @@ function useOffLabel() {
     return (r: string | null) => (r ? (labels[r] ?? r) : '');
 }
 
-export default function Overview({ today, stats, lanes, attention, workload }: Props) {
+export default function Overview({ today, stats, lanes, attention }: Props) {
     const t = useT();
     const locale = useLocale();
     const offLabel = useOffLabel();
-    const [weeks, setWeeks] = useState<8 | 4>(8);
     const j = stats.jobsToday;
     const pct = (n: number) => (j.total ? `${(n / j.total) * 100}%` : '0%');
 
@@ -215,40 +209,6 @@ export default function Overview({ today, stats, lanes, attention, workload }: P
                             {lanes.map((lane) => (
                                 <LaneCard key={lane.id} lane={lane} todayOpen={today.open} />
                             ))}
-                        </div>
-                    </Card>
-
-                    <Card>
-                        <CardHeader title={t('Workload')} icon={CalendarRange} sub={t(':n% booked this week', { n: stats.bookedThisWeek })}>
-                            <div className="flex h-[30px] gap-5">
-                                {([8, 4] as const).map((n) => (
-                                    <button
-                                        key={n}
-                                        type="button"
-                                        aria-pressed={weeks === n}
-                                        onClick={() => setWeeks(n)}
-                                        className={cn(
-                                            'text-muted-foreground border-b-2 border-transparent px-0.5 text-[13px] font-semibold',
-                                            weeks === n && 'border-p text-fg',
-                                        )}
-                                    >
-                                        {n === 8 ? t('8 weeks') : t('4 weeks')}
-                                    </button>
-                                ))}
-                            </div>
-                        </CardHeader>
-                        <div className="text-fg-2 flex gap-4 px-4 pb-1 text-[12.5px]">
-                            <span className="inline-flex items-center gap-1.5">
-                                <i className="bg-p size-3 rounded-[3px]" />
-                                {t('Booked')}
-                            </span>
-                            <span className="inline-flex items-center gap-1.5">
-                                <i className="size-3 rounded-[3px] bg-[#3fc6a0]" />
-                                {t('Available')}
-                            </span>
-                        </div>
-                        <div className="px-3 pb-3">
-                            <WorkloadChart weeks={workload.slice(0, weeks)} />
                         </div>
                     </Card>
                 </div>

@@ -30,7 +30,7 @@ class OverviewTest extends TestCase
             ->where('today.week', 48)
             ->where('stats.nextFree', null)
             ->where('stats.jobsToday.total', 0)
-            ->has('workload', 8)
+            ->missing('workload')
             ->has('lanes', 0)
             ->has('attention', 0)
             ->where('shell.hours.open', '08:00')

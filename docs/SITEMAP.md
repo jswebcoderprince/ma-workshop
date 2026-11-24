@@ -24,7 +24,7 @@ flowchart LR
 | URL | Page | Main actions |
 |---|---|---|
 | `/login` | Login | email + password, remember me |
-| `/` | Overview | KPI cards, workload chart, mechanics' load, upcoming jobs |
+| `/` | Overview | KPI cards, today's schedule by mechanic, needs attention |
 | `/calendar` | Calendar | month / week / day; click empty spot → new job; click job → job drawer; side lists "Customers to contact" and "Could move earlier"; free capacity row |
 | `/jobs` | Jobs list | filter by status and "to contact"; search; opens job drawer |
 | `/jobs/{job}/card` | Job card | A4 print layout |

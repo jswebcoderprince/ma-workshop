@@ -17,21 +17,17 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Landing page (design/stitch overview): today per mechanic, what needs attention, the next weeks.
+ * Landing page (design/stitch overview): today per mechanic and what needs attention.
  */
 class OverviewController extends Controller
 {
-    private const WEEKS = 8;
-
     public function __invoke(Workshop $workshop): Response
     {
         $schedule = $workshop->schedule();
         $cal = $schedule->calendar;
         $availability = $workshop->availability();
-        $now = $workshop->currentQuarter();
         $next = $workshop->nextQuarter();
         $today = $workshop->today();
-        $monday = WorkCalendar::addDays($today, 1 - WorkCalendar::weekday($today));
 
         $mechanics = Mechanic::query()->where('active', true)->ordered()->get();
         $ids = $mechanics->pluck('id')->all();
@@ -46,12 +42,6 @@ class OverviewController extends Controller
 
             return ['job' => $w, 'from' => $cal->quarterStart($today, $qs->min()), 'to' => $cal->quarterEnd($today, $qs->max()), 'quarters' => $qs->count()];
         })->filter();
-
-        $workload = [];
-        for ($i = 0; $i < self::WEEKS; $i++) {
-            $from = WorkCalendar::addDays($monday, 7 * $i);
-            $workload[] = ['week' => (int) date('W', strtotime($from)), 'from' => $from] + $schedule->utilisation($ids, $from, WorkCalendar::addDays($from, 7), $now);
-        }
 
         $nextFree = $mechanics->filter(fn (Mechanic $m) => $m->worksOn('car'))
             ->map(fn (Mechanic $m) => ['mechanic' => $m->name, 'at' => $schedule->earliest($m->id, 4, $next)])
@@ -95,8 +85,6 @@ class OverviewController extends Controller
                     'earlier' => $toCall->filter(fn (WorkOrder $w) => $w->notify_customer?->value === 'earlier')->count(),
                     'later' => $toCall->filter(fn (WorkOrder $w) => $w->notify_customer?->value === 'later')->count(),
                 ],
-                'bookedThisWeek' => self::percent($workload[0]),
-                'bookedNextWeek' => self::percent($workload[1]),
                 'nextFree' => $nextFree ? [
                     'date' => $nextFree['at']->date,
                     'time' => $cal->quarterStart($nextFree['at']->date, $nextFree['at']->quarter),
@@ -105,7 +93,6 @@ class OverviewController extends Controller
             ],
             'lanes' => $mechanics->map(fn (Mechanic $m) => $this->lane($m, $today, $next, $todayJobs, $schedule, $availability))->values(),
             'attention' => $this->attention($warnings, $toCall, $earlier, $jobs, $schedule),
-            'workload' => $workload,
         ]);
     }
 
