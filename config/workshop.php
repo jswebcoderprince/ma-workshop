@@ -8,7 +8,7 @@ return [
     // Used by `db:seed`: the owner's login. Without OWNER_PASSWORD a random one is printed once.
     'owner' => [
         'name' => env('OWNER_NAME', 'Owner'),
-        'email' => env('OWNER_EMAIL', 'admin@workshop.test'),
+        'email' => env('OWNER_EMAIL', 'contact@workshop.test'),
         'password' => env('OWNER_PASSWORD'),
     ],
 
