@@ -1,4 +1,5 @@
 import { AppSidebar, useNav } from '@/components/app-sidebar';
+import { PhoneInstallBanner, useInstallAction } from '@/components/install-app';
 import { LogoMark } from '@/components/logo';
 import {
     DropdownMenu,
@@ -14,7 +15,7 @@ import { useLocale, useT } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Bell, ChevronRight, CircleCheck, House, LogOut, Moon, Search, Settings, TriangleAlert, UserRound, X } from 'lucide-react';
+import { Bell, ChevronRight, CircleCheck, Download, House, LogOut, Moon, Search, Settings, TriangleAlert, UserRound, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -44,6 +45,7 @@ export default function AppLayout({
     const [mini, setMini] = useState(() => typeof window !== 'undefined' && localStorage.getItem('sidebar-mini') === '1');
     const [toast, setToast] = useState<{ text: string; warn: boolean; undo: number | null } | null>(null);
     const searchRef = useRef<HTMLInputElement>(null);
+    const install = useInstallAction();
 
     useEffect(() => {
         // The server sets these on the first load; keep them right after client-side navigation too.
@@ -210,6 +212,11 @@ export default function AppLayout({
                                 <DropdownMenuItem onSelect={() => updateAppearance(dark ? 'light' : 'dark')}>
                                     <Moon /> {t('Dark mode')}
                                 </DropdownMenuItem>
+                                {install.can && (
+                                    <DropdownMenuItem onSelect={install.run}>
+                                        <Download /> {t('Install the app')}
+                                    </DropdownMenuItem>
+                                )}
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
                                     <Link href={route('logout')} method="post" as="button" className="w-full">
@@ -227,6 +234,7 @@ export default function AppLayout({
                     tabIndex={-1}
                     className="page-enter flex min-w-0 flex-col gap-5 px-4 pt-4 pb-24 outline-none md:px-6 md:pt-5 md:pb-10"
                 >
+                    <PhoneInstallBanner />
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
@@ -279,6 +287,8 @@ export default function AppLayout({
                     })}
                 </div>
             </nav>
+
+            {install.dialog}
 
             <AnimatePresence>
                 {toast && (

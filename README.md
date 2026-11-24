@@ -17,7 +17,7 @@ Live (planned): `https://workshop.maenginelab.lt`
 | Phases 1–8 | Done: scheduling engine, calendar (day, week, month, drag and drop with Undo), jobs, customers, mechanics, job cards, invoices, PWA, redesign |
 | Phase 9 | Waiting: deploy to the client's Hostinger plan, real company details and mechanics, switch to Lithuanian ([docs/DEPLOY.md](docs/DEPLOY.md)) |
 | Tests | 118 passing (`php artisan test`) |
-| Guide for the owner | [docs/OWNER_GUIDE.md](docs/OWNER_GUIDE.md) |
+| Guide for the owner | [Lithuanian](docs/OWNER_GUIDE.lt.md) · [English](docs/OWNER_GUIDE.md) |
 
 The data in the screenshots is fictional sample data.
 
@@ -33,6 +33,8 @@ The data in the screenshots is fictional sample data.
 - **Mechanics:** working days, vehicle types, holidays, days off, sick leave; workshop closed days.
 - **Customers and vehicles** stored for reuse; search by name, phone or plate.
 - **Job card** (A4, for the mechanic) and **VAT invoice** (series MAE, numbers never reused; void and re-issue).
+- **Install as an app** on a computer (Chrome, Edge), Android, iPhone/iPad and Mac from the app's own Install button:
+  own window, MA icon, shortcuts (New job, Calendar, Jobs, Customers to call), updates by itself.
 - **Activity history** on every job. Light and dark mode. Lithuanian and English.
 
 ## Screenshots
@@ -71,6 +73,12 @@ The data in the screenshots is fictional sample data.
 |---|---|---|
 | ![Phone overview](docs/screenshots/16-mobile-overview.png) | ![Phone calendar](docs/screenshots/17-mobile-calendar.png) | ![Phone jobs](docs/screenshots/18-mobile-jobs.png) |
 
+### Install as an app
+
+| Computer: Install card in the menu | iPhone: the steps (Safari has no install button) |
+|---|---|
+| ![Install on a computer](docs/screenshots/22-install-desktop.png) | ![Install on iPhone](docs/screenshots/21-mobile-install-iphone.png) |
+
 ## Design
 
 ![Design sheet](docs/screenshots/design-sheet.png)
@@ -92,7 +100,7 @@ The design sheet above is [design/design-sheet.html](design/design-sheet.html) (
 
 | File | What is in it |
 |---|---|
-| [docs/OWNER_GUIDE.md](docs/OWNER_GUIDE.md) | How the owner uses the app day to day |
+| [docs/OWNER_GUIDE.lt.md](docs/OWNER_GUIDE.lt.md) · [EN](docs/OWNER_GUIDE.md) | How the owner uses the app day to day (Lithuanian, English) |
 | [docs/SCOPE.md](docs/SCOPE.md) | What v1 does and does not do, client decisions with dates |
 | [docs/SCHEDULING_RULES.md](docs/SCHEDULING_RULES.md) | Quarters, positions, warnings, free slot search, "could move earlier" |
 | [docs/DATA_MODEL.md](docs/DATA_MODEL.md) | Tables and relations |

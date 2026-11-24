@@ -6,12 +6,16 @@ import { MotionConfig } from 'motion/react';
 import { createRoot } from 'react-dom/client';
 import { route as routeFn } from 'ziggy-js';
 import { initializeTheme } from './hooks/use-appearance';
+import { listenForInstall } from './lib/install';
 
 declare global {
     const route: typeof routeFn;
 }
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// Before anything is drawn: the browser's install offer can come right away (lib/install.ts).
+listenForInstall();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

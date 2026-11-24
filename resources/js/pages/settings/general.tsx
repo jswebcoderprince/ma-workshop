@@ -1,3 +1,4 @@
+import { InstallSection } from '@/components/install-app';
 import { Button, Segmented } from '@/components/ui-kit';
 import { useAppearance } from '@/hooks/use-appearance';
 import SettingsLayout from '@/layouts/settings-layout';
@@ -96,6 +97,7 @@ export default function General({ values }: { values: Values }) {
                         ]}
                     />
                 </section>
+                <InstallSection />
             </form>
         </SettingsLayout>
     );

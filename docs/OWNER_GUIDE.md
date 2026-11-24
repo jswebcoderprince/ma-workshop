@@ -1,20 +1,34 @@
 # MA Workshop: owner's guide
 
 How to use the workshop planner day to day. The app is in Lithuanian, so button names are given in Lithuanian
-first, with the English name in brackets.
+first, with the English name in brackets. Lithuanian version: [OWNER_GUIDE.lt.md](OWNER_GUIDE.lt.md).
 
 Address: **https://workshop.maenginelab.lt** (works on a computer, tablet or phone)
 
 ---
 
-## 1. Sign in and install on your phone
+## 1. Sign in and install the app
 
-- Open the address and sign in with your e-mail and password. You can change the password in
-  **Nustatymai → Paskyra** (Settings → Account).
-- **Phone (iPhone):** open the address in Safari → Share button → **Add to Home Screen**.
-- **Phone (Android):** open it in Chrome → menu ⋮ → **Install app** or **Add to Home screen**.
+Open the address and sign in with your e-mail and password. You can change the password in
+**Nustatymai → Paskyra** (Settings → Account).
 
-The app then opens full screen with the MA icon, like any other app.
+The planner can be installed like a normal program on the computer and on the phone: it gets its own window and the
+MA icon, and it updates by itself (nothing to download again).
+
+- **Computer (Chrome or Edge):** press **Įdiegti** (Install) in the box at the bottom of the menu. The same button is
+  in the user menu (your initials, top right) and in **Nustatymai → Bendra** (Settings → General). Confirm in the
+  window that opens. The MA icon appears in the Start menu; you can pin it to the taskbar. Right-click the icon for
+  shortcuts: **Naujas darbas**, **Kalendorius**, **Darbai**, **Reikia paskambinti**.
+- **Android phone (Chrome):** press **Įdiegti** in the blue bar at the top of the app, then confirm.
+- **iPhone or iPad (Safari):** press **Įdiegti**. The app shows the three steps: Share button → **Add to Home Screen**
+  → **Add**.
+- **Mac (Safari):** menu **File → Add to Dock**.
+
+The box disappears once the app is installed. If you close it with ×, the button is still in the user menu and in
+Settings.
+
+**To remove the app:** on Windows, right-click the MA icon in the Start menu → **Uninstall**. On a phone, press and
+hold the icon → **Remove** / **Uninstall**. All data stays on the server; nothing is lost.
 
 ## 2. How time works: quarter days
 
@@ -162,7 +176,7 @@ On the **Mechanikai** (Mechanics) page:
 
 | Page | What to set |
 |---|---|
-| **Bendra** (General) | Language (Lietuvių / English), accent colour, light or dark look on this device |
+| **Bendra** (General) | Language (Lietuvių / English), accent colour, light or dark look on this device, install the app |
 | **Įmonė** (Company) | Company name, company code, VAT code, address, bank account, phone, e-mail. Printed on invoices and job cards |
 | **Sąskaitos** (Invoices) | VAT payer yes/no, VAT rate, series (MAE), next number, payment term, hourly rate |
 | **Darbo laikas** (Working hours) | Opening time and number of quarters for each weekday |

@@ -10,7 +10,7 @@
 | Database | MySQL / MariaDB | Hostinger shared hosting |
 | Calendar | Our own CSS-grid component | Off-the-shelf resource timelines (FullCalendar) are paid; our grid is simple (days × quarters) |
 | PDF | Browser print with A4 CSS | "Save as PDF" is built into every browser; no server PDF library |
-| Install | PWA: web manifest + small service worker | Android "Install app", iPhone "Add to Home Screen" |
+| Install | PWA: web manifest + small service worker + an "Install" button in the app | Computer (Chrome/Edge) and Android: the app's own button opens the browser's install dialog; iPhone/iPad and Mac Safari: the app shows the steps |
 
 ## Code layout
 
@@ -47,7 +47,13 @@ to the frontend. The frontend does not redo the maths; it renders positions the 
 
 ## PWA
 
-- `public/manifest.webmanifest`: name, icons (192, 512, maskable), `display: standalone`, theme colour.
+- `public/manifest.webmanifest`: name, Lithuanian description, icons (192, 512, maskable), `display: standalone`, theme
+  colour, and shortcuts on the installed icon (Naujas darbas → `/calendar?new=1`, Kalendorius, Darbai, Reikia paskambinti).
+- In-app install (`lib/install.ts`, `components/install-app.tsx`, 2026-11-24): `beforeinstallprompt` is caught in
+  `app.tsx` before React draws and kept for our own button. Shown as a card at the bottom of the sidebar, a slim bar on
+  phones, an item in the user menu and a section in Settings → General. Safari has no prompt, so iPhone/iPad get the
+  three steps (Share → Add to Home Screen → Add) and Mac Safari gets File → Add to Dock. Hidden once installed
+  (`display-mode: standalone`); the card and bar can be closed (remembered in this browser).
 - `public/sw.js`: caches the app shell and static assets only. Data is always live; no offline mode in v1.
 - iOS needs `apple-touch-icon` and `apple-mobile-web-app-capable` meta tags.
 

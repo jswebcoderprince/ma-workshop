@@ -1,3 +1,4 @@
+import { SidebarInstall } from '@/components/install-app';
 import { LogoMark } from '@/components/logo';
 import { useAppearance } from '@/hooks/use-appearance';
 import { initials } from '@/lib/format';
@@ -404,6 +405,8 @@ export function AppSidebar({ mini, onToggle }: { mini: boolean; onToggle: () => 
                     })}
                 </ul>
             </nav>
+
+            <SidebarInstall mini={mini} />
 
             {/* three round buttons, as in the reference */}
             <div className={cn('border-line flex shrink-0 items-center justify-center border-t py-4', mini ? 'flex-col gap-2' : 'gap-4')}>

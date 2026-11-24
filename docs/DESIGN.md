@@ -60,6 +60,9 @@ letter-spaced labels and the slate/cobalt sidebar looked AI-made. Labels are now
   for that mechanic; Invoices → All / Valid / Voided; Settings → its five pages. Collapsed, every row opens its menu
   with the row's own name on top. Bottom: three round buttons (dark/light, account, log out).
   The graphite sidebar with the "Today" list (2026-11-23) is replaced; that list now lives in the Mechanics menu.
+  Above the round buttons: an "Install the app" card (tinted primary, icon square, one line, full-width primary button,
+  × to hide) until the app is installed; collapsed, a round primary download button. Phones get the same as a slim bar
+  above the page.
 - Header: breadcrumb (house icon, "›" between parts), "Open today · 08:00 – 18:00" pill, filled search (Ctrl K),
   bell with customers-to-call count, user menu.
 - Page heading: 30px bold title, optional pills, subtitle "Today · date · Week N", actions on the right.
