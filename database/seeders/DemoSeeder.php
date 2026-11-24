@@ -11,12 +11,15 @@ use App\Models\WorkOrder;
 use App\Scheduling\Availability;
 use App\Scheduling\Position;
 use App\Scheduling\WorkCalendar;
+use App\Support\Invoicing;
+use App\Support\Settings;
 use App\Support\Workshop;
 use Illuminate\Database\Seeder;
 
 /**
  * Fictional sample data: four mechanics, 32 customers, about five weeks of jobs from this week's Monday.
  * Names, phones and plates are made up. Same data as design/frame.html.
+ * Also placeholder company details and a few invoices (one voided and issued again), so a demo shows the whole flow.
  */
 class DemoSeeder extends Seeder
 {
@@ -60,6 +63,15 @@ class DemoSeeder extends Seeder
         ['Inga Kučinskienė', '+370 648 60521', 'Toyota Corolla', 2018, 'IKC913', 'car'],
         ['Žygimantas Gudaitis', '+370 613 87740', 'VW Touran', 2010, 'ZGD102', 'car'],
         ['Evelina Lukšaitė', '+370 662 29058', 'Škoda Superb', 2017, 'ELK356', 'car'],
+    ];
+
+    // Finished last week, so the demo has history and invoices: [mechanic, customer #, work, days before Monday, quarter, quarters]
+    private const PAST = [
+        [0, 7, 'Variklio diagnostika', 7, 0, 2],
+        [1, 12, 'Stabdžių sistemos remontas', 6, 1, 3],
+        [2, 3, 'Sezoninis aptarnavimas', 5, 0, 2],
+        [3, 26, 'Variklio aptarnavimas', 4, 2, 2],
+        [0, 15, 'Stabdžių sistemos remontas', 3, 0, 3],
     ];
 
     // Per mechanic, in order: [customer #, work, quarters, gap after (negative = overlap), status, notify, planned quarters]
@@ -141,6 +153,50 @@ class DemoSeeder extends Seeder
                 for ($i = 0; $i < max(0, $dur + $gap); $i++) {
                     $cursor = $cal->next($cursor);
                 }
+            }
+        }
+
+        foreach (self::PAST as [$mi, $cn, $work, $back, $q, $dur]) {
+            $job = WorkOrder::create([
+                'customer_id' => $customers[$cn]->id,
+                'vehicle_id' => $customers[$cn]->vehicles->first()->id,
+                'mechanic_id' => $mechanics[$mi]->id,
+                'description' => $work,
+                'start_date' => WorkCalendar::addDays($monday, -$back),
+                'start_quarter' => $q,
+                'duration_quarters' => $dur,
+                'planned_quarters' => $dur,
+                'status' => WorkOrderStatus::Completed,
+                'completed_at' => now(),
+            ]);
+            self::sampleLines($job);
+        }
+
+        $this->invoices($workshop->today());
+    }
+
+    /** Placeholder company details (replace with the client's real ones) and invoices for the finished jobs. */
+    private function invoices(string $today): void
+    {
+        Settings::set('company', [
+            'name' => 'MA Engine Lab',
+            'code' => '123456789',
+            'vat_code' => 'LT123456789',
+            'address' => 'Pavyzdžio g. 1, Prienai',
+            'bank' => 'LT00 0000 0000 0000 0000',
+            'phone' => '+370 600 00000',
+            'email' => 'info@example.lt',
+        ]);
+
+        $days = (int) Settings::get('payment_days', 14);
+        $done = WorkOrder::query()->where('status', WorkOrderStatus::Completed)->has('lines')->orderBy('start_date')->get();
+        foreach ($done as $i => $job) {
+            $issued = WorkCalendar::addDays($today, -max(0, 3 - $i));
+            $invoice = Invoicing::issue($job, $issued, WorkCalendar::addDays($issued, $days));
+            // The first one shows a correction: voided, then a new invoice with the next number.
+            if ($i === 0 && $invoice) {
+                $invoice->update(['voided_at' => now()]);
+                Invoicing::issue($job, $today, WorkCalendar::addDays($today, $days));
             }
         }
     }

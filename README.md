@@ -116,6 +116,29 @@ Laravel 12 (PHP 8.3), MySQL, Inertia 2, React 19, TypeScript, Tailwind CSS 4, mo
 Scheduling maths is plain PHP in `app/Scheduling` with unit tests. In code a "job" is `WorkOrder` (`work_orders`),
 because Laravel's queue owns the `jobs` table.
 
+## Demo for the client
+
+The demo data is fictional: 4 mechanics, 32 customers, about 6 weeks of jobs (last week finished, this week in
+progress, the next weeks booked), overlaps, time off, customers to call, invoices (one voided and issued again) and
+placeholder company details. Dates follow today, so it always looks current.
+
+In `.env`:
+
+```ini
+SEED_DEMO=true
+OWNER_EMAIL=contact@workshop.test
+OWNER_PASSWORD=choose-a-demo-password
+```
+
+Then (this empties the database and fills it again):
+
+```bash
+C:/php83/php.exe artisan migrate:fresh --seed
+```
+
+Sign in with `contact@workshop.test` and that password. To show it in Lithuanian: Settings → General → Lietuvių.
+Never set `SEED_DEMO=true` on the live site.
+
 ## Run locally (Windows)
 
 Needs XAMPP MySQL running, PHP 8.3 at `C:\php83`, Node 20+.
@@ -124,7 +147,7 @@ Needs XAMPP MySQL running, PHP 8.3 at `C:\php83`, Node 20+.
 composer install
 npm install
 cp .env.example .env && C:/php83/php.exe artisan key:generate
-C:/php83/php.exe artisan migrate --seed       # SEED_DEMO=true in .env adds the sample data
+C:/php83/php.exe artisan migrate --seed       # SEED_DEMO=true in .env adds the demo data (see above)
 C:/php83/php.exe artisan serve --port=8010    # http://127.0.0.1:8010
 npm run dev
 ```
